@@ -1,0 +1,135 @@
+import axios, { AxiosError, type AxiosInstance, type AxiosRequestConfig } from "axios";
+import { ENV } from "../config/env";
+import { authStorage } from "../features/auth/storage";
+import type { CurrentUser } from "../features/auth/types";
+
+type RetryConfig = AxiosRequestConfig & { _retry?: boolean };
+
+type TokenPair = {
+  access_token: string;
+  refresh_token?: string;
+  token_type: string;
+};
+
+class ApiClient {
+  private client: AxiosInstance;
+
+  constructor() {
+    this.client = axios.create({
+      baseURL: ENV.API_BASE_URL,
+      headers: { "Content-Type": "application/json" },
+    });
+
+    this.client.interceptors.request.use((config) => {
+      const tokens = authStorage.readTokens();
+      if (tokens?.accessToken) {
+        config.headers.Authorization = `Bearer ${tokens.accessToken}`;
+      }
+      return config;
+    });
+
+    this.client.interceptors.response.use(
+      (response) => response,
+      async (error: AxiosError) => {
+        const original = error.config as RetryConfig | undefined;
+        const statusCode = error.response?.status;
+        const tokens = authStorage.readTokens();
+        if (!original || original._retry || statusCode !== 401 || !tokens?.refreshToken) {
+          return Promise.reject(error);
+        }
+
+        original._retry = true;
+        try {
+          const refreshed = await this.client.post<TokenPair>("/auth/refresh", {
+            refresh_token: tokens.refreshToken,
+          });
+          authStorage.writeTokens({
+            accessToken: refreshed.data.access_token,
+            refreshToken: refreshed.data.refresh_token,
+          });
+          return this.client(original);
+        } catch {
+          authStorage.clearTokens();
+          authStorage.clearUser();
+          return Promise.reject(error);
+        }
+      },
+    );
+  }
+
+  get instance(): AxiosInstance {
+    return this.client;
+  }
+
+  async login(email: string, password: string): Promise<void> {
+    const response = await this.client.post<TokenPair>("/auth/login/json", { email, password });
+    authStorage.writeTokens({
+      accessToken: response.data.access_token,
+      refreshToken: response.data.refresh_token,
+    });
+  }
+
+  async sendSignupOtp(payload: {
+    email: string;
+    password: string;
+    name: string;
+    referral_code?: string;
+  }): Promise<void> {
+    await this.client.post("/auth/signup/send-otp", payload);
+  }
+
+  async verifySignupOtp(payload: {
+    email: string;
+    password: string;
+    name: string;
+    otp_code: string;
+    referral_code?: string;
+  }): Promise<void> {
+    const response = await this.client.post<TokenPair>("/auth/signup/verify-otp", payload);
+    authStorage.writeTokens({
+      accessToken: response.data.access_token,
+      refreshToken: response.data.refresh_token,
+    });
+  }
+
+  async logout(): Promise<void> {
+    try {
+      await this.client.post("/auth/logout");
+    } finally {
+      authStorage.clearTokens();
+      authStorage.clearUser();
+    }
+  }
+
+  async me(): Promise<CurrentUser> {
+    const response = await this.client.get<CurrentUser>("/auth/me");
+    authStorage.writeUser(response.data);
+    return response.data;
+  }
+
+  async forgotPasswordSendOtp(email: string): Promise<void> {
+    await this.client.post("/auth/forgot-password/send-otp", { email });
+  }
+
+  async forgotPasswordVerifyOtp(email: string, otp_code: string): Promise<{ reset_token: string }> {
+    const response = await this.client.post<{ reset_token: string }>("/auth/forgot-password/verify-otp", {
+      email,
+      otp_code,
+    });
+    return response.data;
+  }
+
+  async resetPassword(reset_token: string, new_password: string): Promise<void> {
+    await this.client.post("/auth/forgot-password/reset", { reset_token, new_password });
+  }
+
+  async exchangeHandoff(ticket: string): Promise<void> {
+    const response = await this.client.post<TokenPair>("/auth/handoff/exchange", { ticket });
+    authStorage.writeTokens({
+      accessToken: response.data.access_token,
+      refreshToken: response.data.refresh_token,
+    });
+  }
+}
+
+export const apiClient = new ApiClient();
