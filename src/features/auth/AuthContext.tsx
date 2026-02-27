@@ -43,7 +43,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     (async () => {
       try {
         await refreshUser();
-      } catch {
+      } catch (err) {
+        console.error("Auth init error:", err);
         authStorage.clearTokens();
         authStorage.clearUser();
         setUser(null);
@@ -54,15 +55,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value = useMemo<AuthContextValue>(
-    () => ({
-      user,
-      isLoading,
-      isAuthenticated: Boolean(user),
-      isSuperuser: Boolean(user?.is_superuser),
-      login,
-      logout,
-      refreshUser,
-    }),
+    () => {
+      // Safely handle strict true/false conversion
+      const isSuper = user?.is_superuser === true;
+      return {
+        user,
+        isLoading,
+        isAuthenticated: Boolean(user),
+        isSuperuser: isSuper,
+        login,
+        logout,
+        refreshUser,
+      };
+    },
     [isLoading, user],
   );
 
