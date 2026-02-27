@@ -1,8 +1,55 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../assets/css/landing.css";
 
+// Critical above-fold images — must be loaded before we reveal the hero section.
+const CRITICAL_CDN_IMAGES = [
+  "https://d2znch1yzypu23.cloudfront.net/Logo-Primary_light.png",
+  "https://d2znch1yzypu23.cloudfront.net/Mixar-UI-Viewport.svg",
+  "https://d2znch1yzypu23.cloudfront.net/Mixar-UI-Header.svg",
+  "https://d2znch1yzypu23.cloudfront.net/Mixar-UI-Moodboard.svg",
+  "https://d2znch1yzypu23.cloudfront.net/Mixar-UI-Chat%20Window.svg",
+  "https://d2znch1yzypu23.cloudfront.net/Mixar-UI-Chat_Prompt%20Window.svg",
+  "https://d2znch1yzypu23.cloudfront.net/Mixar-UI-Chat%20Message.svg",
+];
+
+function preloadImage(url: string): Promise<void> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve();
+    img.onerror = () => resolve(); // never reject — a broken image shouldn't block render
+    img.src = url;
+  });
+}
+
 export function LandingPage() {
+  const [isReady, setIsReady] = useState(false);
+
+  // Wait for critical above-fold images + custom fonts, then reveal.
+  // 5-second hard fallback so slow connections are never permanently blocked.
+  useEffect(() => {
+    let cancelled = false;
+
+    const fallback = setTimeout(() => {
+      if (!cancelled) setIsReady(true);
+    }, 5000);
+
+    Promise.all([
+      ...CRITICAL_CDN_IMAGES.map(preloadImage),
+      document.fonts.ready,
+    ]).then(() => {
+      if (!cancelled) {
+        clearTimeout(fallback);
+        setIsReady(true);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      clearTimeout(fallback);
+    };
+  }, []);
+
   // --- Navbar scroll effect ---
   useEffect(() => {
     const navbar = document.querySelector(".navbar");
@@ -270,6 +317,14 @@ export function LandingPage() {
 
   return (
     <>
+      {/* Loading overlay — hides the page until CDN images + fonts are ready */}
+      <div
+        className={`lp-overlay${isReady ? " lp-overlay--hidden" : ""}`}
+        aria-hidden="true"
+      >
+        <img src="/assets/Logomark.svg" alt="" className="lp-overlay-logo" />
+      </div>
+
       <nav className="navbar">
         <div className="navbar-content">
           <Link to="/" className="logo">
