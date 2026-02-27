@@ -16,21 +16,27 @@ function LandingLoader() {
   const [animKey, setAnimKey] = useState(0);
 
   useEffect(() => {
+    let cancelled = false;
     let idx = 0;
+    const timers: ReturnType<typeof setTimeout>[] = [];
 
     const showNext = () => {
+      if (cancelled) return;
       if (idx < LOADER_MESSAGES.length) {
         setText(LOADER_MESSAGES[idx]);
-        setAnimKey((k) => k + 1); // re-trigger CSS animation each message
+        setAnimKey((k) => k + 1);
         idx++;
-        setTimeout(showNext, 700);
+        timers.push(setTimeout(showNext, 700));
       } else {
-        setTimeout(() => setHidden(true), 500);
+        timers.push(setTimeout(() => { if (!cancelled) setHidden(true); }, 500));
       }
     };
 
-    const initial = setTimeout(showNext, 300);
-    return () => clearTimeout(initial);
+    timers.push(setTimeout(showNext, 300));
+    return () => {
+      cancelled = true;
+      timers.forEach(clearTimeout);
+    };
   }, []);
 
   return (
@@ -47,7 +53,7 @@ function LandingLoader() {
 export function LandingPage() {
   return (
     <div
-      className="landing-page"
+      className="lp-landing-page"
       style={{ backgroundImage: `url(${bgSrc})` }}
     >
       <LandingLoader />

@@ -4,7 +4,7 @@
    ============================================================ */
 
 /* Root element wrapper */
-.landing-page {
+.lp-landing-page {
     min-height: 100vh;
     background-size: cover;
     background-position: center;
@@ -327,6 +327,10 @@
 
 /* ── Responsive ─────────────────────────────────────────── */
 @media (max-width: 768px) {
+    .lp-landing-page {
+        background-attachment: scroll;
+    }
+
     .lp-nav {
         padding: 1rem 1.5rem;
     }
