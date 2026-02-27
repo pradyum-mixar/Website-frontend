@@ -4,6 +4,7 @@ import "../assets/css/dashboard.css";
 
 export function AppShell() {
   const { user, logout, isSuperuser } = useAuth();
+  console.log("AppShell Auth State:", { user, isSuperuser, is_superuser_prop: user?.is_superuser });
 
   const handleLogout = async () => {
     await logout();

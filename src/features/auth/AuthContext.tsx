@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<AuthContextValue>(
     () => {
       // Safely handle strict true/false conversion
-      const isSuper = user?.is_superuser === true;
+      const isSuper = user?.is_superuser === true || user?.is_superuser === "true" || user?.is_superuser === 1;
       return {
         user,
         isLoading,

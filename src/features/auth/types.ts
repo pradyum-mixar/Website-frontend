@@ -8,7 +8,7 @@ export type CurrentUser = {
   email: string;
   name?: string;
   is_verified: boolean;
-  is_superuser: boolean;
+  is_superuser: boolean | number | string;
   google_id?: string;
   credits: number;
 };
