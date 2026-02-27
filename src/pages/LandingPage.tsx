@@ -1,155 +1,1373 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import logoSrc from "../assets/Logo-Primary_light.png";
-import bgSrc from "../assets/skate_bg.webp";
 import "../assets/css/landing.css";
 
-const LOADER_MESSAGES = [
-  "Unwrapping...",
-  "Placing islands...",
-  "Generating textures...",
-] as const;
-
-function LandingLoader() {
-  const [hidden, setHidden] = useState(false);
-  const [text, setText] = useState("");
-  const [animKey, setAnimKey] = useState(0);
-
+export function LandingPage() {
+  // --- Navbar scroll effect ---
   useEffect(() => {
-    let cancelled = false;
-    let idx = 0;
-    const timers: ReturnType<typeof setTimeout>[] = [];
+    const navbar = document.querySelector(".navbar");
+    if (!navbar) return;
 
-    const showNext = () => {
-      if (cancelled) return;
-      if (idx < LOADER_MESSAGES.length) {
-        setText(LOADER_MESSAGES[idx]);
-        setAnimKey((k) => k + 1);
-        idx++;
-        timers.push(setTimeout(showNext, 700));
+    function handleScroll() {
+      const scrollY = window.scrollY;
+      if (scrollY > 50) {
+        navbar!.classList.add("scrolled");
       } else {
-        timers.push(setTimeout(() => { if (!cancelled) setHidden(true); }, 500));
+        navbar!.classList.remove("scrolled");
       }
-    };
+    }
 
-    timers.push(setTimeout(showNext, 300));
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+
     return () => {
-      cancelled = true;
-      timers.forEach(clearTimeout);
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  // --- Features section animation ---
+  useEffect(() => {
+    const featuresSection = document.querySelector(".features-section");
+    if (!featuresSection) return;
+
+    const featuresObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+    featuresObserver.observe(featuresSection);
+
+    const archCards = document.querySelectorAll<HTMLElement>(".arch-card");
+    archCards.forEach((card, index) => {
+      card.style.opacity = "0";
+      card.style.transform = "translateY(20px)";
+      card.style.transition = `opacity 0.5s ease ${index * 0.1}s, transform 0.5s ease ${index * 0.1}s`;
+    });
+
+    const archContainer = document.querySelector(".architecture-container");
+    if (archContainer) {
+      const archObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              archCards.forEach((card) => {
+                card.style.opacity = "1";
+                card.style.transform = "translateY(0)";
+              });
+            }
+          });
+        },
+        { threshold: 0.2 }
+      );
+      archObserver.observe(archContainer);
+    }
+
+    return () => {
+      featuresObserver.disconnect();
+    };
+  }, []);
+
+  // --- Central line scroll animation ---
+  useEffect(() => {
+    const architectureContainer = document.querySelector<HTMLElement>(".architecture-container");
+    const centralLineCurrent = document.querySelector<HTMLElement>(".central-line-current");
+    const centralLineContainer = document.querySelector<HTMLElement>(".central-line-container");
+    const connectingLineWrapper = document.querySelector<HTMLElement>(".connecting-line-wrapper");
+    const connectingLineCurrent = document.querySelector<HTMLElement>(".connecting-line-current");
+    const headerGlowDot = document.querySelector<HTMLElement>(".header-glow-dot");
+    const stickyHeader = document.querySelector<HTMLElement>(".sticky-features-header");
+    const stickyFeaturesContent = document.querySelector<HTMLElement>(".sticky-features-content");
+
+    if (!architectureContainer || !centralLineCurrent || !centralLineContainer) return;
+
+    let animationTriggered = false;
+
+    function updateLinePosition() {
+      const containerRect = architectureContainer!.getBoundingClientRect();
+      const lineContainerRect = centralLineContainer!.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+
+      const sectionTop = containerRect.top;
+      const sectionBottom = containerRect.bottom;
+      const lineHeight = centralLineCurrent!.offsetHeight;
+      const maxTravel = lineContainerRect.height - lineHeight;
+
+      const scrollStart = viewportHeight * 0.7;
+      const scrollEnd = viewportHeight * 0.4;
+
+      let archProgress = 0;
+      if (sectionTop <= scrollStart && sectionBottom >= scrollEnd) {
+        const totalScrollDistance = scrollStart + (containerRect.height - scrollEnd);
+        const currentScroll = scrollStart - sectionTop;
+        archProgress = currentScroll / totalScrollDistance;
+      } else if (sectionBottom < scrollEnd) {
+        archProgress = 1;
+      }
+      archProgress = Math.max(0, Math.min(1, archProgress));
+
+      const topPosition = archProgress * maxTravel;
+      centralLineCurrent!.style.top = `${topPosition}px`;
+
+      if (archProgress >= 0.999) {
+        const fadeProgress = (archProgress - 0.9) / 0.1;
+        centralLineCurrent!.style.opacity = `${1 - fadeProgress}`;
+      } else {
+        centralLineCurrent!.style.opacity = "1";
+      }
+
+      if (connectingLineWrapper && connectingLineCurrent) {
+        const connectingRect = connectingLineWrapper.getBoundingClientRect();
+        const connectingHeight = connectingRect.height;
+        const connectingLineHeight = 120;
+        const connectingMaxTravel = connectingHeight - connectingLineHeight;
+
+        const connectStart = viewportHeight * 0.5;
+        const connectEnd = viewportHeight * 0.2;
+
+        let connectProgress = 0;
+        if (archProgress >= 1 && connectingRect.top <= connectStart) {
+          if (connectingRect.top >= connectEnd) {
+            connectProgress = (connectStart - connectingRect.top) / (connectStart - connectEnd);
+          } else {
+            connectProgress = 1;
+          }
+        }
+        connectProgress = Math.max(0, Math.min(1, connectProgress));
+
+        connectingLineCurrent.style.opacity = connectProgress > 0 ? "1" : "0";
+        connectingLineCurrent.style.top = `${connectProgress * connectingMaxTravel}px`;
+
+        if (headerGlowDot && stickyHeader) {
+          if (connectProgress >= 0.9 && !animationTriggered) {
+            animationTriggered = true;
+
+            connectingLineCurrent.style.opacity = "0";
+            connectingLineCurrent.style.transition = "opacity 0.3s ease-out";
+
+            headerGlowDot.classList.add("active");
+            stickyHeader.classList.add("glowing");
+
+            setTimeout(() => {
+              if (headerGlowDot.classList.contains("active")) {
+                stickyHeader.classList.add("text-visible");
+              }
+            }, 300);
+
+            setTimeout(() => {
+              if (stickyFeaturesContent && headerGlowDot.classList.contains("active")) {
+                stickyFeaturesContent.classList.add("cards-visible");
+              }
+            }, 2000);
+          } else if (connectProgress < 0.9) {
+            animationTriggered = false;
+            headerGlowDot.classList.remove("active");
+            stickyHeader.classList.remove("glowing");
+            stickyHeader.classList.remove("text-visible");
+            if (stickyFeaturesContent) {
+              stickyFeaturesContent.classList.remove("cards-visible");
+            }
+          }
+        }
+      }
+    }
+
+    window.addEventListener("scroll", updateLinePosition, { passive: true });
+    window.addEventListener("resize", updateLinePosition, { passive: true });
+    updateLinePosition();
+
+    return () => {
+      window.removeEventListener("scroll", updateLinePosition);
+      window.removeEventListener("resize", updateLinePosition);
+    };
+  }, []);
+
+  // --- Sticky features fade effect ---
+  useEffect(() => {
+    const header = document.querySelector<HTMLElement>(".sticky-features-header");
+    const rows = document.querySelectorAll<HTMLElement>(".feature-showcase, .feature-grid-section");
+    if (rows.length < 2) return;
+
+    const rowsArray = Array.from(rows);
+    const secondRow = rowsArray[1];
+
+    function updateFade() {
+      const viewportHeight = window.innerHeight;
+
+      if (header && secondRow) {
+        const secondRect = secondRow.getBoundingClientRect();
+        const fadeStart = viewportHeight * 0.9;
+        const fadeEnd = viewportHeight * 0.7;
+
+        if (secondRect.top > fadeStart) {
+          header.style.opacity = "1";
+        } else if (secondRect.top <= fadeStart && secondRect.top > fadeEnd) {
+          const progress = (fadeStart - secondRect.top) / (fadeStart - fadeEnd);
+          header.style.opacity = String(Math.max(0, 1 - progress));
+        } else {
+          header.style.opacity = "0";
+        }
+      }
+
+      rowsArray.forEach((row, index) => {
+        if (index === rowsArray.length - 1) return;
+
+        const nextRow = rowsArray[index + 1];
+        const nextRect = nextRow.getBoundingClientRect();
+
+        const fadeStart = viewportHeight * 0.9;
+        const fadeEnd = viewportHeight * 0.7;
+
+        if (nextRect.top > fadeStart) {
+          row.style.opacity = "1";
+        } else if (nextRect.top <= fadeStart && nextRect.top > fadeEnd) {
+          const progress = (fadeStart - nextRect.top) / (fadeStart - fadeEnd);
+          row.style.opacity = String(Math.max(0, 1 - progress));
+        } else {
+          row.style.opacity = "0";
+        }
+      });
+    }
+
+    window.addEventListener("scroll", updateFade, { passive: true });
+    updateFade();
+
+    return () => {
+      window.removeEventListener("scroll", updateFade);
+    };
+  }, []);
+
+  // --- Try Mixar section animation ---
+  useEffect(() => {
+    const tryMixarSection = document.querySelector(".try-mixar-section");
+    const tryMixarContent = document.querySelector(".try-mixar-content");
+    const tryMixarVisual = document.querySelector(".try-mixar-visual");
+
+    if (!tryMixarSection || !tryMixarContent || !tryMixarVisual) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            tryMixarContent.classList.add("animate-in");
+            tryMixarVisual.classList.add("animate-in");
+          }
+        });
+      },
+      { threshold: 0.2 }
+    );
+
+    observer.observe(tryMixarSection);
+
+    return () => {
+      observer.disconnect();
     };
   }, []);
 
   return (
-    <div className={`lp-loader${hidden ? " lp-loader-hidden" : ""}`}>
-      <div className="lp-loader-content">
-        <p key={animKey} className="lp-loader-text">
-          {text}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-export function LandingPage() {
-  return (
-    <div
-      className="lp-landing-page"
-      style={{ backgroundImage: `url(${bgSrc})` }}
-    >
-      <LandingLoader />
-
-      {/* Navigation */}
-      <nav className="lp-nav">
-        <Link to="/" className="lp-nav-brand">
-          <img src={logoSrc} alt="Mixar" className="lp-brand-logo" />
-        </Link>
-        <div className="lp-nav-links">
-          <Link to="/auth/login" className="lp-nav-link">
-            Log In
+    <>
+      <nav className="navbar">
+        <div className="navbar-content">
+          <Link to="/" className="logo">
+            <img src="https://d2znch1yzypu23.cloudfront.net/Logo-Primary_light.png" alt="Mixar" />
           </Link>
-          <Link to="/auth/signup" className="lp-nav-cta">
-            <span>Sign Up</span>
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
+          <div className="nav-links">
+            <a href="/about">About</a>
+            <a href="#features">Features</a>
+            <a href="#" className="nav-link-badge">
+              Pricing<span className="nav-badge">TBU!</span>
+            </a>
+          </div>
+          <div className="nav-buttons">
+            <a
+              href="https://discord.gg/YVqvkQx8rX"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-nav-secondary"
             >
-              <path d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
-          </Link>
+              Join Discord
+            </a>
+            <Link to="/auth/login" className="btn-nav-primary">
+              Sign In
+            </Link>
+          </div>
         </div>
       </nav>
 
-      {/* Tagline */}
-      <p className="lp-hero-tagline">Ride through a new world of 3D</p>
-
-      {/* Hero */}
-      <main className="lp-hero">
-        <div className="lp-hero-content">
-          <h1 className="lp-hero-title">
-            <span className="lp-title-line">The AI Native</span>
-            <span className="lp-title-line lp-highlight">3D Editor.</span>
-          </h1>
-        </div>
-
-        <div className="lp-hero-actions">
-          <Link to="/auth/signup" className="lp-btn-waitlist">
-            <span className="lp-btn-waitlist-text">Sign Up</span>
-            <span className="lp-btn-waitlist-arrow">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-              >
-                <path d="M5 12h14M12 5l7 7-7 7" />
+      <div className="hero-wrapper">
+        <header>
+          <p className="intro-text">Introducing Mixar</p>
+          <h1>The Agentic 3D-Editor</h1>
+          <p className="sub-headline">
+            Power of Blender. Speed of AI.
+            The End of <span className="highlight">Grunt Work</span>
+          </p>
+          <div className="actions">
+            <a href="https://mixar.app/signup/frontend/signup.html" className="btn-download">
+              Sign Up
+            </a>
+            <a href="https://mixar.app/signup/frontend/signup.html" className="btn-arrow">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M5 12H19"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M12 5L19 12L12 19"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
-            </span>
-          </Link>
-        </div>
-      </main>
-
-      {/* Social Links */}
-      <div className="lp-social-links">
-        <a
-          href="https://x.com/mixar_app"
-          className="lp-social-link"
-          aria-label="Twitter / X"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-          </svg>
-        </a>
-        <a
-          href="https://discord.gg/mixar"
-          className="lp-social-link"
-          aria-label="Discord"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z" />
-          </svg>
-        </a>
-        <a
-          href="https://linkedin.com/company/mixar"
-          className="lp-social-link"
-          aria-label="LinkedIn"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-          </svg>
-        </a>
+            </a>
+          </div>
+        </header>
+        <main>
+          <div className="stack">
+            <div className="stack-base">
+              <div className="stack-layer viewport">
+                <img
+                  src="https://d2znch1yzypu23.cloudfront.net/Mixar-UI-Viewport.svg"
+                  alt="Viewport"
+                  className="stack-item"
+                />
+              </div>
+              <div className="stack-layer viewport-header">
+                <img
+                  src="https://d2znch1yzypu23.cloudfront.net/Mixar-UI-Header.svg"
+                  alt="Header"
+                  className="stack-item"
+                />
+              </div>
+              <div className="stack-layer mood-board">
+                <img
+                  src="https://d2znch1yzypu23.cloudfront.net/Mixar-UI-Moodboard.svg"
+                  alt="Mood board"
+                  className="stack-item"
+                />
+              </div>
+              <div className="stack-layer chat-window">
+                <img
+                  src="https://d2znch1yzypu23.cloudfront.net/Mixar-UI-Chat%20Window.svg"
+                  alt="Chat Window"
+                  className="stack-item"
+                />
+              </div>
+              <div className="stack-layer chat-prompt">
+                <img
+                  src="https://d2znch1yzypu23.cloudfront.net/Mixar-UI-Chat_Prompt%20Window.svg"
+                  alt="Chat Prompt"
+                  className="stack-item"
+                />
+              </div>
+              <div className="stack-layer chat-message">
+                <img
+                  src="https://d2znch1yzypu23.cloudfront.net/Mixar-UI-Chat%20Message.svg"
+                  alt="Chat Message"
+                  className="stack-item"
+                />
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
-    </div>
+
+      <section id="features" className="features-section">
+        <div className="features-sticky-content">
+          <div className="features-header">
+            <h2>Built to assist, not replace</h2>
+            <p className="features-subheading">
+              An AI-native editor designed to assist your existing creative flow.
+            </p>
+          </div>
+
+          <div className="architecture-container">
+            <div className="central-line-container">
+              <div className="central-line"></div>
+              <div className="central-line-current"></div>
+            </div>
+
+            <div className="architecture-top">
+              <div className="arch-card-wrapper primary-wrapper">
+                <div className="arch-card">
+                  <div className="arch-card-front primary-front">
+                    <div className="arch-card-icon">
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12 2L2 7L12 12L22 7L12 2Z"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M2 17L12 22L22 17"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M2 12L12 17L22 12"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </div>
+                    <div className="arch-card-text">
+                      <span className="arch-card-title">MIXIE: ORCHESTRATOR</span>
+                      <span className="arch-card-subtitle">SEQUENCE &amp; LOGIC</span>
+                    </div>
+                  </div>
+                  <div className="arch-card-back">
+                    <p>
+                      Central AI orchestration layer that coordinates all Mixar components and
+                      workflows.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="architecture-middle">
+              <div className="architecture-column">
+                <span className="tier-label">Agentic Capability</span>
+                <div className="column-cards">
+                  <div className="arch-card-row">
+                    <div className="node-dot"></div>
+                    <div className="arch-card-wrapper">
+                      <div className="arch-card">
+                        <div className="arch-card-front">
+                          <div className="arch-card-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                              <rect
+                                x="3"
+                                y="3"
+                                width="7"
+                                height="7"
+                                rx="1"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                              />
+                              <rect
+                                x="14"
+                                y="3"
+                                width="7"
+                                height="7"
+                                rx="1"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                              />
+                              <rect
+                                x="3"
+                                y="14"
+                                width="7"
+                                height="7"
+                                rx="1"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                              />
+                              <rect
+                                x="14"
+                                y="14"
+                                width="7"
+                                height="7"
+                                rx="1"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                              />
+                            </svg>
+                          </div>
+                          <div className="arch-card-text">
+                            <span className="arch-card-title">MIX-UV</span>
+                            <span className="arch-card-subtitle">SEAM PREDICTION</span>
+                          </div>
+                        </div>
+                        <div className="arch-card-back">
+                          <p>Transformer based model for seam prediction. Analyzes mesh topology.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="arch-card-row">
+                    <div className="node-dot"></div>
+                    <div className="arch-card-wrapper">
+                      <div className="arch-card">
+                        <div className="arch-card-front">
+                          <div className="arch-card-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                              <circle
+                                cx="12"
+                                cy="12"
+                                r="3"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                              />
+                              <path
+                                d="M12 2V5M12 19V22M2 12H5M19 12H22"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                              />
+                            </svg>
+                          </div>
+                          <div className="arch-card-text">
+                            <span className="arch-card-title">UV-ADVISOR</span>
+                            <span className="arch-card-subtitle">PLACEMENT LOGIC</span>
+                          </div>
+                        </div>
+                        <div className="arch-card-back">
+                          <p>
+                            Intelligent UV island placement and optimization for efficient texturing.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="arch-card-row">
+                    <div className="node-dot"></div>
+                    <div className="arch-card-wrapper">
+                      <div className="arch-card">
+                        <div className="arch-card-front">
+                          <div className="arch-card-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                              <path
+                                d="M12 3V21M3 12H21"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                              />
+                              <circle
+                                cx="12"
+                                cy="12"
+                                r="9"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                              />
+                            </svg>
+                          </div>
+                          <div className="arch-card-text">
+                            <span className="arch-card-title">BAKE ADVISOR</span>
+                            <span className="arch-card-subtitle">CYCLES RENDER</span>
+                          </div>
+                        </div>
+                        <div className="arch-card-back">
+                          <p>Automated baking settings and optimization for Cycles renderer.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="arch-card-row">
+                    <div className="node-dot"></div>
+                    <div className="arch-card-wrapper">
+                      <div className="arch-card">
+                        <div className="arch-card-front">
+                          <div className="arch-card-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                              <path
+                                d="M4 4H10V10H4V4Z"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                              />
+                              <path
+                                d="M14 4H20V10H14V4Z"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                              />
+                              <path
+                                d="M4 14H10V20H4V14Z"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                              />
+                              <path
+                                d="M17 14V20M14 17H20"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                              />
+                            </svg>
+                          </div>
+                          <div className="arch-card-text">
+                            <span className="arch-card-title">MIX-MAT</span>
+                            <span className="arch-card-subtitle">PBR GENERATION</span>
+                          </div>
+                        </div>
+                        <div className="arch-card-back">
+                          <p>AI-powered PBR material generation from text or image references.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="architecture-column">
+                <span className="tier-label">Generative Capability</span>
+                <div className="column-cards">
+                  <div className="arch-card-row">
+                    <div className="node-dot"></div>
+                    <div className="arch-card-wrapper">
+                      <div className="arch-card">
+                        <div className="arch-card-front">
+                          <div className="arch-card-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                              <circle
+                                cx="12"
+                                cy="6"
+                                r="3"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                              />
+                              <path
+                                d="M12 9V15M8 18H16"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                              />
+                              <circle
+                                cx="12"
+                                cy="18"
+                                r="3"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                              />
+                            </svg>
+                          </div>
+                          <div className="arch-card-text">
+                            <span className="arch-card-title">IDEATION</span>
+                            <span className="arch-card-subtitle">VISION GEN</span>
+                          </div>
+                        </div>
+                        <div className="arch-card-back">
+                          <p>Generate creative concepts and visual ideas from text descriptions.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="arch-card-row">
+                    <div className="node-dot"></div>
+                    <div className="arch-card-wrapper">
+                      <div className="arch-card">
+                        <div className="arch-card-front">
+                          <div className="arch-card-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                              <path
+                                d="M9 5H7C5.89543 5 5 5.89543 5 7V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V7C19 5.89543 18.1046 5 17 5H15"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                              />
+                              <path
+                                d="M9 3H15V5H9V3Z"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                              />
+                              <path
+                                d="M9 12H15M9 16H12"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                              />
+                            </svg>
+                          </div>
+                          <div className="arch-card-text">
+                            <span className="arch-card-title">STEP-PREDICTION</span>
+                            <span className="arch-card-subtitle">LLM GUIDE</span>
+                          </div>
+                        </div>
+                        <div className="arch-card-back">
+                          <p>LLM-powered workflow guidance and next-step recommendations.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="arch-card-row">
+                    <div className="node-dot"></div>
+                    <div className="arch-card-wrapper">
+                      <div className="arch-card">
+                        <div className="arch-card-front">
+                          <div className="arch-card-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                              <path
+                                d="M21 15V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V15"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                              />
+                              <path
+                                d="M12 3V15M12 15L7 10M12 15L17 10"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          </div>
+                          <div className="arch-card-text">
+                            <span className="arch-card-title">EXPORT</span>
+                            <span className="arch-card-subtitle">AUTO-COMPLETE</span>
+                          </div>
+                        </div>
+                        <div className="arch-card-back">
+                          <p>
+                            Smart export with auto-completion of settings and format optimization.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="architecture-bottom">
+              <div className="arch-card-wrapper primary-wrapper">
+                <div className="arch-card">
+                  <div className="arch-card-front primary-front">
+                    <div className="arch-card-icon">
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="9"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                        />
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="4"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                        />
+                        <path
+                          d="M12 3V8M12 16V21M3 12H8M16 12H21"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    </div>
+                    <div className="arch-card-text">
+                      <span className="arch-card-title">MIXAR CORE</span>
+                      <span className="arch-card-subtitle">SPATIAL ENGINE</span>
+                    </div>
+                  </div>
+                  <div className="arch-card-back">
+                    <p>
+                      The foundational spatial engine powering all 3D operations and rendering.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="connecting-line-wrapper">
+        <div className="connecting-line"></div>
+        <div className="connecting-line-current"></div>
+      </div>
+
+      <div className="sticky-features-wrapper">
+        <div className="sticky-features-header">
+          <div className="header-glow-dot"></div>
+          <h2>One Workspace, Infinite Possibilities</h2>
+          <p>Generate concepts, create 3D assets, and iterate faster than ever.</p>
+        </div>
+
+        <div className="sticky-features-content">
+          <section className="feature-showcase">
+            <div className="feature-showcase-card">
+              <div className="feature-showcase-content">
+                <h3>
+                  Meet <span className="text-gradient">Mixie</span>: Your AI Assistant
+                </h3>
+                <p>
+                  Ask Mixie to handle UV unwrapping, asset placement, or complex lighting setups.
+                  Designed to automate technical drudgery, Mixie is your intelligent co-pilot that
+                  accelerates your workflow exactly the way you want.
+                </p>
+              </div>
+              <div className="feature-showcase-visual">
+                <video
+                  className="showcase-gif"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  aria-label="UV Unwrap"
+                >
+                  <source
+                    src="/assets/feature_cards/webgif_UV_Unwrap_V1.webm"
+                    type="video/webm"
+                  />
+                  <source
+                    src="/assets/feature_cards/webgif_UV_Unwrap_V1.mp4"
+                    type="video/mp4"
+                  />
+                </video>
+              </div>
+            </div>
+          </section>
+
+          <section className="feature-grid-section">
+            <div className="feature-grid-container">
+              <div className="feature-grid-header">
+                <h2>Blender but Better</h2>
+              </div>
+              <div className="feature-grid">
+                <div className="feature-grid-card">
+                  <div className="feature-grid-card-content">
+                    <h4>Dedicated Workspaces</h4>
+                    <p>
+                      Access professional-grade environments specifically optimized for modeling,
+                      texturing, and UV editing. Whether you are refining AI-generated assets or
+                      building from scratch, our workspaces provide the precision you need.
+                    </p>
+                  </div>
+                  <div className="feature-grid-card-visual">
+                    <video autoPlay loop muted playsInline aria-label="UI Feature">
+                      <source
+                        src="/assets/feature_cards/webgif_UI_V1.webm"
+                        type="video/webm"
+                      />
+                      <source
+                        src="/assets/feature_cards/webgif_UI_V1.mp4"
+                        type="video/mp4"
+                      />
+                    </video>
+                  </div>
+                </div>
+
+                <div className="feature-grid-card">
+                  <div className="feature-grid-card-content">
+                    <h4>Layer-Based Texturing</h4>
+                    <p>
+                      Master your materials with a dedicated, non-destructive layer-based interface.
+                      Combine the flexibility of traditional texturing workflows with the speed of
+                      AI-driven tools.
+                    </p>
+                  </div>
+                  <div className="feature-grid-card-visual">
+                    <video autoPlay loop muted playsInline aria-label="Texture Feature">
+                      <source
+                        src="/assets/feature_cards/webgif_tex_V1.webm"
+                        type="video/webm"
+                      />
+                      <source
+                        src="/assets/feature_cards/webgif_tex_V1.mp4"
+                        type="video/mp4"
+                      />
+                    </video>
+                  </div>
+                </div>
+
+                <div className="feature-grid-card">
+                  <div className="feature-grid-card-content">
+                    <h4>Integrated Moodboard</h4>
+                    <p>
+                      Conceptualize directly within your editor without the friction of switching
+                      tools. Generate AI reference images, set style contexts, and prompt real-time
+                      changes to stay in the creative flow.
+                    </p>
+                  </div>
+                  <div className="feature-grid-card-visual">
+                    <video autoPlay loop muted playsInline aria-label="Integrated Moodboard">
+                      <source
+                        src="/assets/feature_cards/webgif_moodboard_v1.webm"
+                        type="video/webm"
+                      />
+                      <source
+                        src="/assets/feature_cards/webgif_moodboard_v1.mp4"
+                        type="video/mp4"
+                      />
+                    </video>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="feature-grid-section feature-row-2col">
+            <div className="feature-grid-container">
+              <h3 className="feature-grid-subtitle">Leverage Generative AI</h3>
+              <div className="feature-grid-2col">
+                <div className="feature-grid-card">
+                  <div className="feature-grid-card-content">
+                    <h4>Asset Generation</h4>
+                    <p>
+                      Access the industry's leading image-to-3D and text-to-3D models in one
+                      unified interface. Whether you need a high-poly organic sculpt or an optimized
+                      low-poly asset, you can generate and import them instantly.
+                    </p>
+                  </div>
+                  <div className="feature-grid-card-visual">
+                    <video autoPlay loop muted playsInline aria-label="Image to 3D Feature">
+                      <source
+                        src="/assets/feature_cards/webgif_image_to_3D_V1.webm"
+                        type="video/webm"
+                      />
+                      <source
+                        src="/assets/feature_cards/webgif_image_to_3D_V1.mp4"
+                        type="video/mp4"
+                      />
+                    </video>
+                  </div>
+                </div>
+
+                <div className="feature-grid-card">
+                  <div className="feature-grid-card-content">
+                    <h4>Texture Generation</h4>
+                    <p>
+                      Instantly generate full PBR map suites including Metalness, Roughness, and
+                      Albedo—at up to 4K resolution. Use AI to create a high-fidelity starting
+                      point, then refine every detail in our layer-based editor.
+                    </p>
+                  </div>
+                  <div className="feature-grid-card-visual">
+                    <video autoPlay loop muted playsInline aria-label="PBR Generation Feature">
+                      <source
+                        src="/assets/feature_cards/webgif_Pbr_V1.webm"
+                        type="video/webm"
+                      />
+                      <source
+                        src="/assets/feature_cards/webgif_Pbr_V1.mp4"
+                        type="video/mp4"
+                      />
+                    </video>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div className="sticky-features-spacer"></div>
+        </div>
+
+        <div className="features-learn-more">
+          <div className="features-learn-more-bg">
+            <img
+              loading="lazy"
+              src="https://d2znch1yzypu23.cloudfront.net/skate_back.webp"
+              alt=""
+            />
+          </div>
+          <div className="features-learn-more-content">
+            <h2>
+              Ride the wave of <span className="text-gradient">agentic 3D</span>,
+              <br />
+              be the fastest artist in the room!
+            </h2>
+            <a href="#" className="btn-learn-more">
+              Learn more
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <section className="try-mixar-section">
+        <div className="try-mixar-container">
+          <div className="try-mixar-content">
+            <h2>Try Mixar Now</h2>
+            <p>Join our Beta, build the future of agentic 3D with us!</p>
+            <div className="try-mixar-buttons">
+              <a href="https://mixar.app/signup/frontend/signup.html" className="btn-waitlist">
+                Sign Up
+              </a>
+              <a
+                href="https://discord.gg/YVqvkQx8rX"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-discord"
+              >
+                Join Discord
+              </a>
+            </div>
+          </div>
+          <div className="try-mixar-visual">
+            <img
+              loading="lazy"
+              src="https://d2znch1yzypu23.cloudfront.net/Join%20US.svg"
+              alt="Join Mixar Beta"
+            />
+          </div>
+        </div>
+      </section>
+
+      <footer className="site-footer">
+        <div className="footer-bg-wrapper">
+          <div className="footer-bg-1">
+            <svg
+              className="block size-full"
+              fill="none"
+              preserveAspectRatio="none"
+              viewBox="0 0 1015 1014.97"
+              style={{ width: "100%", height: "100%" }}
+            >
+              <g id="Group" opacity="0.1">
+                <path
+                  d="M74.7187 529.124C75.5794 523.637 79.4523 518.689 86.2298 514.385C93.0073 510.082 99.4621 508.361 105.487 509.329L113.77 510.62C117.751 511.266 121.193 512.341 123.99 513.74C127.54 516.86 130.015 519.872 131.413 522.561C132.812 525.358 134.426 529.984 136.47 536.439L172.724 658.865L263.844 673.281C248.675 621.212 233.399 569.143 217.908 517.075L215.003 506.64C214.788 505.456 214.25 504.058 213.927 502.767C202.954 495.236 191.658 487.383 179.394 478.992C156.695 463.392 131.198 445.857 103.227 426.493C93.0073 426.493 82.8948 427.999 72.9974 430.688C59.3348 434.453 46.8556 440.263 35.6672 448.224C24.3714 456.185 15.0119 465.652 7.37375 476.732C4.68426 480.605 2.42506 484.693 0.381044 488.889C-1.55539 538.698 3.93119 587.432 15.8726 634.014L57.0756 640.576L74.7187 529.016V529.124Z"
+                  fill="url(#paint0_linear_1_99)"
+                  id="Vector"
+                />
+                <path
+                  d="M658.882 842.51L640.593 958.266L716.652 970.315C718.696 969.347 720.848 968.486 722.892 967.518L746.775 816.476L658.882 842.51Z"
+                  fill="url(#paint1_linear_1_99)"
+                  id="Vector_2"
+                />
+                <path
+                  d="M388.313 964.381C393.907 958.141 399.071 951.687 403.59 945.339C411.551 933.828 419.081 922.855 426.504 912.097C426.504 908.332 426.504 904.459 426.934 900.694L428.118 888.537C430.377 874.014 434.68 861.427 441.027 850.669C443.932 844.967 448.128 839.373 453.292 833.779C458.563 828.185 464.372 823.129 470.72 818.503C477.067 813.877 483.522 809.896 489.869 806.561C494.71 804.087 498.905 802.473 502.778 801.398C514.612 784.185 525.585 768.263 535.375 754.17C551.297 731.148 564.637 711.568 575.395 695.647C586.153 679.725 595.082 666.385 602.505 655.734L630.476 614.854C634.026 608.722 639.082 604.204 645.752 601.084C652.422 598.072 658.231 596.888 663.18 597.641L669.957 598.717C674.906 599.47 680.393 602.59 686.202 607.861C692.011 613.133 694.378 619.48 693.195 627.011L673.508 751.373C685.341 747.93 697.175 744.38 709.009 740.938C726.437 735.881 743.865 730.61 761.293 725.554L775.601 635.509C776.892 623.891 775.386 611.627 771.082 598.717C770.114 595.705 768.931 592.693 767.64 589.788L657.371 513.944C654.143 513.944 651.023 513.944 647.688 514.267C638.544 515.127 630.26 516.741 622.73 519.108C609.713 523.734 597.879 530.942 587.444 540.731C576.901 550.629 568.294 560.419 561.624 570.101L501.702 657.348C501.702 663.05 501.487 668.644 500.627 674.131L498.045 685.211C496.001 698.228 490.837 710.385 482.661 722.004C474.485 733.515 464.695 743.412 453.292 751.911C444.578 758.366 435.433 763.637 425.751 767.725L331.941 904.136L330.866 900.909C316.988 854.434 303.433 807.96 289.77 761.485L198.865 747.07L250.719 921.995C254.484 934.043 258.68 944.156 263.198 952.87C290.738 967.931 319.893 980.626 350.553 990.63C357.438 988.264 364 985.036 370.132 980.841C376.695 976.215 382.827 970.836 388.421 964.596L388.313 964.381Z"
+                  fill="url(#paint2_linear_1_99)"
+                  id="Vector_3"
+                />
+                <path
+                  d="M842.411 356.468L958.167 374.756L970.216 298.697C969.248 296.653 968.387 294.502 967.419 292.458L816.377 268.575L842.411 356.468Z"
+                  fill="url(#paint3_linear_1_99)"
+                  id="Vector_4"
+                />
+                <path
+                  d="M964.293 626.893C958.053 621.299 951.598 616.135 945.251 611.617C933.74 603.656 922.767 596.125 912.009 588.702C908.243 588.702 904.371 588.702 900.605 588.272L888.449 587.089C873.925 584.83 861.339 580.526 850.581 574.179C844.879 571.274 839.285 567.079 833.691 561.915C828.096 556.644 823.04 550.834 818.414 544.487C813.788 538.14 809.808 531.685 806.473 525.338C803.999 520.497 802.385 516.301 801.309 512.428C784.096 500.595 768.174 489.621 754.082 479.832C731.059 463.91 711.48 450.57 695.558 439.812C679.636 429.054 666.296 420.017 655.646 412.702L614.766 384.731C608.634 381.181 604.115 376.125 600.995 369.455C597.983 362.785 596.8 356.975 597.553 352.027L598.629 345.249C599.382 340.301 602.502 334.814 607.773 329.005C613.044 323.195 619.392 320.829 626.922 322.012L751.284 341.699C747.842 329.865 744.292 318.031 740.849 306.198C735.793 288.77 730.522 271.342 725.465 253.914L635.421 239.606C623.802 238.315 611.538 239.821 598.629 244.124C595.616 245.092 592.604 246.276 589.7 247.567L513.856 357.836C513.856 361.063 513.856 364.183 514.178 367.518C515.039 376.663 516.653 384.946 519.02 392.477C523.645 405.494 530.853 417.328 540.643 427.763C550.54 438.306 560.33 446.912 570.012 453.582L657.26 513.504L767.529 589.348L903.94 683.158L900.713 684.233C854.238 698.111 807.764 711.666 761.289 725.329C743.861 730.385 726.433 735.656 709.006 740.713C697.172 744.155 685.338 747.705 673.504 751.148C621.436 766.317 569.367 781.593 517.298 797.085L506.863 799.989C505.68 800.204 504.281 800.742 502.99 801.065C499.117 802.141 494.922 803.647 490.081 806.229C483.626 809.564 477.279 813.544 470.931 818.17C464.584 822.796 458.775 827.96 453.503 833.447C448.232 839.041 444.144 844.635 441.239 850.337C434.892 861.095 430.589 873.789 428.33 888.205L427.146 900.361C426.824 904.234 426.716 907.999 426.716 911.765C426.716 921.985 428.222 932.097 430.912 941.995C434.677 955.657 440.486 968.137 448.447 979.325C456.408 990.621 465.875 999.98 476.956 1007.62C480.829 1010.31 484.917 1012.57 489.112 1014.61C569.367 1017.62 646.932 1001.59 716.751 969.965L640.692 957.917L529.132 940.273C523.646 939.413 518.697 935.54 514.394 928.762C510.09 921.985 508.369 915.53 509.337 909.506L510.628 901.222C511.274 897.242 512.35 893.799 513.748 891.002C516.868 887.452 519.88 884.977 522.57 883.579C525.367 882.18 529.993 880.567 536.448 878.523L658.873 842.268L746.766 816.234L921.691 764.38C933.74 760.615 943.852 756.419 952.566 751.901C967.628 724.361 980.322 695.206 990.327 664.546C987.96 657.661 984.733 651.099 980.537 644.967C975.911 638.404 970.532 632.272 964.293 626.678V626.893Z"
+                  fill="url(#paint4_linear_1_99)"
+                  id="Vector_5"
+                />
+                <path
+                  d="M626.816 51.0352C621.221 57.2749 616.058 63.7296 611.539 70.0769C603.578 81.5879 596.048 92.561 588.625 103.319C588.625 107.084 588.625 110.957 588.194 114.723L587.011 126.879C584.752 141.402 580.449 153.989 574.101 164.747C571.197 170.449 567.001 176.043 561.837 181.637C556.566 187.231 550.757 192.288 544.409 196.914C538.062 201.539 531.607 205.52 525.26 208.855C520.419 211.329 516.223 212.943 512.351 214.019C500.517 231.231 489.544 247.153 479.754 261.246C463.832 284.268 450.492 303.848 439.734 319.77C428.976 335.692 420.047 349.031 412.624 359.682L384.653 400.562C381.103 406.694 376.047 411.213 369.377 414.332C362.707 417.345 356.898 418.528 351.949 417.775L345.171 416.699C340.223 415.946 334.736 412.826 328.927 407.555C323.118 402.283 320.751 395.936 321.934 388.406L341.621 264.043C329.788 267.486 317.954 271.036 306.12 274.479C288.692 279.535 271.264 284.806 253.836 289.863L239.528 379.907C238.237 391.525 239.743 403.79 244.046 416.699C245.015 419.711 246.198 422.724 247.489 425.628L357.758 501.472C360.986 501.472 364.106 501.472 367.441 501.149C376.585 500.289 384.868 498.675 392.399 496.308C405.416 491.682 417.25 484.474 427.685 474.685C438.228 464.787 446.834 454.998 453.504 445.315L513.426 358.068L589.27 247.799L683.08 111.388L684.156 114.615C698.033 161.089 711.588 207.564 725.251 254.038C730.307 271.466 735.579 288.894 740.635 306.322C744.078 318.156 747.628 329.99 751.07 341.824C766.239 393.892 781.515 445.961 797.007 498.03L800.019 508.465C800.234 509.648 800.772 511.047 801.095 512.338C802.171 516.211 803.677 520.406 806.259 525.247C809.594 531.702 813.574 538.049 818.2 544.396C822.826 550.744 827.99 556.553 833.477 561.824C839.071 567.096 844.665 571.184 850.367 574.088C861.125 580.436 873.819 584.739 888.235 586.998L900.391 588.181C904.264 588.504 908.029 588.612 911.795 588.612C922.015 588.612 932.127 587.106 942.025 584.416C955.687 580.651 968.166 574.842 979.355 566.881C990.651 558.92 1000.01 549.453 1007.65 538.372C1010.34 534.499 1012.6 530.411 1014.64 526.215C1017.65 445.961 1001.62 368.396 969.995 298.576L957.946 374.635L940.303 486.196C939.443 491.682 935.57 496.631 928.792 500.934C922.015 505.237 915.56 506.959 909.535 505.99L901.252 504.699C897.271 504.054 893.829 502.978 891.032 501.58C887.482 498.46 885.007 495.448 883.609 492.758C882.21 489.961 880.596 485.335 878.552 478.88L842.298 356.454L816.264 268.562L764.41 93.6368C760.645 81.5879 756.449 71.4754 751.931 62.7614C724.391 47.7002 695.236 35.0058 664.576 25.0009C657.691 27.3677 651.129 30.595 644.997 34.7907C638.434 39.4166 632.302 44.7956 626.708 51.0352H626.816Z"
+                  fill="url(#paint5_linear_1_99)"
+                  id="Vector_6"
+                />
+                <path
+                  d="M356.253 172.94L374.542 57.184L298.483 45.1351C296.439 46.1033 294.287 46.9639 292.243 47.9321L268.361 198.974L356.253 172.94Z"
+                  fill="url(#paint6_linear_1_99)"
+                  id="Vector_7"
+                />
+                <path
+                  d="M289.771 761.272L379.815 775.58C391.434 776.871 403.698 775.365 416.608 771.062C419.62 770.093 422.632 768.91 425.537 767.619C435.219 763.531 444.363 758.26 453.077 751.805C464.373 743.306 474.163 733.408 482.446 721.897C490.622 710.386 495.786 698.122 497.83 685.105L500.412 674.024C501.273 668.538 501.488 662.944 501.488 657.242C501.488 654.015 501.488 650.895 501.165 647.56C500.305 638.416 498.691 630.132 496.324 622.601C491.698 609.584 484.49 597.75 474.701 587.315C464.803 576.772 455.014 568.166 445.331 561.496L358.084 501.574L247.815 425.73L111.403 331.92L114.631 330.845C161.105 316.967 207.58 303.412 254.054 289.749C271.482 284.693 288.91 279.421 306.338 274.365C318.172 270.923 330.006 267.373 341.84 263.93C393.908 248.761 445.977 233.485 498.046 217.993L508.481 214.981C509.664 214.766 511.063 214.228 512.354 213.905C516.226 212.83 520.422 211.323 525.263 208.742C531.718 205.407 538.065 201.426 544.412 196.8C550.76 192.174 556.569 187.01 561.84 181.524C567.112 175.93 571.2 170.336 574.105 164.634C580.452 153.876 584.755 141.181 587.014 126.766L588.197 114.609C588.52 110.736 588.628 106.971 588.628 103.206C588.628 92.9856 587.122 82.8731 584.432 72.9757C580.667 59.3131 574.858 46.8338 566.897 35.6455C558.936 24.3496 549.469 14.9902 538.388 7.35203C534.515 4.66253 530.427 2.40335 526.231 0.359336C445.977 -2.6529 368.412 13.3765 298.592 45.005L374.651 57.0539L486.212 74.697C491.698 75.5577 496.647 79.4305 500.95 86.2081C505.253 92.9856 506.975 99.4404 506.006 105.465L504.715 113.749C504.07 117.729 502.994 121.172 501.596 123.969C498.476 127.519 495.464 129.993 492.774 131.392C489.977 132.79 485.351 134.404 478.896 136.448L356.47 172.702L268.578 198.737L93.6528 250.59C81.6038 254.355 71.4914 258.551 62.7774 263.069C47.7162 290.61 35.0218 319.764 25.0168 350.424C27.3836 357.309 30.611 363.872 34.8066 370.004C39.4325 376.566 44.8115 382.698 51.0512 388.292C57.2908 393.887 63.7456 399.05 70.0928 403.569C81.6039 411.53 92.577 419.06 103.335 426.483C131.413 445.74 156.802 463.275 179.502 478.982C191.658 487.373 203.062 495.227 214.035 502.757C231.247 514.591 247.169 525.564 261.262 535.354C284.284 551.276 303.864 564.616 319.786 575.374C335.707 586.132 349.047 595.061 359.698 602.484L400.578 630.455C406.71 634.005 411.229 639.061 414.348 645.731C417.361 652.401 418.544 658.21 417.791 663.159L416.715 669.936C415.962 674.885 412.842 680.372 407.571 686.181C402.299 691.99 395.952 694.357 388.422 693.174L264.059 673.487L172.939 659.071L57.1832 640.782L15.9801 634.22C23.941 664.88 34.5914 694.68 47.8238 722.973L198.866 746.856L289.771 761.272Z"
+                  fill="url(#paint7_linear_1_99)"
+                  id="Vector_8"
+                />
+              </g>
+              <defs>
+                <linearGradient
+                  gradientUnits="userSpaceOnUse"
+                  id="paint0_linear_1_99"
+                  x1="-0.0492747"
+                  x2="263.952"
+                  y1="550.102"
+                  y2="550.102"
+                >
+                  <stop stopColor="#85C449" />
+                  <stop offset="0.22" stopColor="#6CC35F" />
+                  <stop offset="0.67" stopColor="#2FC199" />
+                  <stop offset="1" stopColor="#00C0C7" />
+                </linearGradient>
+                <linearGradient
+                  gradientUnits="userSpaceOnUse"
+                  id="paint1_linear_1_99"
+                  x1="640.593"
+                  x2="746.775"
+                  y1="893.396"
+                  y2="893.396"
+                >
+                  <stop stopColor="#85C449" />
+                  <stop offset="0.22" stopColor="#6CC35F" />
+                  <stop offset="0.67" stopColor="#2FC199" />
+                  <stop offset="1" stopColor="#00C0C7" />
+                </linearGradient>
+                <linearGradient
+                  gradientUnits="userSpaceOnUse"
+                  id="paint2_linear_1_99"
+                  x1="198.865"
+                  x2="775.816"
+                  y1="752.126"
+                  y2="752.126"
+                >
+                  <stop stopColor="#85C449" />
+                  <stop offset="0.22" stopColor="#6CC35F" />
+                  <stop offset="0.67" stopColor="#2FC199" />
+                  <stop offset="1" stopColor="#00C0C7" />
+                </linearGradient>
+                <linearGradient
+                  gradientUnits="userSpaceOnUse"
+                  id="paint3_linear_1_99"
+                  x1="816.377"
+                  x2="970.108"
+                  y1="321.719"
+                  y2="321.719"
+                >
+                  <stop stopColor="#85C449" />
+                  <stop offset="0.22" stopColor="#6CC35F" />
+                  <stop offset="0.67" stopColor="#2FC199" />
+                  <stop offset="1" stopColor="#00C0C7" />
+                </linearGradient>
+                <linearGradient
+                  gradientUnits="userSpaceOnUse"
+                  id="paint4_linear_1_99"
+                  x1="426.501"
+                  x2="990.327"
+                  y1="627.324"
+                  y2="627.324"
+                >
+                  <stop stopColor="#85C449" />
+                  <stop offset="0.22" stopColor="#6CC35F" />
+                  <stop offset="0.67" stopColor="#2FC199" />
+                  <stop offset="1" stopColor="#00C0C7" />
+                </linearGradient>
+                <linearGradient
+                  gradientUnits="userSpaceOnUse"
+                  id="paint5_linear_1_99"
+                  x1="239.313"
+                  x2="1015.18"
+                  y1="306.86"
+                  y2="306.86"
+                >
+                  <stop stopColor="#85C449" />
+                  <stop offset="0.22" stopColor="#6CC35F" />
+                  <stop offset="0.67" stopColor="#2FC199" />
+                  <stop offset="1" stopColor="#00C0C7" />
+                </linearGradient>
+                <linearGradient
+                  gradientUnits="userSpaceOnUse"
+                  id="paint6_linear_1_99"
+                  x1="268.468"
+                  x2="374.65"
+                  y1="122.055"
+                  y2="122.055"
+                >
+                  <stop stopColor="#85C449" />
+                  <stop offset="0.22" stopColor="#6CC35F" />
+                  <stop offset="0.67" stopColor="#2FC199" />
+                  <stop offset="1" stopColor="#00C0C7" />
+                </linearGradient>
+                <linearGradient
+                  gradientUnits="userSpaceOnUse"
+                  id="paint7_linear_1_99"
+                  x1="15.8726"
+                  x2="588.628"
+                  y1="388.077"
+                  y2="388.077"
+                >
+                  <stop stopColor="#85C449" />
+                  <stop offset="0.22" stopColor="#6CC35F" />
+                  <stop offset="0.67" stopColor="#2FC199" />
+                  <stop offset="1" stopColor="#00C0C7" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <div className="footer-logomark">
+            <img
+              loading="lazy"
+              src="https://d2znch1yzypu23.cloudfront.net/Logomark.svg"
+              alt="Mixar"
+            />
+          </div>
+          <div className="footer-bg-2">
+            <svg
+              className="block size-full"
+              fill="none"
+              preserveAspectRatio="none"
+              viewBox="0 0 840.981 225.786"
+              style={{ width: "100%", height: "auto" }}
+            >
+              <g id="Group">
+                <path
+                  d="M8.9528e-06 53.0479H31.3276L33.2262 69.9577C44.0841 55.5992 60.4005 47.886 80.5142 47.886C102.23 47.886 117.894 57.1419 126.2 73.755C136.761 56.8452 154.621 47.886 176.692 47.886C211.52 47.886 230.685 69.9577 230.685 109.533V225.528H195.204V109.533C195.204 89.4188 186.245 80.1628 166.428 80.1628C143.407 80.1628 133.202 92.6227 133.202 121.399V225.528H97.424V109.533C97.424 89.4188 89.4141 80.1628 69.6564 80.1628C46.6354 80.1628 35.7775 92.6227 35.7775 121.399V225.528H8.9528e-06V52.9886V53.0479Z"
+                  fill="white"
+                  id="Vector"
+                />
+                <path
+                  d="M273.822 0H309.6V32.2769H273.822V0ZM273.822 53.0433H309.6V225.582H273.822V53.0433Z"
+                  fill="white"
+                  id="Vector_2"
+                />
+                <path
+                  d="M394.916 136.114L339.974 53.0488H382.159L416.038 110.245L449.917 53.0488H492.102L437.16 136.114L495.306 225.588H453.121L416.038 162.339L378.955 225.588H336.77L394.916 136.114Z"
+                  fill="white"
+                  id="Vector_3"
+                />
+                <path
+                  d="M509.605 174.998C509.605 139.873 533.575 122.31 577.362 122.31H619.845V108.901C619.845 85.8801 608.037 75.0223 584.067 75.0223C562.648 75.0223 552.146 83.9815 549.536 101.544L516.962 94.8394C520.819 63.8678 544.136 45 583.118 45C629.1 45 655.622 68.3177 655.622 106.646V178.854C655.622 186.864 659.775 190.661 669.387 190.661V225.786C647.968 225.786 632.66 215.878 625.6 204.367C612.487 220.031 595.578 225.786 572.26 225.786C533.575 225.786 509.664 208.876 509.664 174.998H509.605ZM619.845 167.64V149.129L577.362 149.425C554.697 149.425 544.433 156.782 544.433 173.099C544.433 189.415 554.045 195.467 577.362 195.467C606.139 195.467 619.845 185.855 619.845 167.64Z"
+                  fill="white"
+                  id="Vector_4"
+                />
+                <path
+                  d="M700.067 53.0332H731.394L734.242 76.3509C746.049 58.1358 763.612 47.9306 785.387 47.9306C815.112 47.9306 833.327 66.1457 840.981 100.025L805.857 107.382C802.653 89.1667 794.999 79.5549 778.386 79.5549C752.813 79.5549 735.903 103.822 735.903 138.353V225.572H700.126V53.0332H700.067Z"
+                  fill="white"
+                  id="Vector_5"
+                />
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <div className="footer-content">
+          <div className="footer-top">
+            <div className="footer-links">
+              <div className="footer-links-column">
+                <a href="#" className="footer-link">
+                  Technology
+                </a>
+                <a href="#" className="footer-link">
+                  Resources
+                </a>
+              </div>
+              <div className="footer-links-column">
+                <a href="#" className="footer-link">
+                  Expertise
+                </a>
+                <a href="#" className="footer-link">
+                  Key features
+                </a>
+              </div>
+            </div>
+
+            <div className="footer-cta">
+              <h3>Still have questions?</h3>
+              <a href="#" className="btn-mixie-combined">
+                <span className="btn-mixie-text">Meet Mixie</span>
+                <span className="btn-mixie-arrow">
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M5 12h14M12 5l7 7-7 7"
+                      stroke="#010000"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </span>
+              </a>
+            </div>
+          </div>
+
+          <div className="footer-divider"></div>
+
+          <div className="footer-bottom">
+            <p className="copyright">&copy; 2025 mixar. All rights reserved.</p>
+
+            <div className="social-icons">
+              <a
+                href="https://www.instagram.com/mixie3d/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="social-icon-wrapper"
+              >
+                <svg viewBox="0 0 24.35 24.35" fill="none">
+                  <path
+                    d="M12.18 0C15.65 0 18.71 1.4 21.35 4.18C23.35 6.6 24.35 9.25 24.35 12.13C24.35 15.81 22.86 18.97 19.87 21.6C17.48 23.43 14.93 24.35 12.22 24.35C8.44 24.35 5.22 22.77 2.54 19.62C0.85 17.27 0 14.79 0 12.18C0 9.57 0.89 7.02 2.66 4.61C4.24 2.59 6.44 1.18 9.27 0.38C9.76 0.21 10.73 0.08 12.19 0H12.18ZM4.79 11.83V12.46C4.79 15.47 5 17.13 5.42 17.45C5.72 18.18 6.39 18.77 7.45 19.22C8.05 19.45 9.18 19.56 10.83 19.56H13.66C15.87 19.56 17.24 19.29 17.76 18.76C18.43 18.43 18.95 17.71 19.32 16.6C19.49 16.02 19.57 15.03 19.57 13.64V10.81C19.57 8.42 19.26 6.96 18.64 6.41C18.29 5.8 17.56 5.32 16.44 4.97C15.86 4.83 14.53 4.76 12.47 4.76H11.84C8.9 4.76 7.25 4.97 6.89 5.39C6.19 5.71 5.61 6.35 5.16 7.33C4.91 7.84 4.78 9.34 4.78 11.81L4.79 11.83ZM12.6 6.13C15.28 6.13 16.62 6.26 16.62 6.51C16.92 6.51 17.33 6.88 17.85 7.61C18.1 7.89 18.23 9.03 18.23 11.03V13.31C18.23 15.4 18.09 16.56 17.81 16.78C17.58 17.24 17.17 17.63 16.58 17.92C16.31 18.12 15.22 18.22 13.33 18.22H11.05C8.88 18.22 7.71 18.06 7.54 17.75C7.08 17.56 6.69 17.08 6.36 16.31C6.24 16.31 6.17 15.07 6.15 12.59V11.75C6.15 9.07 6.28 7.73 6.53 7.73C6.71 7.22 7.11 6.81 7.71 6.5C8.05 6.25 9.02 6.12 10.63 6.12H12.62L12.6 6.13ZM8.38 12.17C8.38 13.52 9.01 14.62 10.28 15.47C10.92 15.81 11.55 15.98 12.18 15.98C13.8 15.98 14.98 15.16 15.73 13.53C15.9 13.04 15.98 12.61 15.98 12.22C15.98 10.61 15.19 9.43 13.61 8.67C13.28 8.53 12.81 8.43 12.22 8.37C10.64 8.37 9.46 9.16 8.67 10.74C8.53 11.11 8.43 11.59 8.37 12.18L8.38 12.17ZM12.18 9.72C13.18 9.72 13.94 10.24 14.46 11.28C14.57 11.62 14.63 11.94 14.63 12.21C14.63 13.25 14.07 14.01 12.94 14.49C12.66 14.57 12.39 14.62 12.14 14.62C11.04 14.62 10.27 14 9.82 12.76L9.74 12.17C9.74 11.08 10.35 10.29 11.56 9.8L12.19 9.72H12.18ZM15.22 8.24C15.22 8.74 15.53 9.04 16.15 9.13C16.71 9.01 16.99 8.73 16.99 8.28C16.9 7.66 16.6 7.35 16.1 7.35C15.51 7.49 15.21 7.79 15.21 8.24H15.22Z"
+                    fill="#C7C7C7"
+                  />
+                </svg>
+              </a>
+
+              <a
+                href="https://x.com/mixie3D"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="social-icon-wrapper bg-gray"
+              >
+                <svg viewBox="0 0 14 14" fill="none" stroke="#006265">
+                  <path
+                    d="M10.1792 12.7837L1.56029 1.7022C1.35805 1.44227 1.54334 1.06345 1.87266 1.06345H3.50837C3.63048 1.06345 3.74577 1.11984 3.82074 1.21625L12.4397 12.2977C12.6419 12.5578 12.4567 12.9365 12.1273 12.9365H10.4917C10.3695 12.9365 10.2542 12.8802 10.1792 12.7837Z"
+                    fill="white"
+                  />
+                  <path
+                    d="M12.2769 1.06345L1.72309 12.9365"
+                    stroke="#006265"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </a>
+
+              <a
+                href="https://discord.gg/YVqvkQx8rX"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="social-icon-wrapper bg-gray"
+              >
+                <svg viewBox="0 0 18 18" fill="none">
+                  <path
+                    d="M5.25 9.5625C5.25 9.9106 5.36853 10.2444 5.5795 10.4906C5.79048 10.7367 6.07663 10.875 6.375 10.875C6.67337 10.875 6.95952 10.7367 7.1705 10.4906C7.38147 10.2444 7.5 9.9106 7.5 9.5625C7.5 9.2144 7.38147 8.88056 7.1705 8.63442C6.95952 8.38828 6.67337 8.25 6.375 8.25C6.07663 8.25 5.79048 8.38828 5.5795 8.63442C5.36853 8.88056 5.25 9.2144 5.25 9.5625Z"
+                    stroke="#006265"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M10.5 9.5625C10.5 9.9106 10.6185 10.2444 10.8295 10.4906C11.0405 10.7367 11.3266 10.875 11.625 10.875C11.9234 10.875 12.2095 10.7367 12.4205 10.4906C12.6315 10.2444 12.75 9.9106 12.75 9.5625C12.75 9.2144 12.6315 8.88056 12.4205 8.63442C12.2095 8.38828 11.9234 8.25 11.625 8.25C11.3266 8.25 11.0405 8.38828 10.8295 8.63442C10.6185 8.88056 10.5 9.2144 10.5 9.5625Z"
+                    stroke="#006265"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M7.125 4.125C7.125 4.125 7.935 3.75 9 3.75C10.065 3.75 10.875 4.125 10.875 4.125L11.25 3C12.5662 3 13.545 3.21975 14.625 3.75C15.375 5.00025 16.875 8.55 16.875 12.75C15.477 14.193 14.397 14.802 12.75 15L11.625 13.125C11.25 13.2502 10.2 13.5 9 13.5C7.8 13.5 6.75 13.2502 6.375 13.125L5.25 15C3.603 14.802 2.523 14.193 1.125 12.75C1.125 8.55 2.625 5.00025 3.375 3.75C4.455 3.21975 5.43375 3 6.75 3L7.125 4.125Z"
+                    stroke="#006265"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M6.375 13.125C5.5605 12.9172 4.875 12.375 4.875 12.375"
+                    stroke="#006265"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M11.625 13.125C12.4395 12.9172 13.125 12.375 13.125 12.375"
+                    stroke="#006265"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </a>
+
+              <a
+                href="https://www.linkedin.com/company/mixar3d"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="social-icon-wrapper"
+              >
+                <svg viewBox="0 0 24.35 24.35" fill="none">
+                  <path
+                    d="M12.18 0C15.65 0 18.71 1.4 21.35 4.18C23.35 6.6 24.35 9.25 24.35 12.13C24.35 15.81 22.86 18.97 19.87 21.6C17.48 23.43 14.93 24.35 12.22 24.35C8.44 24.35 5.22 22.77 2.54 19.62C0.850001 17.27 0 14.79 0 12.18C0 9.57 0.890004 7.02 2.66 4.61C4.23 2.59 6.43 1.18 9.25 0.38C9.74 0.21 10.71 0.08 12.17 0L12.18 0ZM4.78 6.55C4.97 7.73 5.55 8.32 6.51 8.32H6.64C7.51 8.32 8.08 7.8 8.33 6.76V6.51C8.33 5.74 7.89 5.19 7.02 4.86L6.6 4.78C5.73 4.78 5.14 5.27 4.83 6.26L4.79 6.56L4.78 6.55ZM5.04 9.68V19.57H8.08V9.68H5.04ZM12.98 10.99H12.94V9.68H10.02V19.57H13.06V14.71C13.06 12.99 13.68 12.13 14.92 12.13C15.64 12.13 16.13 12.5 16.4 13.23C16.48 13.72 16.53 14.28 16.53 14.92V19.57H19.57V14.54C19.57 12.13 19.12 10.67 18.22 10.14C17.67 9.69 16.91 9.46 15.94 9.46C14.72 9.46 13.73 9.97 12.98 10.98V10.99Z"
+                    fill="#C7C7C7"
+                  />
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </>
   );
 }
