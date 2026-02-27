@@ -1,0 +1,376 @@
+/* ============================================================
+   Landing Page Styles
+   All classes prefixed lp- to avoid conflict with styles.css
+   ============================================================ */
+
+/* Root element wrapper */
+.landing-page {
+    min-height: 100vh;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* ── Navigation ─────────────────────────────────────────── */
+.lp-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 3rem;
+    z-index: 100;
+    background: linear-gradient(180deg, rgba(10, 10, 10, 0.8) 0%, transparent 100%);
+}
+
+.lp-nav-brand {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.lp-brand-logo {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+}
+
+.lp-nav-links {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* "Log In" secondary link */
+.lp-nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 100px;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.lp-nav-link:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* "Sign Up" primary CTA */
+.lp-nav-cta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 100px;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.lp-nav-cta:hover {
+    background: var(--primary-cyan);
+    border-color: var(--primary-cyan);
+    color: var(--bg-dark);
+}
+
+.lp-nav-cta svg {
+    transition: transform 0.3s ease;
+}
+
+.lp-nav-cta:hover svg {
+    transform: translateX(3px);
+}
+
+/* ── Hero Tagline ────────────────────────────────────────── */
+.lp-hero-tagline {
+    position: fixed;
+    top: 25%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 600px;
+    font-size: 1.25rem;
+    font-weight: 300;
+    color: var(--text-secondary);
+    letter-spacing: 0.02em;
+    text-align: center;
+    z-index: 5;
+    opacity: 0;
+    animation: lp-fadeIn 1s ease forwards;
+    animation-delay: 0.5s;
+}
+
+/* ── Hero Section ────────────────────────────────────────── */
+.lp-hero {
+    position: relative;
+    z-index: 10;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 4rem 2rem;
+    text-align: center;
+}
+
+.lp-hero-content {
+    opacity: 0;
+    transform: translateY(40px);
+    animation: lp-fadeUp 1s ease forwards;
+    animation-delay: 0.3s;
+}
+
+.lp-hero-title {
+    font-size: clamp(2rem, 6vw, 4rem);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+}
+
+.lp-title-line {
+    display: block;
+}
+
+.lp-title-line.lp-highlight {
+    background: linear-gradient(135deg, var(--primary-cyan) 0%, var(--primary-green) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.lp-hero-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 3rem;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: lp-fadeUp 1s ease forwards;
+    animation-delay: 0.6s;
+}
+
+/* ── Waitlist / CTA Button ──────────────────────────────── */
+.lp-btn-waitlist {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.lp-btn-waitlist:hover {
+    transform: translateY(-2px);
+}
+
+.lp-btn-waitlist-text {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 2.5rem;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--bg-dark);
+    background: linear-gradient(135deg, var(--teal) 0%, var(--primary-green) 100%);
+    border-radius: 100px;
+    box-shadow: 0 4px 20px rgba(0, 192, 199, 0.3);
+    transition: all 0.3s ease;
+}
+
+.lp-btn-waitlist:hover .lp-btn-waitlist-text {
+    box-shadow: 0 8px 30px rgba(0, 192, 199, 0.4);
+}
+
+.lp-btn-waitlist-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    background: linear-gradient(135deg, var(--primary-cyan) 0%, var(--primary-green) 100%);
+    border-radius: 50%;
+    color: var(--bg-dark);
+    box-shadow: 0 4px 20px rgba(133, 196, 73, 0.3);
+    transition: all 0.3s ease;
+}
+
+.lp-btn-waitlist:hover .lp-btn-waitlist-arrow {
+    box-shadow: 0 8px 30px rgba(133, 196, 73, 0.4);
+}
+
+.lp-btn-waitlist-arrow svg {
+    transition: transform 0.3s ease;
+}
+
+.lp-btn-waitlist:hover .lp-btn-waitlist-arrow svg {
+    transform: translateX(3px);
+}
+
+/* ── Social Links ────────────────────────────────────────── */
+.lp-social-links {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 100px;
+    backdrop-filter: blur(10px);
+    z-index: 100;
+    opacity: 0;
+    animation: lp-fadeIn 1s ease forwards;
+    animation-delay: 1s;
+}
+
+.lp-social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.lp-social-link:hover {
+    color: var(--primary-cyan);
+    background: rgba(0, 192, 199, 0.1);
+}
+
+/* ── Loader ──────────────────────────────────────────────── */
+.lp-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+
+.lp-loader.lp-loader-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.lp-loader-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.lp-loader-text {
+    font-size: 2rem;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    color: var(--primary-cyan);
+    min-height: 3rem;
+    text-shadow:
+        0 0 20px rgba(0, 192, 199, 0.5),
+        0 0 40px rgba(0, 192, 199, 0.3),
+        0 0 60px rgba(0, 192, 199, 0.1);
+    animation: lp-textFadeIn 0.4s ease forwards;
+}
+
+/* ── Keyframes ───────────────────────────────────────────── */
+@keyframes lp-fadeUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes lp-fadeIn {
+    to { opacity: 1; }
+}
+
+@keyframes lp-textFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+        filter: blur(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0px);
+    }
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .lp-nav {
+        padding: 1rem 1.5rem;
+    }
+
+    .lp-nav-cta,
+    .lp-nav-link {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+    }
+
+    .lp-brand-logo {
+        height: 32px;
+    }
+
+    .lp-hero {
+        padding: 4rem 1.5rem;
+    }
+
+    .lp-hero-tagline {
+        font-size: 1rem;
+    }
+
+    .lp-btn-waitlist-text {
+        padding: 0.875rem 2rem;
+        font-size: 1rem;
+    }
+
+    .lp-btn-waitlist-arrow {
+        width: 46px;
+        height: 46px;
+    }
+
+    .lp-social-links {
+        bottom: 1rem;
+        right: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .lp-hero-title {
+        font-size: 2.5rem;
+    }
+
+    .lp-hero-tagline {
+        font-size: 0.9rem;
+    }
+}
