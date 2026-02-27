@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../features/auth/AuthContext";
+import { LandingPage } from "../pages/LandingPage";
 
 export function RequireAuth() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -17,4 +18,14 @@ export function RequireAdmin() {
   const { isSuperuser } = useAuth();
   if (!isSuperuser) return <Navigate to="/app" replace />;
   return <Outlet />;
+}
+
+/** Shows the landing page to unauthenticated visitors; sends logged-in users to /app. */
+export function LandingRoute() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  // Return null during auth init to avoid a flash of the landing page for logged-in users.
+  if (isLoading) return null;
+  if (isAuthenticated) return <Navigate to="/app" replace />;
+  return <LandingPage />;
 }

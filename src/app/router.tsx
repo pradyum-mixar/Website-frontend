@@ -1,5 +1,5 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { RequireAdmin, RequireAuth } from "./guards";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { LandingRoute, RequireAdmin, RequireAuth } from "./guards";
 import { AppShell } from "../layouts/AppShell";
 import { LoginPage } from "../pages/auth/LoginPage";
 import { SignupPage } from "../pages/auth/SignupPage";
@@ -15,7 +15,7 @@ export function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/auth/login" replace />} />
+        <Route path="/" element={<LandingRoute />} />
         <Route path="/auth/login" element={<LoginPage />} />
         <Route path="/auth/signup" element={<SignupPage />} />
         <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
