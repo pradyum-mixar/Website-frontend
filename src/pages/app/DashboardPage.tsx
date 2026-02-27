@@ -2,10 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "../../lib/api-client";
 import { useAuth } from "../../features/auth/AuthContext";
 
-type UserCreditsResponse = {
-  status: string;
-  data: { remaining_credits: number };
-};
 
 type UsageEvent = {
   id: string;
