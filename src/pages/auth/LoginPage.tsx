@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../features/auth/AuthContext";
 
 export function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -16,7 +17,8 @@ export function LoginPage() {
     setLoading(true);
     try {
       await login(email, password);
-      navigate("/app");
+      const returnTo = searchParams.get("returnTo") || "/app";
+      navigate(returnTo);
     } catch {
       setError("Login failed. Check email/password.");
     } finally {

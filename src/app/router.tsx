@@ -9,6 +9,7 @@ import { HandoffPage } from "../pages/auth/HandoffPage";
 import { DashboardPage } from "../pages/app/DashboardPage";
 import { AccountPage } from "../pages/app/AccountPage";
 import { AdminPage } from "../pages/app/AdminPage";
+import { DesktopLoginPage } from "../pages/auth/DesktopLoginPage";
 
 export function AppRouter() {
   return (
@@ -22,6 +23,7 @@ export function AppRouter() {
         <Route path="/auth/handoff" element={<HandoffPage />} />
 
         <Route element={<RequireAuth />}>
+          <Route path="/app/desktop-login" element={<DesktopLoginPage />} />
           <Route path="/app" element={<AppShell />}>
             <Route index element={<DashboardPage />} />
             <Route path="account" element={<AccountPage />} />

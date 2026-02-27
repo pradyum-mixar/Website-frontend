@@ -1,0 +1,216 @@
+/* Mixar Dashboard - Admin Styles */
+
+/* Referral Card */
+.referral-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 1.5rem;
+}
+
+.referral-form {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+}
+
+.referral-form .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.referral-form .form-input {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.referral-result {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.referral-code-display {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.referral-label {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.referral-code {
+    background: rgba(0, 192, 199, 0.1);
+    border: 1px solid rgba(0, 192, 199, 0.3);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-family: monospace;
+    font-size: 1rem;
+    color: var(--primary-cyan);
+    letter-spacing: 0.05em;
+}
+
+.copy-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.5rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+}
+
+.copy-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--primary-cyan);
+}
+
+.referral-credits {
+    color: var(--primary-green);
+    font-weight: 500;
+}
+
+/* User Info in Table */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.user-avatar-small {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-cyan) 0%, var(--primary-green) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--bg-dark);
+}
+
+.user-name {
+    font-weight: 500;
+}
+
+.admin-badge {
+    background: rgba(133, 196, 73, 0.2);
+    color: var(--primary-green);
+    padding: 0.125rem 0.5rem;
+    border-radius: 100px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.user-email {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.user-credits {
+    color: var(--primary-green);
+    font-weight: 500;
+}
+
+.user-generations {
+    color: var(--text-secondary);
+}
+
+/* Status Badge */
+.status-badge {
+    display: inline-flex;
+    padding: 0.25rem 0.75rem;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-badge.active {
+    background: rgba(34, 197, 94, 0.2);
+    color: var(--success-color);
+}
+
+.status-badge.inactive {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--error-color);
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.pagination-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--primary-cyan);
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-current {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.pagination-info {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .referral-form {
+        flex-direction: column;
+    }
+
+    .referral-form .btn-secondary {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .referral-result {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    .user-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+
+    .user-avatar-small {
+        display: none;
+    }
+}
