@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import logoSrc from "../assets/Logo-Primary_light.png";
-import bgSrc from "../assets/MainBG2.webp";
+import bgSrc from "../assets/skate_bg.webp";
 import "../assets/css/landing.css";
 
 const LOADER_MESSAGES = [
