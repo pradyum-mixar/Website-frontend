@@ -817,23 +817,7 @@ export function LandingPage() {
                 </p>
               </div>
               <div className="feature-showcase-visual">
-                <video
-                  className="showcase-gif"
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  aria-label="UV Unwrap"
-                >
-                  <source
-                    src="/assets/feature_cards/webgif_UV_Unwrap_V1.webm"
-                    type="video/webm"
-                  />
-                  <source
-                    src="/assets/feature_cards/webgif_UV_Unwrap_V1.mp4"
-                    type="video/mp4"
-                  />
-                </video>
+                <img loading="lazy" src="https://d2znch1yzypu23.cloudfront.net/webgif_UV_Unwrap_V1.gif" alt="Meet Mixie" className="showcase-gif" />
               </div>
             </div>
           </section>
@@ -854,16 +838,7 @@ export function LandingPage() {
                     </p>
                   </div>
                   <div className="feature-grid-card-visual">
-                    <video autoPlay loop muted playsInline aria-label="UI Feature">
-                      <source
-                        src="/assets/feature_cards/webgif_UI_V1.webm"
-                        type="video/webm"
-                      />
-                      <source
-                        src="/assets/feature_cards/webgif_UI_V1.mp4"
-                        type="video/mp4"
-                      />
-                    </video>
+                    <img loading="lazy" src="https://d2znch1yzypu23.cloudfront.net/webgif_UI_V1.gif" alt="UI Feature" />
                   </div>
                 </div>
 
@@ -877,16 +852,7 @@ export function LandingPage() {
                     </p>
                   </div>
                   <div className="feature-grid-card-visual">
-                    <video autoPlay loop muted playsInline aria-label="Texture Feature">
-                      <source
-                        src="/assets/feature_cards/webgif_tex_V1.webm"
-                        type="video/webm"
-                      />
-                      <source
-                        src="/assets/feature_cards/webgif_tex_V1.mp4"
-                        type="video/mp4"
-                      />
-                    </video>
+                    <img loading="lazy" src="https://d2znch1yzypu23.cloudfront.net/webgif_tex_V1.gif" alt="Texture Feature" />
                   </div>
                 </div>
 
@@ -900,16 +866,7 @@ export function LandingPage() {
                     </p>
                   </div>
                   <div className="feature-grid-card-visual">
-                    <video autoPlay loop muted playsInline aria-label="Integrated Moodboard">
-                      <source
-                        src="/assets/feature_cards/webgif_moodboard_v1.webm"
-                        type="video/webm"
-                      />
-                      <source
-                        src="/assets/feature_cards/webgif_moodboard_v1.mp4"
-                        type="video/mp4"
-                      />
-                    </video>
+                    <img loading="lazy" src="https://d2znch1yzypu23.cloudfront.net/webgif_moodboard_v1.gif" alt="Integrated Moodboard" />
                   </div>
                 </div>
               </div>
@@ -930,16 +887,7 @@ export function LandingPage() {
                     </p>
                   </div>
                   <div className="feature-grid-card-visual">
-                    <video autoPlay loop muted playsInline aria-label="Image to 3D Feature">
-                      <source
-                        src="/assets/feature_cards/webgif_image_to_3D_V1.webm"
-                        type="video/webm"
-                      />
-                      <source
-                        src="/assets/feature_cards/webgif_image_to_3D_V1.mp4"
-                        type="video/mp4"
-                      />
-                    </video>
+                    <img loading="lazy" src="https://d2znch1yzypu23.cloudfront.net/webgif_image_to_3D_V1.gif" alt="Image to 3D Feature" />
                   </div>
                 </div>
 
@@ -953,16 +901,7 @@ export function LandingPage() {
                     </p>
                   </div>
                   <div className="feature-grid-card-visual">
-                    <video autoPlay loop muted playsInline aria-label="PBR Generation Feature">
-                      <source
-                        src="/assets/feature_cards/webgif_Pbr_V1.webm"
-                        type="video/webm"
-                      />
-                      <source
-                        src="/assets/feature_cards/webgif_Pbr_V1.mp4"
-                        type="video/mp4"
-                      />
-                    </video>
+                    <img loading="lazy" src="https://d2znch1yzypu23.cloudfront.net/webgif_Pbr_V1.gif" alt="PBR Generation Feature" />
                   </div>
                 </div>
               </div>
