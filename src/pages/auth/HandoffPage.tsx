@@ -17,26 +17,32 @@ export function HandoffPage() {
         await apiClient.exchangeHandoff(ticket);
         await refreshUser();
         navigate("/app");
-      } catch {
-        setError("Handoff failed. Please login manually.");
+      } catch (err: any) {
+        setError(err.response?.data?.message || err.message || "Handoff failed. Please login manually.");
       }
     })();
   }, [navigate, refreshUser, searchParams]);
 
   return (
-    <div className="auth-wrap">
-      <div className="auth-card">
-        <h1>Completing sign-in</h1>
-        {!error && <p className="muted">Exchanging your desktop login token...</p>}
+    <main className="page-container">
+      <div className="card">
+        <div className="card-header">
+          <h1 className="card-title">Completing sign-in</h1>
+          {!error && <p className="card-subtitle">Exchanging your desktop login token...</p>}
+        </div>
+        
         {error && (
-          <>
-            <p className="error">{error}</p>
-            <p className="muted">
-              Continue to <Link to="/auth/login">login page</Link>
-            </p>
-          </>
+          <div className="form-error show" style={{ marginBottom: "20px" }}>
+            {error}
+          </div>
+        )}
+        
+        {error && (
+          <p className="form-footer">
+            Continue to <Link to="/auth/login">login page</Link>
+          </p>
         )}
       </div>
-    </div>
+    </main>
   );
 }
