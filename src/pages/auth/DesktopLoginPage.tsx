@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { apiClient } from "../../lib/api-client";
 import { authStorage } from "../../features/auth/storage";
 
 export function DesktopLoginPage() {
@@ -9,26 +10,34 @@ export function DesktopLoginPage() {
 
   useEffect(() => {
     const port = searchParams.get("port");
-    if (!port) {
+    const codeChallenge = searchParams.get("code_challenge");
+
+    if (!port || !codeChallenge) {
       setStatus("error");
-      setErrorMsg("Missing port parameter.");
+      setErrorMsg("Missing authentication parameters.");
       return;
     }
 
     const tokens = authStorage.readTokens();
     if (!tokens?.accessToken) {
       setStatus("error");
-      setErrorMsg("No active session found.");
+      setErrorMsg("Please log in to Mixar before connecting the desktop app.");
       return;
     }
 
-    // Redirect browser to localhost server started by C++ app
-    const callbackUrl = `http://127.0.0.1:${port}/?access_token=${encodeURIComponent(
-      tokens.accessToken,
-    )}&refresh_token=${encodeURIComponent(tokens.refreshToken || "")}`;
-
-    // Send the redirect. We can use window.location.href
-    window.location.href = callbackUrl;
+    (async () => {
+      try {
+        const response = await apiClient.instance.post<{ code: string }>(
+          "/auth/desktop/code",
+          { code_challenge: codeChallenge },
+        );
+        const { code } = response.data;
+        window.location.href = `http://127.0.0.1:${port}/?code=${encodeURIComponent(code)}`;
+      } catch {
+        setStatus("error");
+        setErrorMsg("Failed to authenticate with the desktop app. Please try again.");
+      }
+    })();
   }, [searchParams]);
 
   return (
