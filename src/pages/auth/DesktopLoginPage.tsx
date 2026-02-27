@@ -27,11 +27,11 @@ export function DesktopLoginPage() {
 
     (async () => {
       try {
-        const response = await apiClient.instance.post<{ code: string }>(
+        const response = await apiClient.instance.post<{ data: { code: string } }>(
           "/auth/desktop/code",
           { code_challenge: codeChallenge },
         );
-        const { code } = response.data;
+        const { code } = response.data.data;
         window.location.href = `http://127.0.0.1:${port}/?code=${encodeURIComponent(code)}`;
       } catch {
         setStatus("error");
