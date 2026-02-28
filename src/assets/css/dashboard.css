@@ -12,6 +12,7 @@
 
 .dashboard-header {
     margin-bottom: 3rem;
+    text-align: center;
 }
 
 .dashboard-title {
@@ -28,7 +29,7 @@
 /* Stats Grid */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 1.5rem;
     margin-bottom: 3rem;
 }
@@ -40,6 +41,7 @@
     padding: 2rem;
     backdrop-filter: blur(20px);
     transition: all 0.3s ease;
+    text-align: center;
 }
 
 .stat-card:hover {
@@ -55,7 +57,8 @@
 .stat-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
+    gap: 0.75rem;
     margin-bottom: 1rem;
 }
 
@@ -77,6 +80,7 @@
     font-weight: 500;
     background: rgba(133, 196, 73, 0.1);
     color: var(--primary-green);
+    -webkit-text-fill-color: var(--primary-green);
 }
 
 .stat-value {
@@ -94,6 +98,29 @@
     color: var(--text-secondary);
 }
 
+.btn-buy-credits {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.5rem 1.5rem;
+    border-radius: 100px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    background: linear-gradient(135deg, var(--primary-cyan) 0%, var(--primary-green) 100%);
+    color: #0a0a0a;
+    -webkit-text-fill-color: #0a0a0a;
+    background-clip: border-box;
+    -webkit-background-clip: border-box;
+    transition: all 0.3s ease;
+}
+
+.btn-buy-credits:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 192, 199, 0.3);
+    color: #0a0a0a;
+    -webkit-text-fill-color: #0a0a0a;
+}
+
 /* Usage Section */
 .section {
     margin-bottom: 3rem;
@@ -102,7 +129,7 @@
 .section-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     margin-bottom: 1.5rem;
 }
 
@@ -323,10 +350,12 @@
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: 20px;
-    padding: 2rem;
+    padding: 2.5rem 2rem;
     backdrop-filter: blur(20px);
     display: flex;
+    flex-direction: column;
     align-items: center;
+    text-align: center;
     gap: 1.5rem;
     transition: all 0.3s ease;
 }
@@ -337,9 +366,9 @@
 }
 
 .download-icon {
-    width: 64px;
-    height: 64px;
-    border-radius: 16px;
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -470,6 +499,10 @@
 }
 
 /* Responsive */
+@media (max-width: 1024px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
 @media (max-width: 768px) {
     .dashboard-title { font-size: 2rem; }
     .stats-grid { grid-template-columns: 1fr; }
@@ -477,7 +510,7 @@
     .usage-table th, .usage-table td { padding: 0.75rem 1rem; }
     .account-info { flex-direction: column; text-align: center; }
     .account-actions { justify-content: center; }
-    .download-card { flex-direction: column; text-align: center; }
+    .download-card { padding: 2rem 1.5rem; }
     .community-card { flex-direction: column; text-align: center; }
     .community-actions { width: 100%; justify-content: center; }
 }

@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import { apiClient } from "../../lib/api-client";
 import { useAuth } from "../../features/auth/AuthContext";
 
@@ -76,6 +77,7 @@ export function DashboardPage() {
               </div>
               <div className="stat-value">{user?.credits ?? "--"}</div>
               <div className="stat-label">Credits Balance</div>
+              <Link to="/app/buy-credits" className="btn-buy-credits">Buy Credits</Link>
           </div>
 
           <div className="stat-card">

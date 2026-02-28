@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../features/auth/AuthContext";
 import "../assets/css/landing.css";
 
 // Critical above-fold images — must be loaded before we reveal the hero section.
@@ -23,7 +24,31 @@ function preloadImage(url: string): Promise<void> {
 }
 
 export function LandingPage() {
+  const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
   const [isReady, setIsReady] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLogout = async () => {
+    setProfileOpen(false);
+    await logout();
+    navigate("/");
+  };
+
+  const initials = user?.name
+    ? user.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
+    : user?.email?.split("@")[0].substring(0, 2).toUpperCase() ?? "";
 
   // Wait for critical above-fold images + custom fonts, then reveal.
   // 5-second hard fallback so slow connections are never permanently blocked.
@@ -333,9 +358,8 @@ export function LandingPage() {
           <div className="nav-links">
             <a href="/about">About</a>
             <a href="#features">Features</a>
-            <a href="#" className="nav-link-badge">
-              Pricing<span className="nav-badge">TBU!</span>
-            </a>
+            <Link to="/pricing">Pricing</Link>
+            <Link to="/app/downloads">Download</Link>
           </div>
           <div className="nav-buttons">
             <a
@@ -346,9 +370,38 @@ export function LandingPage() {
             >
               Join Discord
             </a>
-            <Link to="/auth/login" className="btn-nav-primary">
-              Sign In
-            </Link>
+            {isAuthenticated ? (
+              <div className="avatar-dropdown" ref={profileRef}>
+                <button className="user-avatar" onClick={() => setProfileOpen((o) => !o)}>
+                  {initials}
+                </button>
+                {profileOpen && (
+                  <div className="avatar-menu">
+                    <Link to="/app" className="avatar-menu-item" onClick={() => setProfileOpen(false)}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="3" y="3" width="7" height="7" />
+                        <rect x="14" y="3" width="7" height="7" />
+                        <rect x="14" y="14" width="7" height="7" />
+                        <rect x="3" y="14" width="7" height="7" />
+                      </svg>
+                      Dashboard
+                    </Link>
+                    <button className="avatar-menu-item" onClick={handleLogout}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                      </svg>
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link to="/auth/login" className="btn-nav-primary">
+                Sign In
+              </Link>
+            )}
           </div>
         </div>
       </nav>
@@ -385,7 +438,7 @@ export function LandingPage() {
             </a>
           </div>
         </header>
-        <main>
+        <main className="lp-main">
           <div className="stack">
             <div className="stack-base">
               <div className="stack-layer viewport">

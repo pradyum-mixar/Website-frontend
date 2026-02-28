@@ -9,6 +9,11 @@ import { HandoffPage } from "../pages/auth/HandoffPage";
 import { DashboardPage } from "../pages/app/DashboardPage";
 import { AccountPage } from "../pages/app/AccountPage";
 import { AdminPage } from "../pages/app/AdminPage";
+import { PricingPage, PublicPricingPage } from "../pages/app/PricingPage";
+import { OrderSummaryPage } from "../pages/app/OrderSummaryPage";
+import { BuyCreditsPage } from "../pages/app/BuyCreditsPage";
+import { DownloadsPage } from "../pages/app/DownloadsPage";
+import { PaymentSuccessPage } from "../pages/app/PaymentSuccessPage";
 import { DesktopLoginPage } from "../pages/auth/DesktopLoginPage";
 
 export function AppRouter() {
@@ -21,12 +26,18 @@ export function AppRouter() {
         <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
         <Route path="/auth/handoff" element={<HandoffPage />} />
+        <Route path="/pricing" element={<PublicPricingPage />} />
 
         <Route element={<RequireAuth />}>
           <Route path="/app/desktop-login" element={<DesktopLoginPage />} />
           <Route path="/app" element={<AppShell />}>
             <Route index element={<DashboardPage />} />
             <Route path="account" element={<AccountPage />} />
+            <Route path="pricing" element={<PricingPage />} />
+            <Route path="order" element={<OrderSummaryPage />} />
+            <Route path="buy-credits" element={<BuyCreditsPage />} />
+            <Route path="downloads" element={<DownloadsPage />} />
+            <Route path="payment-success" element={<PaymentSuccessPage />} />
             <Route element={<RequireAdmin />}>
               <Route path="admin" element={<AdminPage />} />
             </Route>
