@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { apiClient, type Plan } from "../../lib/api-client";
 import { useAuth } from "../../features/auth/AuthContext";
-import { SUBSCRIPTION_TYPE_TO_SLUG } from "../../features/auth/types";
+import { SUBSCRIPTION_TYPE_TO_SLUG, SUBSCRIPTION_TYPE_TO_LABEL } from "../../features/auth/types";
 import "../../assets/css/pricing.css";
 
 function CheckIcon() {
@@ -46,9 +46,11 @@ type PricingContentProps = {
   standalone?: boolean;
   isAuthenticated: boolean;
   currentPlanId: string | null;
+  hasActiveSubscription: boolean;
+  subscriptionLabel: string;
 };
 
-function PricingContent({ standalone, isAuthenticated, currentPlanId }: PricingContentProps) {
+function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveSubscription, subscriptionLabel }: PricingContentProps) {
   const [yearly, setYearly] = useState(false);
   const navigate = useNavigate();
 
@@ -143,6 +145,10 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId }: PricingC
                   <button className="pricing-cta current" disabled>
                     Current Plan
                   </button>
+                ) : hasActiveSubscription ? (
+                  <button className="pricing-cta" disabled title={`Cancel your ${subscriptionLabel} plan first to switch`}>
+                    Cancel {subscriptionLabel} to switch
+                  </button>
                 ) : (
                   <button className="pricing-cta" onClick={() => handleBuy(plan)}>
                     {isAuthenticated ? plan.cta_label : plan.price_monthly === 0 ? "Get Started" : plan.cta_label}
@@ -162,7 +168,7 @@ export function PublicPricingPage() {
   return (
     <>
       <PricingNav />
-      <PricingContent standalone isAuthenticated={false} currentPlanId={null} />
+      <PricingContent standalone isAuthenticated={false} currentPlanId={null} hasActiveSubscription={false} subscriptionLabel="" />
     </>
   );
 }
@@ -170,7 +176,17 @@ export function PublicPricingPage() {
 /** Authenticated pricing page — rendered inside AppShell */
 export function PricingPage() {
   const { user } = useAuth();
-  const currentPlanId = user ? (SUBSCRIPTION_TYPE_TO_SLUG[user.subscription_type] ?? "free") : null;
+  const subType = user?.subscription_type ?? 0;
+  const hasActiveSubscription = subType > 0;
+  const currentPlanId = hasActiveSubscription ? (SUBSCRIPTION_TYPE_TO_SLUG[subType] ?? null) : null;
+  const subscriptionLabel = SUBSCRIPTION_TYPE_TO_LABEL[subType] ?? "";
 
-  return <PricingContent isAuthenticated currentPlanId={currentPlanId} />;
+  return (
+    <PricingContent
+      isAuthenticated
+      currentPlanId={currentPlanId}
+      hasActiveSubscription={hasActiveSubscription}
+      subscriptionLabel={subscriptionLabel}
+    />
+  );
 }

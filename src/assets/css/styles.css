@@ -104,10 +104,37 @@ body {
     border: none;
     cursor: pointer;
     transition: box-shadow 0.2s ease;
+    position: relative;
 }
 
 .user-avatar:hover {
     box-shadow: 0 0 0 3px rgba(0, 192, 199, 0.3);
+}
+
+.avatar-plan-badge {
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.5rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    padding: 1px 6px;
+    border-radius: 8px;
+    white-space: nowrap;
+    text-transform: uppercase;
+    line-height: 1.4;
+    border: 1.5px solid var(--bg-dark);
+}
+
+.avatar-plan-badge.plan-1 {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+}
+
+.avatar-plan-badge.plan-2 {
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    color: #fff;
 }
 
 .avatar-dropdown {
@@ -436,6 +463,30 @@ body {
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+
+/* Cancel subscription */
+.cancel-sub-item { color: var(--error-color) !important; }
+.cancel-sub-item:hover { background: rgba(239, 68, 68, 0.1) !important; color: var(--error-color) !important; }
+.cancel-sub-item svg { opacity: 1; }
+
+.btn-cancel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.875rem 2rem;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    background: var(--error-color);
+    border: none;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel:hover:not(:disabled) { background: #dc2626; transform: translateY(-2px); }
+.btn-cancel:disabled { opacity: 0.6; cursor: not-allowed; }
 
 @media (max-width: 768px) {
     .nav { padding: 1rem 1.5rem; }

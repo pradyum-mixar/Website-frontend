@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../features/auth/AuthContext";
+import { SUBSCRIPTION_TYPE_TO_LABEL } from "../features/auth/types";
 import "../assets/css/dashboard.css";
 
 export function AppShell() {
@@ -69,6 +70,11 @@ export function AppShell() {
           <div className="avatar-dropdown" ref={dropdownRef}>
             <button className="user-avatar" onClick={() => setDropdownOpen((o) => !o)}>
               {initials}
+              {user && user.subscription_type > 0 && (
+                <span className={`avatar-plan-badge plan-${user.subscription_type}`}>
+                  {SUBSCRIPTION_TYPE_TO_LABEL[user.subscription_type]}
+                </span>
+              )}
             </button>
             {dropdownOpen && (
               <div className="avatar-menu">
@@ -88,6 +94,16 @@ export function AppShell() {
                   </svg>
                   Dashboard
                 </NavLink>
+                {user && user.subscription_type > 0 && !user.subscription_expires_at && (
+                  <NavLink to="/app/cancel-subscription" className="avatar-menu-item cancel-sub-item" onClick={() => setDropdownOpen(false)}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="15" y1="9" x2="9" y2="15" />
+                      <line x1="9" y1="9" x2="15" y2="15" />
+                    </svg>
+                    Cancel Subscription
+                  </NavLink>
+                )}
                 <button className="avatar-menu-item" onClick={handleLogout}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />

@@ -162,6 +162,11 @@ class ApiClient {
     return response.data;
   }
 
+  async cancelSubscription(): Promise<{ status: string; message: string }> {
+    const response = await this.client.post<{ status: string; message: string }>("/subscriptions/cancel");
+    return response.data;
+  }
+
   async createCreditCheckout(quantity: number): Promise<{ status: string; data: { payment_link: string } }> {
     const response = await this.client.post<{ status: string; data: { payment_link: string } }>(
       "/subscriptions/checkout/credits",
