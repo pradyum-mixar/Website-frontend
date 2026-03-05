@@ -24,6 +24,26 @@ export type Plan = {
   cta_label: string;
 };
 
+export type PaymentHistoryItem = {
+  id: string;
+  payment_type: string;
+  status: string;
+  dodo_payment_id: string;
+  amount: number | null;
+  currency: string | null;
+  plan_id: string | null;
+  billing_interval: string | null;
+  credit_quantity: number | null;
+  has_invoice: boolean;
+  created_at: string;
+};
+
+export type PaymentHistoryResponse = {
+  status: string;
+  data: PaymentHistoryItem[];
+  pagination: { skip: number; limit: number; total: number };
+};
+
 class ApiClient {
   private client: AxiosInstance;
 
@@ -173,6 +193,27 @@ class ApiClient {
       { quantity }
     );
     return response.data;
+  }
+
+  async getPaymentHistory(skip = 0, limit = 20): Promise<PaymentHistoryResponse> {
+    const response = await this.client.get<PaymentHistoryResponse>(
+      `/subscriptions/history?skip=${skip}&limit=${limit}`
+    );
+    return response.data;
+  }
+
+  async downloadInvoice(paymentId: string): Promise<void> {
+    const response = await this.client.get(`/subscriptions/invoices/${paymentId}`, {
+      responseType: "blob",
+    });
+    const url = URL.createObjectURL(response.data as Blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `invoice-${paymentId}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   }
 }
 

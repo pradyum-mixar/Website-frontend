@@ -228,6 +228,47 @@
     color: var(--error-color);
 }
 
+.usage-status.refunded {
+    background: rgba(234, 179, 8, 0.1);
+    color: #eab308;
+}
+
+/* Invoice download button */
+.btn-download-invoice {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.85rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid var(--primary-cyan);
+    color: var(--primary-cyan);
+    transition: all 0.2s ease;
+}
+
+.btn-download-invoice:hover:not(:disabled) {
+    background: var(--primary-cyan);
+    color: var(--bg-dark);
+}
+
+.btn-download-invoice:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Pagination controls */
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+}
+
 /* Empty State */
 .empty-state {
     text-align: center;

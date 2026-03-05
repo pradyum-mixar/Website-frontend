@@ -15,6 +15,7 @@ import { BuyCreditsPage } from "../pages/app/BuyCreditsPage";
 import { DownloadsPage } from "../pages/app/DownloadsPage";
 import { PaymentSuccessPage } from "../pages/app/PaymentSuccessPage";
 import { CancelSubscriptionPage } from "../pages/app/CancelSubscriptionPage";
+import { BillingHistoryPage } from "../pages/app/BillingHistoryPage";
 import { DesktopLoginPage } from "../pages/auth/DesktopLoginPage";
 
 export function AppRouter() {
@@ -39,6 +40,7 @@ export function AppRouter() {
             <Route path="buy-credits" element={<BuyCreditsPage />} />
             <Route path="downloads" element={<DownloadsPage />} />
             <Route path="payment-success" element={<PaymentSuccessPage />} />
+            <Route path="billing" element={<BillingHistoryPage />} />
             <Route path="cancel-subscription" element={<CancelSubscriptionPage />} />
             <Route element={<RequireAdmin />}>
               <Route path="admin" element={<AdminPage />} />
