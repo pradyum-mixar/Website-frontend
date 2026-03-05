@@ -1,12 +1,48 @@
+import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { useAuth } from "../../features/auth/AuthContext";
+import { SUBSCRIPTION_TYPE_TO_LABEL } from "../../features/auth/types";
 import "../../assets/css/pricing.css";
 
 export function PaymentSuccessPage() {
   const [searchParams] = useSearchParams();
   const paymentId = searchParams.get("payment_id");
   const status = searchParams.get("status");
+  const { user, refreshUser } = useAuth();
+  const [synced, setSynced] = useState(false);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Poll until user data reflects the payment (webhook delivery may lag a few seconds).
+  // Stop as soon as subscription_type > 0 or credits increase, or after 15 s.
+  useEffect(() => {
+    if (status !== "succeeded") return;
+
+    const initialCredits = user?.credits ?? 0;
+    let attempts = 0;
+    const MAX_ATTEMPTS = 10;
+
+    const poll = async () => {
+      await refreshUser();
+      attempts++;
+      const updated = user?.credits !== initialCredits || (user?.subscription_type ?? 0) > 0;
+      if (updated || attempts >= MAX_ATTEMPTS) {
+        if (pollRef.current) clearInterval(pollRef.current);
+        setSynced(true);
+      }
+    };
+
+    poll(); // immediate first fetch
+    pollRef.current = setInterval(poll, 1500);
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
+  }, []);
 
   const isSucceeded = status === "succeeded";
+  const isSubscribed = user && user.subscription_type > 0;
+  const planLabel = user ? SUBSCRIPTION_TYPE_TO_LABEL[user.subscription_type] : null;
+
+  const successMessage = isSubscribed
+    ? `Your ${planLabel} plan is now active. Your credits have been added.`
+    : "Your credits have been added to your account.";
 
   return (
     <div className="order-summary">
@@ -26,9 +62,12 @@ export function PaymentSuccessPage() {
               <path d="M8 12l3 3 5-6" />
             </svg>
             <h2>Payment Successful!</h2>
-            <p className="order-tagline">
-              Your credits have been added to your account.
-            </p>
+            <p className="order-tagline">{successMessage}</p>
+            {!synced && (
+              <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>
+                Syncing your account…
+              </p>
+            )}
           </>
         ) : (
           <>
@@ -46,8 +85,8 @@ export function PaymentSuccessPage() {
             </svg>
             <h2>Payment Processing</h2>
             <p className="order-tagline">
-              Your payment is being processed. Credits will appear in your
-              account shortly.
+              Your payment is being processed. Credits and plan status will
+              update in your account shortly.
             </p>
           </>
         )}

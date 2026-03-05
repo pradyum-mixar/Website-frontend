@@ -17,7 +17,8 @@ export function OrderSummaryPage() {
     queryFn: () => apiClient.getPlans(),
   });
 
-  const plan = data?.data.find((p) => p.id === planId);
+  const plans = data?.data ?? [];
+  const plan = plans.find((p) => p.id === planId);
 
   const handleCheckout = async () => {
     if (!planId || checkoutLoading) return;

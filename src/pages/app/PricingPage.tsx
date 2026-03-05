@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { apiClient, type Plan } from "../../lib/api-client";
 import { useAuth } from "../../features/auth/AuthContext";
+import { SUBSCRIPTION_TYPE_TO_SLUG } from "../../features/auth/types";
 import "../../assets/css/pricing.css";
 
 function CheckIcon() {
@@ -168,9 +169,8 @@ export function PublicPricingPage() {
 
 /** Authenticated pricing page — rendered inside AppShell */
 export function PricingPage() {
-  // TODO: replace with user.plan_id once the plans column exists on the users table
   const { user } = useAuth();
-  const currentPlanId = user ? "free" : null;
+  const currentPlanId = user ? (SUBSCRIPTION_TYPE_TO_SLUG[user.subscription_type] ?? "free") : null;
 
   return <PricingContent isAuthenticated currentPlanId={currentPlanId} />;
 }
