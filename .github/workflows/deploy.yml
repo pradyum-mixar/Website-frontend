@@ -1,0 +1,70 @@
+name: Deploy to S3 + CloudFront
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-frontend-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build and deploy
+    runs-on: ubuntu-latest
+    environment: PRODUCTION
+    permissions:
+      id-token: write   # Required for OIDC
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        env:
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+          VITE_DOWNLOAD_URL_WINDOWS: ${{ secrets.VITE_DOWNLOAD_URL_WINDOWS }}
+          VITE_DOWNLOAD_URL_MACOS: ${{ secrets.VITE_DOWNLOAD_URL_MACOS }}
+          VITE_DOWNLOAD_URL_LINUX: ${{ secrets.VITE_DOWNLOAD_URL_LINUX }}
+        run: npm run build
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-frontend-deploy
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Sync assets to S3 (long cache)
+        env:
+          BUCKET: ${{ secrets.S3_FRONTEND_BUCKET }}
+        run: |
+          aws s3 sync dist/ s3://"$BUCKET" \
+            --delete \
+            --cache-control "public,max-age=31536000,immutable" \
+            --exclude "index.html"
+
+      - name: Upload index.html (no cache)
+        env:
+          BUCKET: ${{ secrets.S3_FRONTEND_BUCKET }}
+        run: |
+          aws s3 cp dist/index.html s3://"$BUCKET"/index.html \
+            --cache-control "no-cache,no-store,must-revalidate"
+
+      - name: Invalidate CloudFront cache
+        env:
+          DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "$DISTRIBUTION_ID" \
+            --paths "/*"
