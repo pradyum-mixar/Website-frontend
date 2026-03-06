@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { apiClient } from "../../lib/api-client";
+import { apiClient, type SubscriptionStatus } from "../../lib/api-client";
 import { useAuth } from "../../features/auth/AuthContext";
 
 
@@ -24,6 +24,13 @@ export function DashboardPage() {
   const usage = useQuery({
     queryKey: ["usage"],
     queryFn: async () => (await apiClient.instance.get<UsageResponse>("/users/user-usage-logs/?skip=0&limit=20")).data,
+  });
+
+  const subscriptionStatus = useQuery<SubscriptionStatus>({
+    queryKey: ["subscriptionStatus"],
+    queryFn: () => apiClient.getSubscriptionStatus(),
+    enabled: (user?.subscription_type ?? 0) > 0,
+    retry: false,
   });
 
   const getModeLabel = (mode: string) => {
@@ -62,6 +69,17 @@ export function DashboardPage() {
       <div className="dashboard-header">
           <h1 className="dashboard-title">Welcome, <span>{user?.name?.split(' ')[0] || user?.email.split('@')[0]}</span>!</h1>
           <p className="dashboard-subtitle">Manage your credits and view your usage history</p>
+          {subscriptionStatus.data && (
+            <div className="billing-cycle-badge">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 6v6l4 2"/>
+              </svg>
+              {subscriptionStatus.data.subscription_expires_at
+                ? `${subscriptionStatus.data.plan_name} Plan · Expires in ${subscriptionStatus.data.days_left} days`
+                : `${subscriptionStatus.data.plan_name} Plan · ${subscriptionStatus.data.days_left} days left in cycle`}
+            </div>
+          )}
       </div>
 
       <div className="stats-grid">

@@ -44,6 +44,17 @@ export type PaymentHistoryResponse = {
   pagination: { skip: number; limit: number; total: number };
 };
 
+export type SubscriptionStatus = {
+  plan_slug: string;
+  plan_name: string;
+  billing_interval: string;
+  credits_per_month: number;
+  cycle_start: string;
+  cycle_end: string;
+  days_left: number;
+  subscription_expires_at: string | null;
+};
+
 class ApiClient {
   private client: AxiosInstance;
 
@@ -199,6 +210,11 @@ class ApiClient {
     const response = await this.client.get<PaymentHistoryResponse>(
       `/subscriptions/history?skip=${skip}&limit=${limit}`
     );
+    return response.data;
+  }
+
+  async getSubscriptionStatus(): Promise<SubscriptionStatus> {
+    const response = await this.client.get<SubscriptionStatus>("/subscriptions/status");
     return response.data;
   }
 
