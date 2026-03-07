@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAgentRoleAssignments } from "../hooks/useAgentRoleAssignments";
 import { useAgentModelConfigs } from "../hooks/useAgentModelConfigs";
 
-const ROLES = ["planner", "orchestrator", "researcher", "writer", "coder", "reviewer"];
+const ROLES = ["planner", "orchestrator", "compactor", "preprocessor", "chat", "direct_executor"];
 const SLOTS = ["primary", "fallback", "fast", "fast_fallback"];
 
 export function AgentRoleAssignmentsSection() {
@@ -10,11 +10,15 @@ export function AgentRoleAssignmentsSection() {
   const configs = useAgentModelConfigs();
   const [statusMsg, setStatusMsg] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
-  const assignments = list.data ?? [];
+  const grouped = list.data ?? [];
   const configList = configs.list.data ?? [];
 
-  const getAssignment = (role: string, slot: string) =>
-    assignments.find((a) => a.role === role && a.slot === slot);
+  const getConfigId = (role: string, slot: string): string => {
+    const roleGroup = grouped.find((g) => g.role === role);
+    if (!roleGroup) return "";
+    const assignment = roleGroup.slots[slot];
+    return assignment ? String(assignment.config_id) : "";
+  };
 
   const handleChange = (role: string, slot: string, configId: string) => {
     if (configId === "") {
@@ -76,20 +80,20 @@ export function AgentRoleAssignmentsSection() {
             {ROLES.map((role) => (
               <div key={role} className="config-role-matrix-row">
                 <div className="config-role-matrix-label">
-                  {role.charAt(0).toUpperCase() + role.slice(1)}
+                  {role.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
                 </div>
                 {SLOTS.map((slot) => {
-                  const current = getAssignment(role, slot);
+                  const currentId = getConfigId(role, slot);
                   return (
                     <select
                       key={slot}
-                      value={current?.config_id ?? ""}
+                      value={currentId}
                       onChange={(e) => handleChange(role, slot, e.target.value)}
                     >
                       <option value="">— none —</option>
                       {configList.map((c) => (
                         <option key={c.id} value={c.id}>
-                          {c.config_name}
+                          {c.name}
                         </option>
                       ))}
                     </select>

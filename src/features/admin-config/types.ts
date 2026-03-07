@@ -1,44 +1,67 @@
 // ─── Feature Credit Costs ───
 export type FeatureCreditCost = {
+  id: string;
   feature_key: string;
-  credits: number;
-  label?: string;
+  display_name: string;
+  credit_cost: number;
+  enabled: boolean;
+  description?: string;
+  updated_at?: string;
 };
 
 // ─── Agent Model Configs ───
 export type AgentModelConfig = {
   id: string;
-  config_name: string;
-  provider: string;
-  model_name: string;
-  temperature?: number;
-  max_tokens?: number;
+  name: string;
   description?: string;
+  provider: string;
+  model: string;
+  temperature: number;
+  max_tokens: number;
+  thinking: string;
+  thinking_budget?: number;
+  thinking_level?: string;
+  streaming: boolean;
+  timeout?: number;
   enabled: boolean;
   created_at?: string;
   updated_at?: string;
 };
 
 // ─── Agent Role Assignments ───
-export type AgentRoleAssignment = {
+export type AgentRoleAssignmentItem = {
+  id: string;
   role: string;
   slot: string;
   config_id: string;
-  config_name?: string;
+  config: AgentModelConfig;
+  note?: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type AgentRoleAssignmentGrouped = {
+  role: string;
+  slots: Record<string, AgentRoleAssignmentItem>;
 };
 
 // ─── Generation Model Configs ───
 export type GenerationModelConfig = {
   id: string;
-  model_key: string;
-  provider: string;
-  model_name: string;
+  slug: string;
+  generation_type: string;
   display_name: string;
-  supports_image: boolean;
-  supports_video: boolean;
-  default_params?: Record<string, unknown>;
+  generator?: string;
+  model_name?: string;
+  model_ref?: string;
+  model_version?: string;
   enabled: boolean;
-  sort_order?: number;
+  is_default: boolean;
+  credit_cost: number;
+  sort_order: number;
+  max_reference_images?: number;
+  supports_resolution?: boolean;
+  parameters: Record<string, unknown>;
   created_at?: string;
   updated_at?: string;
 };
@@ -46,12 +69,12 @@ export type GenerationModelConfig = {
 // ─── Generation Style Presets ───
 export type GenerationStylePreset = {
   id: string;
-  style_key: string;
+  slug: string;
+  generation_type: string;
   display_name: string;
-  prompt_modifier: string;
-  thumbnail_url?: string;
+  prompt_template: string;
   enabled: boolean;
-  sort_order?: number;
+  sort_order: number;
   created_at?: string;
   updated_at?: string;
 };
@@ -59,10 +82,10 @@ export type GenerationStylePreset = {
 // ─── Generation Feature Flags ───
 export type GenerationFeatureFlag = {
   id: string;
-  flag_key: string;
+  flag_name: string;
+  generation_type: string;
   enabled: boolean;
   description?: string;
-  metadata?: Record<string, unknown>;
   created_at?: string;
   updated_at?: string;
 };

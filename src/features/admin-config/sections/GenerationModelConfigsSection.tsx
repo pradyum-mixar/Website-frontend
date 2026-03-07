@@ -7,15 +7,20 @@ import { ToggleSwitch } from "../components/ToggleSwitch";
 import type { Column, FieldConfig, GenerationModelConfig } from "../types";
 
 const fields: FieldConfig[] = [
-  { name: "model_key", label: "Model Key", type: "text", required: true },
-  { name: "provider", label: "Provider", type: "text", required: true },
-  { name: "model_name", label: "Model Name", type: "text", required: true },
+  { name: "slug", label: "Slug", type: "text", required: true },
+  { name: "generation_type", label: "Generation Type", type: "text", required: true, placeholder: "image, model_3d, depth_to_image, pbr" },
   { name: "display_name", label: "Display Name", type: "text", required: true },
-  { name: "supports_image", label: "Supports Image", type: "boolean" },
-  { name: "supports_video", label: "Supports Video", type: "boolean" },
+  { name: "generator", label: "Generator", type: "text", placeholder: "gemini, flux, hunyuan..." },
+  { name: "model_name", label: "Model Name", type: "text" },
+  { name: "model_ref", label: "Model Ref", type: "text" },
+  { name: "model_version", label: "Model Version", type: "text" },
+  { name: "credit_cost", label: "Credit Cost", type: "number" },
   { name: "sort_order", label: "Sort Order", type: "number" },
+  { name: "max_reference_images", label: "Max Ref Images", type: "number" },
+  { name: "is_default", label: "Is Default", type: "boolean" },
+  { name: "supports_resolution", label: "Supports Resolution", type: "boolean" },
   { name: "enabled", label: "Enabled", type: "boolean" },
-  { name: "default_params", label: "Default Params (JSON)", type: "json" },
+  { name: "parameters", label: "Parameters (JSON)", type: "json" },
 ];
 
 export function GenerationModelConfigsSection() {
@@ -24,9 +29,11 @@ export function GenerationModelConfigsSection() {
   const [deleting, setDeleting] = useState<GenerationModelConfig | null>(null);
 
   const columns: Column<GenerationModelConfig>[] = [
-    { key: "model_key", label: "Key" },
+    { key: "slug", label: "Slug" },
+    { key: "generation_type", label: "Type" },
     { key: "display_name", label: "Display Name" },
-    { key: "provider", label: "Provider" },
+    { key: "credit_cost", label: "Credits" },
+    { key: "sort_order", label: "Order" },
     {
       key: "enabled",
       label: "Enabled",

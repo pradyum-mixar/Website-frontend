@@ -7,10 +7,10 @@ import { ToggleSwitch } from "../components/ToggleSwitch";
 import type { Column, FieldConfig, GenerationFeatureFlag } from "../types";
 
 const fields: FieldConfig[] = [
-  { name: "flag_key", label: "Flag Key", type: "text", required: true },
+  { name: "flag_name", label: "Flag Name", type: "text", required: true },
+  { name: "generation_type", label: "Generation Type", type: "text", required: true, placeholder: "image, model_3d..." },
   { name: "description", label: "Description", type: "textarea" },
   { name: "enabled", label: "Enabled", type: "boolean" },
-  { name: "metadata", label: "Metadata (JSON)", type: "json" },
 ];
 
 export function GenerationFeatureFlagsSection() {
@@ -19,7 +19,8 @@ export function GenerationFeatureFlagsSection() {
   const [deleting, setDeleting] = useState<GenerationFeatureFlag | null>(null);
 
   const columns: Column<GenerationFeatureFlag>[] = [
-    { key: "flag_key", label: "Flag Key" },
+    { key: "flag_name", label: "Flag Name" },
+    { key: "generation_type", label: "Type" },
     {
       key: "description",
       label: "Description",
@@ -77,7 +78,7 @@ export function GenerationFeatureFlagsSection() {
 
       {deleting && (
         <DeleteConfirmModal
-          itemLabel={deleting.flag_key}
+          itemLabel={deleting.flag_name}
           isPending={remove.isPending}
           onConfirm={() => remove.mutate(deleting.id, { onSuccess: () => setDeleting(null) })}
           onClose={() => setDeleting(null)}

@@ -7,12 +7,12 @@ import { ToggleSwitch } from "../components/ToggleSwitch";
 import type { Column, FieldConfig, GenerationStylePreset } from "../types";
 
 const fields: FieldConfig[] = [
-  { name: "style_key", label: "Style Key", type: "text", required: true },
+  { name: "slug", label: "Slug", type: "text", required: true },
+  { name: "generation_type", label: "Generation Type", type: "text", required: true, placeholder: "image, model_3d..." },
   { name: "display_name", label: "Display Name", type: "text", required: true },
-  { name: "thumbnail_url", label: "Thumbnail URL", type: "text" },
   { name: "sort_order", label: "Sort Order", type: "number" },
   { name: "enabled", label: "Enabled", type: "boolean" },
-  { name: "prompt_modifier", label: "Prompt Modifier", type: "textarea" },
+  { name: "prompt_template", label: "Prompt Template", type: "textarea" },
 ];
 
 export function GenerationStylePresetsSection() {
@@ -21,7 +21,8 @@ export function GenerationStylePresetsSection() {
   const [deleting, setDeleting] = useState<GenerationStylePreset | null>(null);
 
   const columns: Column<GenerationStylePreset>[] = [
-    { key: "style_key", label: "Key" },
+    { key: "slug", label: "Slug" },
+    { key: "generation_type", label: "Type" },
     { key: "display_name", label: "Display Name" },
     { key: "sort_order", label: "Order" },
     {
