@@ -1,0 +1,368 @@
+/* ─── Admin Config Dashboard ─── */
+
+/* Tab Bar */
+.config-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.35rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  margin-bottom: 2rem;
+  overflow-x: auto;
+  backdrop-filter: blur(20px);
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.config-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.config-tab {
+  padding: 0.55rem 1rem;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.config-tab:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.config-tab.active {
+  color: var(--bg-dark);
+  background: linear-gradient(135deg, var(--primary-cyan) 0%, var(--primary-green) 100%);
+  font-weight: 600;
+}
+
+.config-tab-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border-color);
+  flex-shrink: 0;
+  margin: 0 0.25rem;
+}
+
+/* Modal */
+.config-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  padding: 1rem;
+}
+
+.config-modal {
+  width: 100%;
+  max-width: 520px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  background: #141414;
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.config-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.config-modal-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.config-modal-close {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  transition: color 0.2s;
+}
+
+.config-modal-close:hover {
+  color: var(--text-primary);
+}
+
+.config-modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+.config-modal-footer {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+/* Form Grid */
+.config-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.config-form-grid .config-field-full {
+  grid-column: 1 / -1;
+}
+
+.config-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.config-form-field label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.config-form-field input,
+.config-form-field select,
+.config-form-field textarea {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  font-family: inherit;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.config-form-field input:focus,
+.config-form-field select:focus,
+.config-form-field textarea:focus {
+  border-color: var(--primary-cyan);
+}
+
+.config-form-field select option {
+  background: #1a1a1a;
+  color: var(--text-primary);
+}
+
+/* Toggle Switch */
+.config-toggle {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.config-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.config-toggle-slider {
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.config-toggle-slider::before {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  left: 3px;
+  bottom: 3px;
+  border-radius: 50%;
+  background: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.config-toggle input:checked + .config-toggle-slider {
+  background: linear-gradient(135deg, var(--primary-cyan), var(--primary-green));
+}
+
+.config-toggle input:checked + .config-toggle-slider::before {
+  transform: translateX(18px);
+  background: var(--bg-dark);
+}
+
+/* Table Row Actions */
+.config-row-actions {
+  display: flex;
+  gap: 0.35rem;
+  justify-content: flex-end;
+}
+
+.config-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.config-action-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--primary-cyan);
+}
+
+.config-action-btn.delete:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--error-color);
+}
+
+/* JSON Editor */
+.config-json-editor {
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+  font-size: 0.8rem;
+  min-height: 100px;
+  resize: vertical;
+  tab-size: 2;
+}
+
+/* Role Matrix */
+.config-role-matrix {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.config-role-matrix-row {
+  display: grid;
+  grid-template-columns: 140px repeat(4, 1fr);
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.config-role-matrix-header {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+.config-role-matrix-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.config-role-matrix select {
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  font-family: inherit;
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.config-role-matrix select:focus {
+  border-color: var(--primary-cyan);
+}
+
+.config-role-matrix select option {
+  background: #1a1a1a;
+  color: var(--text-primary);
+}
+
+/* Delete confirm modal */
+.config-delete-body {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.config-delete-body p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin: 0 0 0.5rem;
+}
+
+.config-delete-body strong {
+  color: var(--text-primary);
+}
+
+.admin-btn-danger {
+  background: var(--error-color);
+  color: #fff;
+}
+
+.admin-btn-danger:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+/* Script status messages */
+.config-script-result {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 200px;
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .config-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .config-role-matrix-row {
+    grid-template-columns: 100px repeat(4, 1fr);
+    gap: 0.5rem;
+  }
+
+  .config-role-matrix select {
+    font-size: 0.7rem;
+    padding: 0.4rem;
+  }
+
+  .config-tab {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.75rem;
+  }
+}
