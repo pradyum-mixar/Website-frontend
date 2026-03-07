@@ -9,6 +9,7 @@ export function AppShell() {
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -18,6 +19,15 @@ export function AppShell() {
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    function handleScroll() {
+      setScrolled(window.scrollY > 20);
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleLogout = async () => {
@@ -32,95 +42,68 @@ export function AppShell() {
 
   return (
     <>
-      <nav className="nav">
-        <NavLink to="/app" className="nav-brand">
-          <img src="/assets/Logo-Primary_light.png" alt="Mixar" className="brand-logo" />
-        </NavLink>
-        <div className="user-menu">
-          {isSuperuser && (
-            <NavLink to="/app/admin" className="nav-link admin-link">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-              </svg>
-              Admin
-            </NavLink>
-          )}
-          <NavLink to="/app/downloads" className="nav-link">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-            Download
+      <nav className={`app-navbar ${scrolled ? "scrolled" : ""}`}>
+        <div className="app-navbar-content">
+          <NavLink to="/app" className="logo">
+            <img src="/assets/Logo-Primary_light.png" alt="Mixar" />
           </NavLink>
-          <NavLink to="/app/pricing" className="nav-link">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="12" y1="1" x2="12" y2="23" />
-              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-            </svg>
-            Pricing
-          </NavLink>
-          <NavLink to="/app/billing" className="nav-link">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
-              <line x1="1" y1="10" x2="23" y2="10" />
-            </svg>
-            Billing
-          </NavLink>
-          <div className="user-credits">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 6v6l4 2" />
-            </svg>
-            <span>{user?.credits ?? 0}</span> credits
-          </div>
-          <div className="avatar-dropdown" ref={dropdownRef}>
-            <button className="user-avatar" onClick={() => setDropdownOpen((o) => !o)}>
-              {initials}
-              {user && user.subscription_type > 0 && (
-                <span className={`avatar-plan-badge plan-${user.subscription_type}`}>
-                  {SUBSCRIPTION_TYPE_TO_LABEL[user.subscription_type]}
-                </span>
-              )}
-            </button>
-            {dropdownOpen && (
-              <div className="avatar-menu">
-                <NavLink to="/" className="avatar-menu-item" onClick={() => setDropdownOpen(false)}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                    <polyline points="9 22 9 12 15 12 15 22" />
-                  </svg>
-                  Home
-                </NavLink>
-                <NavLink to="/app" end className="avatar-menu-item" onClick={() => setDropdownOpen(false)}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="3" y="3" width="7" height="7" />
-                    <rect x="14" y="3" width="7" height="7" />
-                    <rect x="14" y="14" width="7" height="7" />
-                    <rect x="3" y="14" width="7" height="7" />
-                  </svg>
-                  Dashboard
-                </NavLink>
-                {user && user.subscription_type > 0 && !user.subscription_expires_at && (
-                  <NavLink to="/app/cancel-subscription" className="avatar-menu-item cancel-sub-item" onClick={() => setDropdownOpen(false)}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <circle cx="12" cy="12" r="10" />
-                      <line x1="15" y1="9" x2="9" y2="15" />
-                      <line x1="9" y1="9" x2="15" y2="15" />
-                    </svg>
-                    Cancel Subscription
-                  </NavLink>
-                )}
-                <button className="avatar-menu-item" onClick={handleLogout}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                    <polyline points="16 17 21 12 16 7" />
-                    <line x1="21" y1="12" x2="9" y2="12" />
-                  </svg>
-                  Logout
-                </button>
-              </div>
+
+          <div className="app-nav-links">
+            {isSuperuser && (
+              <NavLink to="/app/admin" className="app-nav-link admin-link">Admin</NavLink>
             )}
+            <NavLink to="/app/downloads" className="app-nav-link">Download</NavLink>
+            <NavLink to="/app/pricing" className="app-nav-link">Pricing</NavLink>
+            <NavLink to="/app/manage-subscription" className="app-nav-link">Subscription</NavLink>
+          </div>
+
+          <div className="app-nav-actions">
+            <NavLink to="/app/buy-credits" className="app-credits-pill">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 6v6l4 2" />
+              </svg>
+              <span>{user?.credits ?? 0}</span>
+            </NavLink>
+
+            <div className="avatar-dropdown" ref={dropdownRef}>
+              <button className="user-avatar" onClick={() => setDropdownOpen((o) => !o)}>
+                {initials}
+                {user && user.subscription_type > 0 && (
+                  <span className={`avatar-plan-badge plan-${user.subscription_type}`}>
+                    {SUBSCRIPTION_TYPE_TO_LABEL[user.subscription_type]}
+                  </span>
+                )}
+              </button>
+              {dropdownOpen && (
+                <div className="avatar-menu">
+                  <NavLink to="/" className="avatar-menu-item" onClick={() => setDropdownOpen(false)}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                      <polyline points="9 22 9 12 15 12 15 22" />
+                    </svg>
+                    Home
+                  </NavLink>
+                  <NavLink to="/app" end className="avatar-menu-item" onClick={() => setDropdownOpen(false)}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="3" width="7" height="7" />
+                      <rect x="14" y="3" width="7" height="7" />
+                      <rect x="14" y="14" width="7" height="7" />
+                      <rect x="3" y="14" width="7" height="7" />
+                    </svg>
+                    Dashboard
+                  </NavLink>
+                  <button className="avatar-menu-item" onClick={handleLogout}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                      <polyline points="16 17 21 12 16 7" />
+                      <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </nav>

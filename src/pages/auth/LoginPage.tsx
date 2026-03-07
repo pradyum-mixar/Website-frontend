@@ -78,6 +78,7 @@ export function LoginPage() {
                 </svg>
               </button>
             </div>
+            <Link to="/auth/forgot-password" className="forgot-password-link">Forgot password?</Link>
           </div>
 
           {error && <div className="form-error show">{error}</div>}
@@ -108,8 +109,6 @@ export function LoginPage() {
 
         <p className="form-footer">
           Don't have an account? <Link to="/auth/signup">Sign up</Link>
-          <br />
-          Forgot password? <Link to="/auth/forgot-password">Reset it</Link>
         </p>
       </div>
     </main>
