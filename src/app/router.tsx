@@ -16,6 +16,7 @@ import { DownloadsPage } from "../pages/app/DownloadsPage";
 import { PaymentSuccessPage } from "../pages/app/PaymentSuccessPage";
 import { CancelSubscriptionPage } from "../pages/app/CancelSubscriptionPage";
 import { BillingHistoryPage } from "../pages/app/BillingHistoryPage";
+import { ManageSubscriptionPage } from "../pages/app/ManageSubscriptionPage";
 import { DesktopLoginPage } from "../pages/auth/DesktopLoginPage";
 import { GoogleCallbackPage } from "../pages/auth/GoogleCallbackPage";
 
@@ -43,6 +44,7 @@ export function AppRouter() {
             <Route path="downloads" element={<DownloadsPage />} />
             <Route path="payment-success" element={<PaymentSuccessPage />} />
             <Route path="billing" element={<BillingHistoryPage />} />
+            <Route path="manage-subscription" element={<ManageSubscriptionPage />} />
             <Route path="cancel-subscription" element={<CancelSubscriptionPage />} />
             <Route element={<RequireAdmin />}>
               <Route path="admin" element={<AdminPage />} />
