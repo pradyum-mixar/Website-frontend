@@ -17,7 +17,7 @@ type UsageLog = {
 type UsageLogsResponse = {
   status: string;
   data: UsageLog[];
-  pagination: { total: number; skip: number; limit: number };
+  pagination: { total: number; page: number; page_size: number };
 };
 type UsageStats = {
   total_generations: number;
@@ -101,15 +101,15 @@ const PAGE_SIZE = 10;
 
 export function DashboardPage() {
   const { user } = useAuth();
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const [modeFilter, setModeFilter] = useState("");
 
   const usage = useQuery({
     queryKey: ["usage", page, modeFilter],
     queryFn: async () => {
       const params = new URLSearchParams({
-        skip: String(page * PAGE_SIZE),
-        limit: String(PAGE_SIZE),
+        page: String(page),
+        page_size: String(PAGE_SIZE),
       });
       if (modeFilter) params.set("mode", modeFilter);
       return (await apiClient.instance.get<UsageLogsResponse>(`/users/user-usage-logs/?${params}`)).data;
@@ -162,7 +162,7 @@ export function DashboardPage() {
 
   const handleFilterChange = (value: string) => {
     setModeFilter(value);
-    setPage(0);
+    setPage(1);
   };
 
   return (
@@ -316,17 +316,17 @@ export function DashboardPage() {
               <button
                 className="btn-download-invoice"
                 onClick={() => setPage((p) => p - 1)}
-                disabled={page === 0}
+                disabled={page <= 1}
               >
                 Previous
               </button>
               <span className="usage-date">
-                Page {page + 1} of {totalPages}
+                Page {page} of {totalPages}
               </span>
               <button
                 className="btn-download-invoice"
                 onClick={() => setPage((p) => p + 1)}
-                disabled={page >= totalPages - 1}
+                disabled={page >= totalPages}
               >
                 Next
               </button>
