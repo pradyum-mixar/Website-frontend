@@ -11,6 +11,50 @@ type TokenPair = {
   token_type: string;
 };
 
+export type Plan = {
+  id: string;
+  name: string;
+  tagline: string;
+  price_monthly: number;
+  price_yearly: number;
+  currency: string;
+  credits_per_month: number;
+  features: string[];
+  highlight: boolean;
+  cta_label: string;
+};
+
+export type PaymentHistoryItem = {
+  id: string;
+  payment_type: string;
+  status: string;
+  dodo_payment_id: string;
+  amount: number | null;
+  currency: string | null;
+  plan_id: string | null;
+  billing_interval: string | null;
+  credit_quantity: number | null;
+  has_invoice: boolean;
+  created_at: string;
+};
+
+export type PaymentHistoryResponse = {
+  status: string;
+  data: PaymentHistoryItem[];
+  pagination: { skip: number; limit: number; total: number };
+};
+
+export type SubscriptionStatus = {
+  plan_slug: string;
+  plan_name: string;
+  billing_interval: string;
+  credits_per_month: number;
+  cycle_start: string;
+  cycle_end: string;
+  days_left: number;
+  subscription_expires_at: string | null;
+};
+
 class ApiClient {
   private client: AxiosInstance;
 
@@ -129,6 +173,63 @@ class ApiClient {
       accessToken: response.data.access_token,
       refreshToken: response.data.refresh_token,
     });
+  }
+
+  async getPlans(): Promise<{ status: string; data: Plan[] }> {
+    const response = await this.client.get<{ status: string; data: Plan[] }>("/plans/");
+    return response.data;
+  }
+
+  async createCheckout(planId: string, billing: string): Promise<{ status: string; data: { payment_link: string } }> {
+    const response = await this.client.post<{ status: string; data: { payment_link: string } }>(
+      "/subscriptions/checkout",
+      { plan_id: planId, billing }
+    );
+    return response.data;
+  }
+
+  async getCreditPricing(): Promise<{ status: string; data: { price_per_credit: number; currency: string; min_quantity: number; max_quantity: number } }> {
+    const response = await this.client.get<{ status: string; data: { price_per_credit: number; currency: string; min_quantity: number; max_quantity: number } }>("/plans/credit-pricing");
+    return response.data;
+  }
+
+  async cancelSubscription(): Promise<{ status: string; message: string }> {
+    const response = await this.client.post<{ status: string; message: string }>("/subscriptions/cancel");
+    return response.data;
+  }
+
+  async createCreditCheckout(quantity: number): Promise<{ status: string; data: { payment_link: string } }> {
+    const response = await this.client.post<{ status: string; data: { payment_link: string } }>(
+      "/subscriptions/checkout/credits",
+      { quantity }
+    );
+    return response.data;
+  }
+
+  async getPaymentHistory(skip = 0, limit = 20): Promise<PaymentHistoryResponse> {
+    const response = await this.client.get<PaymentHistoryResponse>(
+      `/subscriptions/history?skip=${skip}&limit=${limit}`
+    );
+    return response.data;
+  }
+
+  async getSubscriptionStatus(): Promise<SubscriptionStatus> {
+    const response = await this.client.get<SubscriptionStatus>("/subscriptions/status");
+    return response.data;
+  }
+
+  async downloadInvoice(paymentId: string): Promise<void> {
+    const response = await this.client.get(`/subscriptions/invoices/${paymentId}`, {
+      responseType: "blob",
+    });
+    const url = URL.createObjectURL(response.data as Blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `invoice-${paymentId}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   }
 }
 

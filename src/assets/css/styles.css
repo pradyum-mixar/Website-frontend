@@ -99,7 +99,95 @@ body {
     align-items: center;
     justify-content: center;
     font-weight: 600;
+    font-size: 0.875rem;
     color: var(--bg-dark);
+    border: none;
+    cursor: pointer;
+    transition: box-shadow 0.2s ease;
+    position: relative;
+}
+
+.user-avatar:hover {
+    box-shadow: 0 0 0 3px rgba(0, 192, 199, 0.3);
+}
+
+.avatar-plan-badge {
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.5rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    padding: 1px 6px;
+    border-radius: 8px;
+    white-space: nowrap;
+    text-transform: uppercase;
+    line-height: 1.4;
+    border: 1.5px solid var(--bg-dark);
+}
+
+.avatar-plan-badge.plan-1 {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+}
+
+.avatar-plan-badge.plan-2 {
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    color: #fff;
+}
+
+.avatar-dropdown {
+    position: relative;
+}
+
+.avatar-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 180px;
+    background: #1a1a1a;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 0.5rem 0;
+    z-index: 200;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    animation: menuFadeIn 0.15s ease;
+}
+
+@keyframes menuFadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.avatar-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.625rem 1rem;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s ease;
+}
+
+.avatar-menu-item:hover {
+    background: rgba(0, 192, 199, 0.1);
+    color: var(--primary-cyan);
+}
+
+.avatar-menu-item svg {
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+.avatar-menu-item:hover svg {
+    opacity: 1;
 }
 
 .page-container {
@@ -375,6 +463,30 @@ body {
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+
+/* Cancel subscription */
+.cancel-sub-item { color: var(--error-color) !important; }
+.cancel-sub-item:hover { background: rgba(239, 68, 68, 0.1) !important; color: var(--error-color) !important; }
+.cancel-sub-item svg { opacity: 1; }
+
+.btn-cancel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.875rem 2rem;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    background: var(--error-color);
+    border: none;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel:hover:not(:disabled) { background: #dc2626; transform: translateY(-2px); }
+.btn-cancel:disabled { opacity: 0.6; cursor: not-allowed; }
 
 @media (max-width: 768px) {
     .nav { padding: 1rem 1.5rem; }

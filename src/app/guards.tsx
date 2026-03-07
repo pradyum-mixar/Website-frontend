@@ -20,12 +20,11 @@ export function RequireAdmin() {
   return <Outlet />;
 }
 
-/** Shows the landing page to unauthenticated visitors; sends logged-in users to /app. */
+/** Shows the landing page to all visitors. */
 export function LandingRoute() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isLoading } = useAuth();
 
   // Return null during auth init to avoid a flash of the landing page for logged-in users.
   if (isLoading) return null;
-  if (isAuthenticated) return <Navigate to="/app" replace />;
   return <LandingPage />;
 }
