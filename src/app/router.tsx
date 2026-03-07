@@ -17,6 +17,7 @@ import { PaymentSuccessPage } from "../pages/app/PaymentSuccessPage";
 import { CancelSubscriptionPage } from "../pages/app/CancelSubscriptionPage";
 import { BillingHistoryPage } from "../pages/app/BillingHistoryPage";
 import { DesktopLoginPage } from "../pages/auth/DesktopLoginPage";
+import { GoogleCallbackPage } from "../pages/auth/GoogleCallbackPage";
 
 export function AppRouter() {
   return (
@@ -28,6 +29,7 @@ export function AppRouter() {
         <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
         <Route path="/auth/handoff" element={<HandoffPage />} />
+        <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
         <Route path="/pricing" element={<PublicPricingPage />} />
 
         <Route element={<RequireAuth />}>
