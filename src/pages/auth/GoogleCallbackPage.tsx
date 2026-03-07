@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { apiClient } from "../../lib/api-client";
 import { useAuth } from "../../features/auth/AuthContext";
@@ -8,8 +8,12 @@ export function GoogleCallbackPage() {
   const navigate = useNavigate();
   const { refreshUser } = useAuth();
   const [error, setError] = useState("");
+  const exchanged = useRef(false);
 
   useEffect(() => {
+    if (exchanged.current) return;
+    exchanged.current = true;
+
     const code = searchParams.get("code");
     const state = searchParams.get("state");
 
