@@ -213,6 +213,19 @@ class ApiClient {
     return response.data;
   }
 
+  async getGoogleLoginUrl(): Promise<string> {
+    const response = await this.client.get<{ url: string }>("/auth/login/google");
+    return response.data.url;
+  }
+
+  async exchangeGoogleCode(code: string, state: string): Promise<void> {
+    const response = await this.client.post<TokenPair>("/auth/google", { code, state });
+    authStorage.writeTokens({
+      accessToken: response.data.access_token,
+      refreshToken: response.data.refresh_token,
+    });
+  }
+
   async getSubscriptionStatus(): Promise<SubscriptionStatus> {
     const response = await this.client.get<SubscriptionStatus>("/subscriptions/status");
     return response.data;
