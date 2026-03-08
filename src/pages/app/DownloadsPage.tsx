@@ -1,8 +1,6 @@
-import type { ReactElement } from "react";
-import { useRef, useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../../features/auth/AuthContext";
+import { useState, useEffect, type ReactElement } from "react";
 import { apiClient } from "../../lib/api-client";
+import { PublicNavbar } from "../../components/PublicNavbar";
 import "../../assets/css/landing.css";
 import "../../assets/css/dashboard.css";
 
@@ -52,29 +50,10 @@ function formatSize(bytes: number): string {
 }
 
 export function DownloadsPage() {
-  const { user, isAuthenticated, logout } = useAuth();
-  const navigate = useNavigate();
-  const [profileOpen, setProfileOpen] = useState(false);
-  const profileRef = useRef<HTMLDivElement>(null);
-
   const [platforms, setPlatforms] = useState<PlatformDownload[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [downloading, setDownloading] = useState<string | null>(null);
-
-  const initials = user?.name
-    ? user.name.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2)
-    : "?";
-
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
-        setProfileOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
 
   useEffect(() => {
     apiClient
@@ -102,52 +81,7 @@ export function DownloadsPage() {
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg, #000)" }}>
-      <nav className="navbar">
-        <div className="navbar-content">
-          <Link to="/" className="logo">
-            <img src="/assets/Logo-Primary_light.png" alt="Mixar" />
-          </Link>
-          <div className="nav-links">
-            <Link to="/about">About</Link>
-            <Link to="/pricing">Pricing</Link>
-            {isAuthenticated && <Link to="/app/downloads">Download</Link>}
-            {isAuthenticated && <Link to="/app">Dashboard</Link>}
-          </div>
-          <div className="nav-buttons">
-            <a
-              href="https://discord.gg/YVqvkQx8rX"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-nav-secondary"
-            >
-              Join Discord
-            </a>
-            {isAuthenticated ? (
-              <div className="avatar-dropdown" ref={profileRef}>
-                <button className="user-avatar" onClick={() => setProfileOpen((o) => !o)}>
-                  {initials}
-                </button>
-                {profileOpen && (
-                  <div className="avatar-menu">
-                    <button className="avatar-menu-item" onClick={async () => { setProfileOpen(false); await logout(); navigate("/"); }}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                        <polyline points="16 17 21 12 16 7" />
-                        <line x1="21" y1="12" x2="9" y2="12" />
-                      </svg>
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <Link to="/auth/login" className="btn-nav-primary">
-                Sign In
-              </Link>
-            )}
-          </div>
-        </div>
-      </nav>
+      <PublicNavbar activePage="download" />
 
       <div className="dashboard-container">
         <div className="dashboard-content">

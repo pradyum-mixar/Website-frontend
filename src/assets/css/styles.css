@@ -182,10 +182,65 @@ body {
     color: var(--primary-green);
 }
 
+/* ─── App Hamburger Toggle ─── */
+.app-hamburger {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.9);
+    cursor: pointer;
+    padding: 4px;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* ─── App Mobile Menu ─── */
+.app-mobile-menu {
+    display: none;
+}
+
 @media (max-width: 768px) {
+    .app-hamburger { display: flex; }
     .app-nav-links { display: none; }
     .app-navbar { padding: 10px 12px; }
-    .app-navbar-content { padding: 8px 16px; }
+    .app-navbar-content { padding: 8px 16px; border-radius: 20px; position: relative; }
+    .app-navbar-content.menu-open { border-radius: 20px; }
+
+    .app-mobile-menu {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-top: 8px;
+        padding: 16px 20px;
+        background: rgba(10, 10, 10, 0.85);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        z-index: 99;
+    }
+
+    .app-mobile-menu .app-nav-link {
+        display: block;
+        padding: 12px 16px;
+        font-size: 15px;
+        border-radius: 12px;
+        transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .app-mobile-menu .app-nav-link:hover,
+    .app-mobile-menu .app-nav-link.active {
+        background: rgba(255, 255, 255, 0.06);
+        color: #fff;
+    }
+
+    .mobile-menu-divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.08);
+        margin: 4px 0;
+    }
 }
 
 .user-avatar {
@@ -616,4 +671,12 @@ body {
     .btn-arrow { width: 46px; height: 46px; }
     .otp-input { width: 46px; height: 54px; font-size: 1.25rem; }
     .btn-google { padding: 0.875rem 1.25rem; font-size: 0.95rem; }
+}
+
+@media (max-width: 480px) {
+    .card { padding: 1.5rem 1.25rem; }
+    .card-title { font-size: 1.5rem; }
+    .card-header { margin-bottom: 1.75rem; }
+    .otp-input { width: 40px; height: 48px; font-size: 1.1rem; }
+    .otp-container { gap: 0.5rem; }
 }
