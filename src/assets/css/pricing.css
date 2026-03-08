@@ -11,7 +11,7 @@
 }
 
 .pricing-page.pricing-standalone {
-    padding: 6rem 2rem 2rem; /* top clears fixed nav, sides for standalone */
+    padding: 2rem 2rem 2rem;
 }
 
 /* Public nav bar */
@@ -523,6 +523,6 @@
 
 @media (max-width: 480px) {
     .pricing-page.pricing-standalone {
-        padding: 5rem 1rem 1rem;
+        padding: 1.5rem 1rem 1rem;
     }
 }

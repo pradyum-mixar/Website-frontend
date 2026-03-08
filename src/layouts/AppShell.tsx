@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../features/auth/AuthContext";
 import { SUBSCRIPTION_TYPE_TO_LABEL } from "../features/auth/types";
 import "../assets/css/dashboard.css";
@@ -7,9 +7,10 @@ import "../assets/css/dashboard.css";
 export function AppShell() {
   const { user, logout, isSuperuser } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isOnDashboard = location.pathname === "/app" || location.pathname === "/app/";
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -19,15 +20,6 @@ export function AppShell() {
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    function handleScroll() {
-      setScrolled(window.scrollY > 20);
-    }
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleLogout = async () => {
@@ -42,9 +34,9 @@ export function AppShell() {
 
   return (
     <>
-      <nav className={`app-navbar ${scrolled ? "scrolled" : ""}`}>
+      <nav className="app-navbar">
         <div className="app-navbar-content">
-          <NavLink to="/app" className="logo">
+          <NavLink to="/" className="logo">
             <img src="/assets/Logo-Primary_light.png" alt="Mixar" />
           </NavLink>
 
@@ -52,9 +44,13 @@ export function AppShell() {
             {isSuperuser && (
               <NavLink to="/app/admin" className="app-nav-link admin-link">Admin</NavLink>
             )}
+            {isOnDashboard ? (
+              <NavLink to="/" className="app-nav-link">Home</NavLink>
+            ) : (
+              <NavLink to="/app" end className="app-nav-link">Dashboard</NavLink>
+            )}
             <NavLink to="/app/downloads" className="app-nav-link">Download</NavLink>
-            <NavLink to="/app/pricing" className="app-nav-link">Pricing</NavLink>
-            <NavLink to="/app/manage-subscription" className="app-nav-link">Subscription</NavLink>
+            <NavLink to="/app/manage-subscription" className="app-nav-link">Manage Subscription</NavLink>
           </div>
 
           <div className="app-nav-actions">
@@ -77,22 +73,6 @@ export function AppShell() {
               </button>
               {dropdownOpen && (
                 <div className="avatar-menu">
-                  <NavLink to="/" className="avatar-menu-item" onClick={() => setDropdownOpen(false)}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                      <polyline points="9 22 9 12 15 12 15 22" />
-                    </svg>
-                    Home
-                  </NavLink>
-                  <NavLink to="/app" end className="avatar-menu-item" onClick={() => setDropdownOpen(false)}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <rect x="3" y="3" width="7" height="7" />
-                      <rect x="14" y="3" width="7" height="7" />
-                      <rect x="14" y="14" width="7" height="7" />
-                      <rect x="3" y="14" width="7" height="7" />
-                    </svg>
-                    Dashboard
-                  </NavLink>
                   <button className="avatar-menu-item" onClick={handleLogout}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />

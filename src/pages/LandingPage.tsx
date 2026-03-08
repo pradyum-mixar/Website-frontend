@@ -75,28 +75,6 @@ export function LandingPage() {
     };
   }, []);
 
-  // --- Navbar scroll effect ---
-  useEffect(() => {
-    const navbar = document.querySelector(".navbar");
-    if (!navbar) return;
-
-    function handleScroll() {
-      const scrollY = window.scrollY;
-      if (scrollY > 50) {
-        navbar!.classList.add("scrolled");
-      } else {
-        navbar!.classList.remove("scrolled");
-      }
-    }
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-
   // --- Features section animation ---
   useEffect(() => {
     const featuresSection = document.querySelector(".features-section");
@@ -357,9 +335,9 @@ export function LandingPage() {
           </Link>
           <div className="nav-links">
             <Link to="/about">About</Link>
-            <a href="#features">Features</a>
             <Link to="/pricing">Pricing</Link>
-            <Link to="/app/downloads">Download</Link>
+            {isAuthenticated && <Link to="/app/downloads">Download</Link>}
+            {isAuthenticated && <Link to="/app">Dashboard</Link>}
           </div>
           <div className="nav-buttons">
             <a
@@ -377,15 +355,6 @@ export function LandingPage() {
                 </button>
                 {profileOpen && (
                   <div className="avatar-menu">
-                    <Link to="/app" className="avatar-menu-item" onClick={() => setProfileOpen(false)}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <rect x="3" y="3" width="7" height="7" />
-                        <rect x="14" y="3" width="7" height="7" />
-                        <rect x="14" y="14" width="7" height="7" />
-                        <rect x="3" y="14" width="7" height="7" />
-                      </svg>
-                      Dashboard
-                    </Link>
                     <button className="avatar-menu-item" onClick={handleLogout}>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -415,10 +384,10 @@ export function LandingPage() {
             The End of <span className="highlight">Grunt Work</span>
           </p>
           <div className="actions">
-            <a href="/auth/signup" className="btn-download">
-              Sign Up
-            </a>
-            <a href="/auth/signup" className="btn-arrow">
+            <Link to={isAuthenticated ? "/app" : "/auth/signup"} className="btn-download">
+              {isAuthenticated ? "Dashboard" : "Sign Up"}
+            </Link>
+            <Link to={isAuthenticated ? "/app" : "/auth/signup"} className="btn-arrow">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
                   d="M5 12H19"
@@ -435,7 +404,7 @@ export function LandingPage() {
                   strokeLinejoin="round"
                 />
               </svg>
-            </a>
+            </Link>
           </div>
         </header>
         <main className="lp-main">
@@ -1046,9 +1015,9 @@ export function LandingPage() {
             <h2>Try Mixar Now</h2>
             <p>Join our Beta, build the future of agentic 3D with us!</p>
             <div className="try-mixar-buttons">
-              <a href="/auth/signup" className="btn-waitlist">
-                Sign Up
-              </a>
+              <Link to={isAuthenticated ? "/app" : "/auth/signup"} className="btn-waitlist">
+                {isAuthenticated ? "Dashboard" : "Sign Up"}
+              </Link>
               <a
                 href="https://discord.gg/YVqvkQx8rX"
                 target="_blank"
