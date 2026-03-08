@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { apiClient, type Plan } from "../../lib/api-client";
 import { useAuth } from "../../features/auth/AuthContext";
 import { SUBSCRIPTION_TYPE_TO_SLUG, SUBSCRIPTION_TYPE_TO_LABEL } from "../../features/auth/types";
+import "../../assets/css/landing.css";
 import "../../assets/css/pricing.css";
 
 function CheckIcon() {
@@ -30,13 +31,70 @@ function SkeletonCard() {
 }
 
 function PricingNav() {
+  const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  const initials = user?.name
+    ? user.name.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2)
+    : "?";
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
   return (
-    <nav className="pricing-nav">
-      <Link to="/" className="pricing-nav-brand">
-        <img src="https://d2znch1yzypu23.cloudfront.net/Logo-Primary_light.png" alt="Mixar" />
-      </Link>
-      <div className="pricing-nav-links">
-        <Link to="/auth/login" className="pricing-nav-signin">Sign In</Link>
+    <nav className="navbar">
+      <div className="navbar-content">
+        <Link to="/" className="logo">
+          <img src="https://d2znch1yzypu23.cloudfront.net/Logo-Primary_light.png" alt="Mixar" />
+        </Link>
+        <div className="nav-links">
+          <Link to="/about">About</Link>
+          <Link to="/pricing">Pricing</Link>
+          {isAuthenticated && <Link to="/app/downloads">Download</Link>}
+          {isAuthenticated && <Link to="/app">Dashboard</Link>}
+        </div>
+        <div className="nav-buttons">
+          <a
+            href="https://discord.gg/YVqvkQx8rX"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-nav-secondary"
+          >
+            Join Discord
+          </a>
+          {isAuthenticated ? (
+            <div className="avatar-dropdown" ref={profileRef}>
+              <button className="user-avatar" onClick={() => setProfileOpen((o) => !o)}>
+                {initials}
+              </button>
+              {profileOpen && (
+                <div className="avatar-menu">
+                  <button className="avatar-menu-item" onClick={async () => { setProfileOpen(false); await logout(); navigate("/"); }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                      <polyline points="16 17 21 12 16 7" />
+                      <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link to="/auth/login" className="btn-nav-primary">
+              Sign In
+            </Link>
+          )}
+        </div>
       </div>
     </nav>
   );
@@ -165,10 +223,22 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
 
 /** Public pricing page — includes its own nav bar */
 export function PublicPricingPage() {
+  const { user, isAuthenticated } = useAuth();
+  const subType = user?.subscription_type ?? 0;
+  const hasActiveSubscription = isAuthenticated && subType > 0;
+  const currentPlanId = hasActiveSubscription ? (SUBSCRIPTION_TYPE_TO_SLUG[subType] ?? null) : null;
+  const subscriptionLabel = SUBSCRIPTION_TYPE_TO_LABEL[subType] ?? "";
+
   return (
     <>
       <PricingNav />
-      <PricingContent standalone isAuthenticated={false} currentPlanId={null} hasActiveSubscription={false} subscriptionLabel="" />
+      <PricingContent
+        standalone
+        isAuthenticated={isAuthenticated}
+        currentPlanId={currentPlanId}
+        hasActiveSubscription={hasActiveSubscription}
+        subscriptionLabel={subscriptionLabel}
+      />
     </>
   );
 }

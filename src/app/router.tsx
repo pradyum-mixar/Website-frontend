@@ -38,13 +38,13 @@ export function AppRouter() {
 
         <Route element={<RequireAuth />}>
           <Route path="/app/desktop-login" element={<DesktopLoginPage />} />
+          <Route path="/app/downloads" element={<DownloadsPage />} />
           <Route path="/app" element={<AppShell />}>
             <Route index element={<DashboardPage />} />
             <Route path="account" element={<AccountPage />} />
             <Route path="pricing" element={<PricingPage />} />
             <Route path="order" element={<OrderSummaryPage />} />
             <Route path="buy-credits" element={<BuyCreditsPage />} />
-            <Route path="downloads" element={<DownloadsPage />} />
             <Route path="payment-success" element={<PaymentSuccessPage />} />
             <Route path="billing" element={<BillingHistoryPage />} />
             <Route path="manage-subscription" element={<ManageSubscriptionPage />} />

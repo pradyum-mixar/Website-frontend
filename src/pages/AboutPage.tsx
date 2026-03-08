@@ -1,11 +1,12 @@
 import { useRef, useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../features/auth/AuthContext";
 import "../assets/css/landing.css";
 import "../assets/css/about.css";
 
 export function AboutPage() {
   const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
@@ -37,9 +38,9 @@ export function AboutPage() {
           </Link>
           <div className="nav-links">
             <Link to="/about" className="active">About</Link>
-            <a href="/#features">Features</a>
             <Link to="/pricing">Pricing</Link>
-            <Link to="/app/downloads">Download</Link>
+            {isAuthenticated && <Link to="/app/downloads">Download</Link>}
+            {isAuthenticated && <Link to="/app">Dashboard</Link>}
           </div>
           <div className="nav-buttons">
             <a
@@ -57,9 +58,14 @@ export function AboutPage() {
                 </button>
                 {profileOpen && (
                   <div className="avatar-menu">
-                    <Link to="/app" className="avatar-menu-item">Dashboard</Link>
-                    <Link to="/app/account" className="avatar-menu-item">Account</Link>
-                    <button className="avatar-menu-item" onClick={() => logout()}>Sign Out</button>
+                    <button className="avatar-menu-item" onClick={async () => { setProfileOpen(false); await logout(); navigate("/"); }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                      </svg>
+                      Logout
+                    </button>
                   </div>
                 )}
               </div>

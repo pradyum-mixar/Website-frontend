@@ -16,7 +16,11 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<CurrentUser | null>(authStorage.readUser());
+  const [user, setUser] = useState<CurrentUser | null>(() => {
+    // Only trust cached user if we also have a token
+    const tokens = authStorage.readTokens();
+    return tokens?.accessToken ? authStorage.readUser() : null;
+  });
   const [isLoading, setIsLoading] = useState(true);
 
   const refreshUser = async (): Promise<CurrentUser | null> => {
