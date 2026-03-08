@@ -19,12 +19,14 @@ import { BillingHistoryPage } from "../pages/app/BillingHistoryPage";
 import { ManageSubscriptionPage } from "../pages/app/ManageSubscriptionPage";
 import { DesktopLoginPage } from "../pages/auth/DesktopLoginPage";
 import { GoogleCallbackPage } from "../pages/auth/GoogleCallbackPage";
+import { AboutPage } from "../pages/AboutPage";
 
 export function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LandingRoute />} />
+        <Route path="/about" element={<AboutPage />} />
         <Route path="/auth/login" element={<LoginPage />} />
         <Route path="/auth/signup" element={<SignupPage />} />
         <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />

@@ -356,7 +356,7 @@ export function LandingPage() {
             <img src="https://d2znch1yzypu23.cloudfront.net/Logo-Primary_light.png" alt="Mixar" />
           </Link>
           <div className="nav-links">
-            <a href="/about">About</a>
+            <Link to="/about">About</Link>
             <a href="#features">Features</a>
             <Link to="/pricing">Pricing</Link>
             <Link to="/app/downloads">Download</Link>
