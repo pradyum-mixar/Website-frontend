@@ -34,7 +34,7 @@ export function GoogleCallbackPage() {
         setError(message);
       }
     })();
-  }, [searchParams, navigate, refreshUser]);
+  }, []);
 
   return (
     <main className="page-container">
