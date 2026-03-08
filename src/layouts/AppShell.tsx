@@ -10,6 +10,7 @@ export function AppShell() {
   const location = useLocation();
   const isOnDashboard = location.pathname === "/app" || location.pathname === "/app/";
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -22,8 +23,14 @@ export function AppShell() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
+
   const handleLogout = async () => {
     setDropdownOpen(false);
+    setMenuOpen(false);
     await logout();
     navigate("/");
   };
@@ -35,7 +42,7 @@ export function AppShell() {
   return (
     <>
       <nav className="app-navbar">
-        <div className="app-navbar-content">
+        <div className={`app-navbar-content${menuOpen ? " menu-open" : ""}`}>
           <NavLink to="/" className="logo">
             <img src="/assets/Logo-Primary_light.png" alt="Mixar" />
           </NavLink>
@@ -84,8 +91,48 @@ export function AppShell() {
                 </div>
               )}
             </div>
+
+            {/* Hamburger toggle — visible only on mobile */}
+            <button
+              className="app-hamburger"
+              onClick={() => setMenuOpen((o) => !o)}
+              aria-label="Toggle menu"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                {menuOpen ? (
+                  <>
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </>
+                ) : (
+                  <>
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <line x1="3" y1="12" x2="21" y2="12" />
+                    <line x1="3" y1="18" x2="21" y2="18" />
+                  </>
+                )}
+              </svg>
+            </button>
           </div>
         </div>
+
+        {/* Mobile menu dropdown */}
+        {menuOpen && (
+          <div className="app-mobile-menu">
+            {isSuperuser && (
+              <NavLink to="/app/admin" className="app-nav-link admin-link">Admin</NavLink>
+            )}
+            {isOnDashboard ? (
+              <NavLink to="/" className="app-nav-link">Home</NavLink>
+            ) : (
+              <NavLink to="/app" end className="app-nav-link">Dashboard</NavLink>
+            )}
+            <NavLink to="/app/downloads" className="app-nav-link">Download</NavLink>
+            <NavLink to="/app/manage-subscription" className="app-nav-link">Manage Subscription</NavLink>
+            <div className="mobile-menu-divider" />
+            <button className="app-nav-link" onClick={handleLogout} style={{ background: "none", border: "none", cursor: "pointer", textAlign: "left", padding: 0 }}>Logout</button>
+          </div>
+        )}
       </nav>
 
       <main className="dashboard-container">

@@ -231,6 +231,22 @@ class ApiClient {
     return response.data;
   }
 
+  async getAvailableDownloads(): Promise<{
+    status: string;
+    data: { platform: string; version: string; size_bytes: number; installer_type: string | null }[];
+  }> {
+    const response = await this.client.get("/downloads");
+    return response.data;
+  }
+
+  async getDownloadUrl(platform: string): Promise<{
+    status: string;
+    data: { url: string; platform: string; version: string; size_bytes: number; sha256: string; installer_type: string | null };
+  }> {
+    const response = await this.client.get(`/downloads/${platform}`);
+    return response.data;
+  }
+
   async downloadInvoice(paymentId: string): Promise<void> {
     const response = await this.client.get(`/subscriptions/invoices/${paymentId}`, {
       responseType: "blob",
