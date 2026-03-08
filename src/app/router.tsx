@@ -9,6 +9,7 @@ import { HandoffPage } from "../pages/auth/HandoffPage";
 import { DashboardPage } from "../pages/app/DashboardPage";
 import { AccountPage } from "../pages/app/AccountPage";
 import { AdminPage } from "../pages/app/AdminPage";
+import { AdminConfigPage } from "../pages/app/AdminConfigPage";
 import { PricingPage, PublicPricingPage } from "../pages/app/PricingPage";
 import { OrderSummaryPage } from "../pages/app/OrderSummaryPage";
 import { BuyCreditsPage } from "../pages/app/BuyCreditsPage";
@@ -19,12 +20,14 @@ import { BillingHistoryPage } from "../pages/app/BillingHistoryPage";
 import { ManageSubscriptionPage } from "../pages/app/ManageSubscriptionPage";
 import { DesktopLoginPage } from "../pages/auth/DesktopLoginPage";
 import { GoogleCallbackPage } from "../pages/auth/GoogleCallbackPage";
+import { AboutPage } from "../pages/AboutPage";
 
 export function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LandingRoute />} />
+        <Route path="/about" element={<AboutPage />} />
         <Route path="/auth/login" element={<LoginPage />} />
         <Route path="/auth/signup" element={<SignupPage />} />
         <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
@@ -48,6 +51,7 @@ export function AppRouter() {
             <Route path="cancel-subscription" element={<CancelSubscriptionPage />} />
             <Route element={<RequireAdmin />}>
               <Route path="admin" element={<AdminPage />} />
+              <Route path="admin/config" element={<AdminConfigPage />} />
             </Route>
           </Route>
         </Route>

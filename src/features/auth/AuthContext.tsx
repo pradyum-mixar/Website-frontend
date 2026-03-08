@@ -10,7 +10,7 @@ type AuthContextValue = {
   isSuperuser: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  refreshUser: () => Promise<void>;
+  refreshUser: () => Promise<CurrentUser | null>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -19,14 +19,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<CurrentUser | null>(authStorage.readUser());
   const [isLoading, setIsLoading] = useState(true);
 
-  const refreshUser = async () => {
+  const refreshUser = async (): Promise<CurrentUser | null> => {
     const tokens = authStorage.readTokens();
     if (!tokens?.accessToken) {
       setUser(null);
-      return;
+      return null;
     }
     const me = await apiClient.me();
     setUser(me);
+    return me;
   };
 
   const login = async (email: string, password: string) => {
