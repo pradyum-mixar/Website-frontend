@@ -302,6 +302,19 @@
     color: var(--primary-green);
 }
 
+.pricing-cta.switch {
+    text-decoration: none;
+    cursor: pointer;
+    border-color: #eab308;
+    color: #eab308;
+}
+
+.pricing-cta.switch:hover {
+    background: rgba(234, 179, 8, 0.1);
+    border-color: #facc15;
+    color: #facc15;
+}
+
 .pricing-card.featured .pricing-cta {
     background: linear-gradient(135deg, var(--primary-cyan) 0%, var(--primary-green) 100%);
     color: var(--bg-dark);
