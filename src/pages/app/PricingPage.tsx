@@ -146,9 +146,9 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
                     Current Plan
                   </button>
                 ) : hasActiveSubscription ? (
-                  <button className="pricing-cta" disabled title={`Cancel your ${subscriptionLabel} plan first to switch`}>
+                  <Link to="/app/manage-subscription?tab=cancel" className="pricing-cta switch">
                     Cancel {subscriptionLabel} to switch
-                  </button>
+                  </Link>
                 ) : (
                   <button className="pricing-cta" onClick={() => handleBuy(plan)}>
                     {isAuthenticated ? plan.cta_label : plan.price_monthly === 0 ? "Get Started" : plan.cta_label}
