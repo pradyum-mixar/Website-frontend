@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../features/auth/AuthContext";
 import { PublicNavbar } from "../components/PublicNavbar";
 import "../assets/css/landing.css";
@@ -26,7 +26,6 @@ function preloadImage(url: string): Promise<void> {
 
 export function LandingPage() {
   const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
   const [isReady, setIsReady] = useState(false);
 
 
