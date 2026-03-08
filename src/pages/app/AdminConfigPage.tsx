@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { useSearchParams } from "react-router-dom";
 import { FeatureCreditCostsSection } from "../../features/admin-config/sections/FeatureCreditCostsSection";
 import { AgentModelConfigsSection } from "../../features/admin-config/sections/AgentModelConfigsSection";
@@ -54,7 +55,7 @@ const TABS: { group: string; items: { key: Tab; label: string }[] }[] = [
   },
 ];
 
-const SECTION_MAP: Record<Tab, () => JSX.Element> = {
+const SECTION_MAP: Record<Tab, () => ReactElement> = {
   "credit-costs": FeatureCreditCostsSection,
   "agent-models": AgentModelConfigsSection,
   "role-assignments": AgentRoleAssignmentsSection,
