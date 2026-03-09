@@ -48,7 +48,7 @@ export function ManageSubscriptionPage() {
     retry: false,
   });
 
-  const planLabel = subscriptionStatus.data?.plan_name ?? user?.plan_name ?? "Free";
+  const planLabel = subscriptionStatus?.plan_name ?? user?.plan_name ?? "Free";
   const hasSub = (user?.subscription_type ?? 0) > 0;
   const alreadyCancelled = !!user?.subscription_expires_at;
 
