@@ -95,6 +95,7 @@ class ApiClient {
         } catch {
           authStorage.clearTokens();
           authStorage.clearUser();
+          window.location.href = "/auth/login";
           return Promise.reject(error);
         }
       },
