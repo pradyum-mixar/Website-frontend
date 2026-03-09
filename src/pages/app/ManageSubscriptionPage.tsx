@@ -41,7 +41,7 @@ export function ManageSubscriptionPage() {
   const activeTab = (searchParams.get("tab") as Tab) || "overview";
   const setTab = (tab: Tab) => setSearchParams({ tab }, { replace: true });
 
-  const subscriptionStatus = useQuery<SubscriptionStatus>({
+  const { data: subscriptionStatus, isLoading: statusLoading, isError: statusError } = useQuery<SubscriptionStatus>({
     queryKey: ["subscriptionStatus"],
     queryFn: () => apiClient.getSubscriptionStatus(),
     enabled: (user?.subscription_type ?? 0) > 0,
@@ -88,7 +88,9 @@ export function ManageSubscriptionPage() {
           planLabel={planLabel}
           hasSub={hasSub}
           alreadyCancelled={alreadyCancelled}
-          subscriptionStatus={subscriptionStatus.data}
+          subscriptionStatus={subscriptionStatus}
+          statusLoading={statusLoading}
+          statusError={statusError}
           user={user}
         />
       )}
@@ -106,11 +108,13 @@ export function ManageSubscriptionPage() {
   );
 }
 
-function OverviewTab({ planLabel, hasSub, alreadyCancelled, subscriptionStatus, user }: {
+function OverviewTab({ planLabel, hasSub, alreadyCancelled, subscriptionStatus, statusLoading, statusError, user }: {
   planLabel: string;
   hasSub: boolean;
   alreadyCancelled: boolean;
   subscriptionStatus?: SubscriptionStatus;
+  statusLoading?: boolean;
+  statusError?: boolean;
   user: ReturnType<typeof useAuth>["user"];
 }) {
   return (
@@ -134,7 +138,13 @@ function OverviewTab({ planLabel, hasSub, alreadyCancelled, subscriptionStatus, 
           </Link>
         </div>
 
-        {subscriptionStatus && (
+        {statusError && (
+          <p style={{ color: "var(--text-secondary)", fontSize: "0.875rem" }}>
+            Could not load subscription details. Please refresh.
+          </p>
+        )}
+
+        {subscriptionStatus && !statusLoading && !statusError && (
           <div className="sub-plan-details">
             <div className="sub-detail-row">
               <span className="sub-detail-label">Billing Cycle</span>
@@ -167,10 +177,11 @@ function OverviewTab({ planLabel, hasSub, alreadyCancelled, subscriptionStatus, 
 function BillingTab() {
   const [page, setPage] = useState(0);
   const [downloading, setDownloading] = useState<string | null>(null);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["billing-history", page],
-    queryFn: () => apiClient.getPaymentHistory(page * PAGE_SIZE, PAGE_SIZE),
+    queryFn: () => apiClient.getPaymentHistory(page + 1, PAGE_SIZE),
   });
 
   const items = data?.data ?? [];
@@ -178,11 +189,12 @@ function BillingTab() {
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   const handleDownload = async (paymentId: string) => {
+    setDownloadError(null);
     setDownloading(paymentId);
     try {
       await apiClient.downloadInvoice(paymentId);
     } catch {
-      // silently fail
+      setDownloadError("Failed to download invoice. Please try again.");
     } finally {
       setDownloading(null);
     }
@@ -190,6 +202,14 @@ function BillingTab() {
 
   if (isLoading) {
     return <div className="loading"><div className="spinner" /></div>;
+  }
+
+  if (isError) {
+    return (
+      <div className="billing-error" style={{ color: "var(--text-secondary)", textAlign: "center", padding: "2rem" }}>
+        Failed to load billing history. Please refresh the page.
+      </div>
+    );
   }
 
   if (items.length === 0) {
@@ -210,6 +230,9 @@ function BillingTab() {
 
   return (
     <>
+      {downloadError && (
+        <p style={{ color: "var(--error-color)", marginBottom: "1rem" }}>{downloadError}</p>
+      )}
       <div className="usage-table-container">
         <table className="usage-table">
           <thead>

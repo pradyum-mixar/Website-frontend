@@ -14,6 +14,7 @@ export function PaymentSuccessPage() {
   const [syncState, setSyncState] = useState<SyncState>("polling");
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const initialCreditsRef = useRef<number | null>(null);
+  const initialSubTypeRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (status !== "succeeded" && status !== "active") return;
@@ -21,7 +22,11 @@ export function PaymentSuccessPage() {
     if (initialCreditsRef.current === null) {
       initialCreditsRef.current = user?.credits ?? 0;
     }
+    if (initialSubTypeRef.current === null) {
+      initialSubTypeRef.current = user?.subscription_type ?? 0;
+    }
     const initialCredits = initialCreditsRef.current;
+    const initialSubType = initialSubTypeRef.current;
     let attempts = 0;
     const MAX_ATTEMPTS = 12;
 
@@ -30,7 +35,7 @@ export function PaymentSuccessPage() {
       attempts++;
       const credits = freshUser?.credits ?? user?.credits ?? 0;
       const subType = freshUser?.subscription_type ?? user?.subscription_type ?? 0;
-      const updated = credits !== initialCredits || subType > 0;
+      const updated = credits > initialCredits || subType > initialSubType;
 
       if (updated) {
         if (pollRef.current) clearInterval(pollRef.current);

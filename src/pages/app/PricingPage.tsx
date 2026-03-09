@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { apiClient, type Plan } from "../../lib/api-client";
 import { useAuth } from "../../features/auth/AuthContext";
+import { SUBSCRIPTION_TYPE_TO_SLUG, SUBSCRIPTION_TYPE_TO_LABEL } from "../../features/auth/types";
 import { PublicNavbar } from "../../components/PublicNavbar";
 import "../../assets/css/landing.css";
 import "../../assets/css/pricing.css";
@@ -43,7 +44,7 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
   const [yearly, setYearly] = useState(false);
   const navigate = useNavigate();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["plans"],
     queryFn: () => apiClient.getPlans(),
   });
@@ -66,6 +67,19 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
     const billing = yearly ? "yearly" : "monthly";
     navigate(`/app/order?plan=${plan.id}&billing=${billing}`);
   };
+
+  if (isError) {
+    return (
+      <div className={`pricing-page${standalone ? " pricing-standalone" : ""}`}>
+        <div className="dashboard-header">
+          <h1 className="dashboard-title">Pricing Plans</h1>
+        </div>
+        <p style={{ color: "var(--text-secondary)", textAlign: "center", marginTop: "2rem" }}>
+          Failed to load plans. Please refresh the page.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className={`pricing-page${standalone ? " pricing-standalone" : ""}`}>

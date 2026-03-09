@@ -19,7 +19,6 @@ export function SignupPage() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const [referralCode, setReferralCode] = useState("");
   const [otpCode, setOtpCode] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -46,7 +45,6 @@ export function SignupPage() {
         email,
         password,
         name,
-        referral_code: referralCode || undefined,
       });
       setStep("otp");
       setMessage("OTP sent to your email.");
@@ -67,7 +65,6 @@ export function SignupPage() {
         password,
         name,
         otp_code: otpCode,
-        referral_code: referralCode || undefined,
       });
       await refreshUser();
       navigate("/app");
@@ -123,16 +120,6 @@ export function SignupPage() {
                 </button>
               </div>
             </div>
-            <div className="form-group">
-              <label className="form-label">Referral Code (Optional)</label>
-              <input
-                className="form-input"
-                placeholder="Referral code"
-                value={referralCode}
-                onChange={(e) => setReferralCode(e.target.value)}
-              />
-            </div>
-
             {error && <div className="form-error show">{error}</div>}
 
             <button className="btn" type="submit" disabled={loading}>
