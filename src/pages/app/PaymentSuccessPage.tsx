@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../features/auth/AuthContext";
-import { SUBSCRIPTION_TYPE_TO_LABEL } from "../../features/auth/types";
+
 import "../../assets/css/pricing.css";
 
 type SyncState = "polling" | "synced" | "sync-failed";
@@ -16,7 +16,7 @@ export function PaymentSuccessPage() {
   const initialCreditsRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (status !== "succeeded") return;
+    if (status !== "succeeded" && status !== "active") return;
 
     if (initialCreditsRef.current === null) {
       initialCreditsRef.current = user?.credits ?? 0;
@@ -48,13 +48,13 @@ export function PaymentSuccessPage() {
     };
   }, []);
 
-  const isSucceeded = status === "succeeded";
+  const isSucceeded = status === "succeeded" || status === "active";
   const isFailed = status === "failed";
   const isTimedOut = status === "timeout" || status === "expired";
   const isUnknown = !isSucceeded && !isFailed && !isTimedOut;
 
   const isSubscribed = user && user.subscription_type > 0;
-  const planLabel = user ? SUBSCRIPTION_TYPE_TO_LABEL[user.subscription_type] : null;
+  const planLabel = user?.plan_name ?? null;
 
   const successMessage = isSubscribed
     ? `Your ${planLabel} plan is now active. Your credits have been added.`
