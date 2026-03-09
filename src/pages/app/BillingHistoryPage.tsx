@@ -39,7 +39,7 @@ export function BillingHistoryPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["billing-history", page],
-    queryFn: () => apiClient.getPaymentHistory(page * PAGE_SIZE, PAGE_SIZE),
+    queryFn: () => apiClient.getPaymentHistory(page + 1, PAGE_SIZE),
   });
 
   const items = data?.data ?? [];

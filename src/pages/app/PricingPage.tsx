@@ -44,7 +44,7 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
   const [yearly, setYearly] = useState(false);
   const navigate = useNavigate();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["plans"],
     queryFn: () => apiClient.getPlans(),
   });
@@ -67,6 +67,19 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
     const billing = yearly ? "yearly" : "monthly";
     navigate(`/app/order?plan=${plan.id}&billing=${billing}`);
   };
+
+  if (isError) {
+    return (
+      <div className={`pricing-page${standalone ? " pricing-standalone" : ""}`}>
+        <div className="dashboard-header">
+          <h1 className="dashboard-title">Pricing Plans</h1>
+        </div>
+        <p style={{ color: "var(--text-secondary)", textAlign: "center", marginTop: "2rem" }}>
+          Failed to load plans. Please refresh the page.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className={`pricing-page${standalone ? " pricing-standalone" : ""}`}>

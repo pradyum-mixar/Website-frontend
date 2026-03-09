@@ -41,7 +41,7 @@ export type PaymentHistoryItem = {
 export type PaymentHistoryResponse = {
   status: string;
   data: PaymentHistoryItem[];
-  pagination: { skip: number; limit: number; total: number };
+  pagination: { page_no: number; page_size: number; total: number };
 };
 
 export type SubscriptionStatus = {
@@ -206,9 +206,9 @@ class ApiClient {
     return response.data;
   }
 
-  async getPaymentHistory(skip = 0, limit = 20): Promise<PaymentHistoryResponse> {
+  async getPaymentHistory(page_no = 1, page_size = 20): Promise<PaymentHistoryResponse> {
     const response = await this.client.get<PaymentHistoryResponse>(
-      `/subscriptions/history?skip=${skip}&limit=${limit}`
+      `/subscriptions/history?page_no=${page_no}&page_size=${page_size}`
     );
     return response.data;
   }
