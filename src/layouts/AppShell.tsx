@@ -73,7 +73,7 @@ export function AppShell() {
               <button className="user-avatar" onClick={() => setDropdownOpen((o) => !o)}>
                 {initials}
                 {user && user.subscription_type > 0 && (
-                  <span className={`avatar-plan-badge plan-${user.subscription_type}`}>
+                  <span className={`avatar-plan-badge plan-${user.plan_slug}`}>
                     {user.plan_name}
                   </span>
                 )}
