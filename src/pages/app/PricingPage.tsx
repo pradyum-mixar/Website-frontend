@@ -171,8 +171,8 @@ export function PublicPricingPage() {
   const { user, isAuthenticated } = useAuth();
   const subType = user?.subscription_type ?? 0;
   const hasActiveSubscription = isAuthenticated && subType > 0;
-  const currentPlanId = hasActiveSubscription ? (SUBSCRIPTION_TYPE_TO_SLUG[subType] ?? null) : null;
-  const subscriptionLabel = SUBSCRIPTION_TYPE_TO_LABEL[subType] ?? "";
+  const currentPlanId = hasActiveSubscription ? (user?.plan_slug ?? null) : null;
+  const subscriptionLabel = user?.plan_name ?? "";
 
   return (
     <>
@@ -193,8 +193,8 @@ export function PricingPage() {
   const { user } = useAuth();
   const subType = user?.subscription_type ?? 0;
   const hasActiveSubscription = subType > 0;
-  const currentPlanId = hasActiveSubscription ? (SUBSCRIPTION_TYPE_TO_SLUG[subType] ?? null) : null;
-  const subscriptionLabel = SUBSCRIPTION_TYPE_TO_LABEL[subType] ?? "";
+  const currentPlanId = hasActiveSubscription ? (user?.plan_slug ?? null) : null;
+  const subscriptionLabel = user?.plan_name ?? "";
 
   return (
     <PricingContent

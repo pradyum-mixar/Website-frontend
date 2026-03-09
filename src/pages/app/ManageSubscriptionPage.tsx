@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { apiClient, type PaymentHistoryItem, type SubscriptionStatus } from "../../lib/api-client";
 import { useAuth } from "../../features/auth/AuthContext";
-import { SUBSCRIPTION_TYPE_TO_LABEL } from "../../features/auth/types";
+
 
 const PAGE_SIZE = 20;
 
@@ -48,7 +48,7 @@ export function ManageSubscriptionPage() {
     retry: false,
   });
 
-  const planLabel = SUBSCRIPTION_TYPE_TO_LABEL[user?.subscription_type ?? 0] ?? "Free";
+  const planLabel = subscriptionStatus.data?.plan_name ?? user?.plan_name ?? "Free";
   const hasSub = (user?.subscription_type ?? 0) > 0;
   const alreadyCancelled = !!user?.subscription_expires_at;
 
@@ -129,7 +129,7 @@ function OverviewTab({ planLabel, hasSub, alreadyCancelled, subscriptionStatus, 
               ) : hasSub ? (
                 <span className="usage-status completed">Active</span>
               ) : (
-                <span className="usage-status pending">Free Tier</span>
+                <span className="usage-status pending">{planLabel}</span>
               )}
             </div>
           </div>

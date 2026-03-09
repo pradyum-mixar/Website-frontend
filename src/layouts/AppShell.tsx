@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../features/auth/AuthContext";
-import { SUBSCRIPTION_TYPE_TO_LABEL } from "../features/auth/types";
+
 import "../assets/css/dashboard.css";
 
 export function AppShell() {
@@ -73,8 +73,8 @@ export function AppShell() {
               <button className="user-avatar" onClick={() => setDropdownOpen((o) => !o)}>
                 {initials}
                 {user && user.subscription_type > 0 && (
-                  <span className={`avatar-plan-badge plan-${user.subscription_type}`}>
-                    {SUBSCRIPTION_TYPE_TO_LABEL[user.subscription_type]}
+                  <span className={`avatar-plan-badge plan-${user.plan_slug}`}>
+                    {user.plan_name}
                   </span>
                 )}
               </button>
