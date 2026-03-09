@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { LandingRoute, RequireAdmin, RequireAuth } from "./guards";
 import { AppShell } from "../layouts/AppShell";
 import { LoginPage } from "../pages/auth/LoginPage";
@@ -35,6 +35,8 @@ export function AppRouter() {
         <Route path="/auth/handoff" element={<HandoffPage />} />
         <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
         <Route path="/pricing" element={<PublicPricingPage />} />
+        <Route path="/gdc2026" element={<Navigate to="/" replace />} />
+        <Route path="/gdc-2026" element={<Navigate to="/" replace />} />
 
         <Route element={<RequireAuth />}>
           <Route path="/app/desktop-login" element={<DesktopLoginPage />} />
