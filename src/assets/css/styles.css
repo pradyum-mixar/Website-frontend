@@ -280,12 +280,17 @@ body {
     border: 1.5px solid var(--bg-dark);
 }
 
-.avatar-plan-badge.plan-1 {
+.avatar-plan-badge.plan-basic {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #fff;
+}
+
+.avatar-plan-badge.plan-pro {
     background: linear-gradient(135deg, #6366f1, #8b5cf6);
     color: #fff;
 }
 
-.avatar-plan-badge.plan-2 {
+.avatar-plan-badge.plan-enterprise {
     background: linear-gradient(135deg, #f59e0b, #ef4444);
     color: #fff;
 }

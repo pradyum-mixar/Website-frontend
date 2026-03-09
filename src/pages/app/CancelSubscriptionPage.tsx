@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { apiClient } from "../../lib/api-client";
 import { useAuth } from "../../features/auth/AuthContext";
-import { SUBSCRIPTION_TYPE_TO_LABEL } from "../../features/auth/types";
 import "../../assets/css/pricing.css";
 
 export function CancelSubscriptionPage() {
@@ -15,7 +14,7 @@ export function CancelSubscriptionPage() {
     return <Navigate to="/app/pricing" replace />;
   }
 
-  const planLabel = SUBSCRIPTION_TYPE_TO_LABEL[user.subscription_type] ?? "Paid";
+  const planLabel = user.plan_name ?? "Paid";
   const alreadyCancelled = !!user.subscription_expires_at;
 
   const handleCancel = async () => {
