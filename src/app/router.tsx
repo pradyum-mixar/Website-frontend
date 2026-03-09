@@ -21,6 +21,7 @@ import { ManageSubscriptionPage } from "../pages/app/ManageSubscriptionPage";
 import { DesktopLoginPage } from "../pages/auth/DesktopLoginPage";
 import { GoogleCallbackPage } from "../pages/auth/GoogleCallbackPage";
 import { AboutPage } from "../pages/AboutPage";
+import { NotFoundPage } from "../pages/NotFoundPage";
 
 export function AppRouter() {
   return (
@@ -35,8 +36,8 @@ export function AppRouter() {
         <Route path="/auth/handoff" element={<HandoffPage />} />
         <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
         <Route path="/pricing" element={<PublicPricingPage />} />
-        <Route path="/gdc2026" element={<Navigate to="/" replace />} />
-        <Route path="/gdc-2026" element={<Navigate to="/" replace />} />
+        <Route path="/gdc2026" element={<Navigate to="/auth/signup" replace />} />
+        <Route path="*" element={<NotFoundPage />} />
 
         <Route element={<RequireAuth />}>
           <Route path="/app/desktop-login" element={<DesktopLoginPage />} />
