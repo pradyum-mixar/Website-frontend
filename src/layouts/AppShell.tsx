@@ -61,12 +61,12 @@ export function AppShell() {
           </div>
 
           <div className="app-nav-actions">
-            <NavLink to="/app/buy-credits" className="app-credits-pill">
+            <NavLink to="/app/manage-subscription" className="app-credits-pill">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 6v6l4 2" />
+                <line x1="12" y1="1" x2="12" y2="23" />
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
               </svg>
-              <span>{user?.credits ?? 0}</span>
+              <span>${((user?.credits ?? 0) / 100).toFixed(2)}</span>
             </NavLink>
 
             <div className="avatar-dropdown" ref={dropdownRef}>

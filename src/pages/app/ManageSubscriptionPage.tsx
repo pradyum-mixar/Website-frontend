@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { apiClient, type PaymentHistoryItem, type SubscriptionStatus } from "../../lib/api-client";
+import { apiClient, type PaymentHistoryItem, type SubscriptionStatus, type UpgradePreview } from "../../lib/api-client";
 import { useAuth } from "../../features/auth/AuthContext";
 
 
@@ -32,7 +32,7 @@ function statusClass(status: string): string {
   }
 }
 
-type Tab = "overview" | "billing" | "cancel";
+type Tab = "overview" | "billing" | "upgrade" | "cancel";
 
 export function ManageSubscriptionPage() {
   const { user, refreshUser } = useAuth();
@@ -74,6 +74,14 @@ export function ManageSubscriptionPage() {
           Billing History
         </button>
         {hasSub && !alreadyCancelled && (
+          <button className={`sub-tab ${activeTab === "upgrade" ? "active" : ""}`} onClick={() => setTab("upgrade")}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="17 11 12 6 7 11" /><line x1="12" y1="18" x2="12" y2="6" />
+            </svg>
+            Change Plan
+          </button>
+        )}
+        {hasSub && !alreadyCancelled && (
           <button className={`sub-tab ${activeTab === "cancel" ? "active" : ""}`} onClick={() => setTab("cancel")}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />
@@ -95,6 +103,15 @@ export function ManageSubscriptionPage() {
         />
       )}
       {activeTab === "billing" && <BillingTab />}
+      {activeTab === "upgrade" && hasSub && !alreadyCancelled && (
+        <UpgradeTab
+          currentPlanSlug={subscriptionStatus?.plan_slug ?? null}
+          onUpgraded={() => {
+            refreshUser();
+            navigate("/app/manage-subscription?tab=overview");
+          }}
+        />
+      )}
       {activeTab === "cancel" && hasSub && !alreadyCancelled && (
         <CancelTab
           planLabel={planLabel}
@@ -155,17 +172,47 @@ function OverviewTab({ planLabel, hasSub, alreadyCancelled, subscriptionStatus, 
               </span>
             </div>
             <div className="sub-detail-row">
-              <span className="sub-detail-label">Credits Balance</span>
-              <span className="sub-detail-value">{user?.credits ?? 0} credits</span>
+              <span className="sub-detail-label">Usage this cycle</span>
+              <span className="sub-detail-value">
+                ${((subscriptionStatus.plan_value_cents - subscriptionStatus.balance_cents) / 100).toFixed(2)} of ${(subscriptionStatus.plan_value_cents / 100).toFixed(2)} used
+              </span>
             </div>
+            <div className="sub-detail-row" style={{ flexDirection: "column", gap: "0.4rem" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+                <span className="sub-detail-label">Balance remaining</span>
+                <span className="sub-detail-value" style={{
+                  color: subscriptionStatus.usage_pct >= 100 ? "var(--error-color)" :
+                         subscriptionStatus.usage_pct >= 80 ? "#f59e0b" : undefined,
+                }}>
+                  ${(subscriptionStatus.balance_cents / 100).toFixed(2)} ({(100 - subscriptionStatus.usage_pct).toFixed(1)}%)
+                </span>
+              </div>
+              <div style={{ width: "100%", height: "6px", borderRadius: "3px", background: "var(--border-color, #333)", overflow: "hidden" }}>
+                <div style={{
+                  height: "100%",
+                  width: `${Math.min(subscriptionStatus.usage_pct, 100)}%`,
+                  borderRadius: "3px",
+                  background: subscriptionStatus.usage_pct >= 100 ? "var(--error-color)" :
+                              subscriptionStatus.usage_pct >= 80 ? "#f59e0b" : "var(--accent-color, #6366f1)",
+                  transition: "width 0.3s ease",
+                }} />
+              </div>
+            </div>
+            {subscriptionStatus.usage_pct >= 100 && (
+              <div style={{ marginTop: "0.75rem" }}>
+                <Link to="/app/manage-subscription?tab=upgrade" className="btn-buy-credits" style={{ display: "inline-block" }}>
+                  Upgrade for more usage
+                </Link>
+              </div>
+            )}
           </div>
         )}
 
         {!hasSub && (
           <div className="sub-plan-details">
             <div className="sub-detail-row">
-              <span className="sub-detail-label">Credits Balance</span>
-              <span className="sub-detail-value">{user?.credits ?? 0} credits</span>
+              <span className="sub-detail-label">Balance</span>
+              <span className="sub-detail-value">${((user?.credits ?? 0) / 100).toFixed(2)}</span>
             </div>
           </div>
         )}
@@ -347,6 +394,120 @@ function CancelTab({ planLabel, onCancelled }: { planLabel: string; onCancelled:
             {loading ? "Cancelling..." : "Confirm Cancellation"}
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function UpgradeTab({ currentPlanSlug, onUpgraded }: { currentPlanSlug: string | null; onUpgraded: () => void }) {
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [preview, setPreview] = useState<UpgradePreview | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [upgradeLoading, setUpgradeLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const { data } = useQuery({
+    queryKey: ["plans"],
+    queryFn: () => apiClient.getPlans(),
+  });
+
+  const plans = (data?.data ?? []).filter((p) => p.price_monthly > 0 && p.id !== currentPlanSlug);
+
+  const handleSelectPlan = async (planId: string) => {
+    setSelectedPlan(planId);
+    setPreview(null);
+    setError(null);
+    setPreviewLoading(true);
+    try {
+      const result = await apiClient.previewUpgrade(planId);
+      setPreview(result);
+    } catch {
+      setError("Could not load pricing preview. Please try again.");
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const handleConfirm = async () => {
+    if (!selectedPlan || upgradeLoading) return;
+    setError(null);
+    setUpgradeLoading(true);
+    try {
+      const result = await apiClient.upgradeSubscription(selectedPlan);
+      setSuccess(result.message);
+      setTimeout(onUpgraded, 2000);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Upgrade failed. Please try again.");
+      setUpgradeLoading(false);
+    }
+  };
+
+  return (
+    <div className="sub-overview">
+      <div className="sub-plan-card">
+        <h2 style={{ marginBottom: "0.5rem" }}>Change Plan</h2>
+        <p className="order-tagline" style={{ marginBottom: "1.5rem", color: "var(--text-secondary)" }}>
+          Select a plan to upgrade or downgrade to. Changes apply immediately.
+        </p>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginBottom: "1.5rem" }}>
+          {plans.map((plan) => (
+            <button
+              key={plan.id}
+              onClick={() => handleSelectPlan(plan.id)}
+              style={{
+                textAlign: "left",
+                padding: "1rem",
+                border: `1px solid ${selectedPlan === plan.id ? "var(--accent-color, #6366f1)" : "var(--border-color, #333)"}`,
+                borderRadius: "8px",
+                background: selectedPlan === plan.id ? "var(--card-bg-hover, #1a1a2e)" : "transparent",
+                cursor: "pointer",
+                color: "inherit",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontWeight: 600 }}>{plan.name}</span>
+                <span>${plan.price_monthly}/mo — ${(plan.credits_per_month / 100).toFixed(0)} usage</span>
+              </div>
+            </button>
+          ))}
+        </div>
+
+        {previewLoading && <p style={{ color: "var(--text-secondary)" }}>Loading preview...</p>}
+
+        {preview && selectedPlan && !previewLoading && (
+          <div className="sub-plan-details" style={{ marginBottom: "1.5rem" }}>
+            <div className="sub-detail-row">
+              <span className="sub-detail-label">Charged today</span>
+              <span className="sub-detail-value" style={{ fontWeight: 600 }}>
+                ${(preview.immediate_charge_amount / 100).toFixed(2)} {preview.immediate_charge_currency}
+              </span>
+            </div>
+            <div className="sub-detail-row">
+              <span className="sub-detail-label">New plan</span>
+              <span className="sub-detail-value">{preview.new_plan_name}</span>
+            </div>
+            <div className="sub-detail-row">
+              <span className="sub-detail-label">New monthly usage</span>
+              <span className="sub-detail-value">${(preview.new_credits_per_month / 100).toFixed(0)}</span>
+            </div>
+          </div>
+        )}
+
+        {error && <p className="checkout-error" style={{ marginBottom: "1rem" }}>{error}</p>}
+        {success && <p style={{ color: "var(--success-color, #22c55e)", marginBottom: "1rem" }}>{success}</p>}
+
+        {preview && !success && (
+          <button
+            className="btn-cancel"
+            style={{ background: "var(--accent-color, #6366f1)", borderColor: "var(--accent-color, #6366f1)" }}
+            disabled={upgradeLoading}
+            onClick={handleConfirm}
+          >
+            {upgradeLoading ? "Processing..." : `Confirm — Switch to ${preview.new_plan_name}`}
+          </button>
+        )}
       </div>
     </div>
   );

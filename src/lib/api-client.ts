@@ -49,10 +49,21 @@ export type SubscriptionStatus = {
   plan_name: string;
   billing_interval: string;
   credits_per_month: number;
+  balance_cents: number;
+  plan_value_cents: number;
+  usage_pct: number;
   cycle_start: string;
   cycle_end: string;
   days_left: number;
   subscription_expires_at: string | null;
+};
+
+export type UpgradePreview = {
+  immediate_charge_amount: number;
+  immediate_charge_currency: string;
+  new_plan_id: string;
+  new_plan_name: string;
+  new_credits_per_month: number;
 };
 
 class ApiClient {
@@ -228,7 +239,17 @@ class ApiClient {
   }
 
   async getSubscriptionStatus(): Promise<SubscriptionStatus> {
-    const response = await this.client.get<SubscriptionStatus>("/subscriptions/status");
+    const response = await this.client.get<{ status: string; data: SubscriptionStatus }>("/subscriptions/status");
+    return response.data.data;
+  }
+
+  async previewUpgrade(planId: string): Promise<UpgradePreview> {
+    const response = await this.client.post<UpgradePreview>("/subscriptions/upgrade/preview", { plan_id: planId });
+    return response.data;
+  }
+
+  async upgradeSubscription(planId: string): Promise<{ status: string; message: string }> {
+    const response = await this.client.post<{ status: string; message: string }>("/subscriptions/upgrade", { plan_id: planId });
     return response.data;
   }
 

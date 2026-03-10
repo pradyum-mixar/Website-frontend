@@ -6,50 +6,82 @@ import "../../assets/css/pricing.css";
 
 type SyncState = "polling" | "synced" | "sync-failed";
 
+function readPreCheckoutBaseline(): { credits: number; subscription_type: number } {
+  try {
+    const raw = sessionStorage.getItem("pre_checkout_user");
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return {
+        credits: parsed.credits ?? 0,
+        subscription_type: parsed.subscription_type ?? 0,
+      };
+    }
+  } catch { /* ignore */ }
+  return { credits: 0, subscription_type: 0 };
+}
+
 export function PaymentSuccessPage() {
   const [searchParams] = useSearchParams();
   const paymentId = searchParams.get("payment_id");
   const status = searchParams.get("status");
   const { user, refreshUser } = useAuth();
   const [syncState, setSyncState] = useState<SyncState>("polling");
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const initialCreditsRef = useRef<number | null>(null);
-  const initialSubTypeRef = useRef<number | null>(null);
+  const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (status !== "succeeded" && status !== "active") return;
 
-    if (initialCreditsRef.current === null) {
-      initialCreditsRef.current = user?.credits ?? 0;
-    }
-    if (initialSubTypeRef.current === null) {
-      initialSubTypeRef.current = user?.subscription_type ?? 0;
-    }
-    const initialCredits = initialCreditsRef.current;
-    const initialSubType = initialSubTypeRef.current;
+    // Read pre-payment baseline from sessionStorage (set before checkout redirect).
+    // This avoids a race where RequireAuth's refreshUser() already updates the user
+    // context with post-payment values before this component mounts.
+    const baseline = readPreCheckoutBaseline();
+    const initialCredits = baseline.credits;
+    const initialSubType = baseline.subscription_type;
+
     let attempts = 0;
-    const MAX_ATTEMPTS = 12;
+    const MAX_ATTEMPTS = 15;
+    let cancelled = false;
 
     const poll = async () => {
-      const freshUser = await refreshUser();
-      attempts++;
-      const credits = freshUser?.credits ?? user?.credits ?? 0;
-      const subType = freshUser?.subscription_type ?? user?.subscription_type ?? 0;
-      const updated = credits > initialCredits || subType > initialSubType;
+      if (cancelled) return;
 
-      if (updated) {
-        if (pollRef.current) clearInterval(pollRef.current);
-        setSyncState("synced");
-      } else if (attempts >= MAX_ATTEMPTS) {
-        if (pollRef.current) clearInterval(pollRef.current);
+      try {
+        const freshUser = await refreshUser();
+        if (cancelled) return;
+
+        const credits = freshUser?.credits ?? 0;
+        const subType = freshUser?.subscription_type ?? 0;
+        const updated = credits > initialCredits || subType > initialSubType;
+
+        if (updated) {
+          sessionStorage.removeItem("pre_checkout_user");
+          setSyncState("synced");
+          return;
+        }
+      } catch (err) {
+        console.error("Payment sync poll error:", err);
+      }
+
+      attempts++;
+
+      if (attempts >= MAX_ATTEMPTS) {
+        sessionStorage.removeItem("pre_checkout_user");
         setSyncState("sync-failed");
+        return;
+      }
+
+      // Schedule next poll — prevents overlapping requests unlike setInterval
+      if (!cancelled) {
+        pollRef.current = setTimeout(poll, 2500);
       }
     };
 
-    poll();
-    pollRef.current = setInterval(poll, 2000);
+    // Give the backend a moment to process the webhook before first poll
+    pollRef.current = setTimeout(poll, 1500);
+
     return () => {
-      if (pollRef.current) clearInterval(pollRef.current);
+      cancelled = true;
+      if (pollRef.current) clearTimeout(pollRef.current);
     };
   }, []);
 

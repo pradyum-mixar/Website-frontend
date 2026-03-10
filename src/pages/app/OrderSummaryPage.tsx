@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "../../features/auth/AuthContext";
 import { apiClient } from "../../lib/api-client";
 import "../../assets/css/pricing.css";
 
@@ -9,6 +10,7 @@ export function OrderSummaryPage() {
   const planId = searchParams.get("plan");
   const billing = searchParams.get("billing") ?? "monthly";
 
+  const { user } = useAuth();
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,6 +27,11 @@ export function OrderSummaryPage() {
     setError(null);
     setCheckoutLoading(true);
     try {
+      // Snapshot pre-payment state so PaymentSuccessPage can detect changes
+      sessionStorage.setItem(
+        "pre_checkout_user",
+        JSON.stringify({ credits: user?.credits ?? 0, subscription_type: user?.subscription_type ?? 0 }),
+      );
       const result = await apiClient.createCheckout(planId, billing);
       window.location.href = result.data.payment_link;
     } catch (err: unknown) {
