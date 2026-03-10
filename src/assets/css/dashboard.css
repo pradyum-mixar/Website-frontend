@@ -552,6 +552,96 @@
     color: var(--primary-cyan);
 }
 
+/* Upgrade Banner — free user conversion */
+.upgrade-banner {
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, rgba(0, 192, 199, 0.08) 0%, rgba(133, 196, 73, 0.06) 100%);
+    border: 1px solid rgba(0, 192, 199, 0.2);
+    border-radius: 16px;
+    padding: 1.75rem 2rem;
+}
+
+.upgrade-banner-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+.upgrade-banner-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 0.35rem;
+}
+
+.upgrade-banner-desc {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0 0 0.75rem;
+    line-height: 1.5;
+    max-width: 540px;
+}
+
+.upgrade-banner-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.upgrade-banner-features span {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    background: rgba(0, 192, 199, 0.1);
+    border-radius: 6px;
+    font-size: 0.75rem;
+    color: var(--primary-cyan);
+    font-weight: 500;
+}
+
+.upgrade-banner-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, var(--primary-cyan) 0%, var(--primary-green) 100%);
+    color: #0a0a0a;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 100px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    flex-shrink: 0;
+}
+
+.upgrade-banner-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 192, 199, 0.3);
+}
+
+.usage-bar-nudge {
+    color: var(--primary-cyan);
+    font-weight: 500;
+}
+
+.empty-state-cta {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.6rem 1.5rem;
+    background: linear-gradient(135deg, var(--primary-cyan) 0%, var(--primary-green) 100%);
+    color: #0a0a0a;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 100px;
+    text-decoration: none;
+    transition: transform 0.2s ease;
+}
+
+.empty-state-cta:hover {
+    transform: translateY(-2px);
+}
+
 /* Usage Bars Section - Claude Code style */
 .usage-section {
     display: flex;
@@ -656,4 +746,6 @@
     .community-card { flex-direction: column; text-align: center; }
     .community-actions { width: 100%; justify-content: center; }
     .usage-bar-header { flex-direction: column; align-items: flex-start; gap: 0.25rem; }
+    .upgrade-banner-content { flex-direction: column; text-align: center; }
+    .upgrade-banner-features { justify-content: center; }
 }

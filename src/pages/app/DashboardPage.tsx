@@ -115,6 +115,33 @@ export function DashboardPage() {
         )}
       </div>
 
+      {/* Upgrade Banner — only for free users (loss aversion + value framing) */}
+      {!hasSubscription && (
+        <div className="upgrade-banner">
+          <div className="upgrade-banner-content">
+            <div className="upgrade-banner-text">
+              <h3 className="upgrade-banner-title">Unlock the full power of Mixar</h3>
+              <p className="upgrade-banner-desc">
+                Get monthly credits for AI image generation, 3D modeling, texture painting, and the Blender agent.
+                Teams using Mixar ship 3D assets 10x faster.
+              </p>
+              <div className="upgrade-banner-features">
+                <span>Image Generation</span>
+                <span>3D Model Creation</span>
+                <span>Texture Painting</span>
+                <span>AI Blender Agent</span>
+              </div>
+            </div>
+            <Link to="/app/pricing" className="upgrade-banner-cta">
+              View Plans
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Usage Bars - Claude Code style */}
       <div className="usage-section">
         {/* Credits Usage Bar */}
@@ -131,20 +158,22 @@ export function DashboardPage() {
             <div
               className={`usage-bar-fill${remainingPct < 20 ? " critical" : remainingPct < 50 ? " warning" : ""}`}
               style={{
-                width: `${hasSubscription ? remainingPct : 100}%`,
+                width: `${hasSubscription ? remainingPct : (creditsRemaining > 0 ? 100 : 0)}%`,
               }}
             />
           </div>
           <div className="usage-bar-footer">
             {hasSubscription ? (
               <span>{Math.round(remainingPct)}% remaining</span>
+            ) : creditsRemaining === 0 ? (
+              <span className="usage-bar-nudge">Subscribe to get monthly credits</span>
             ) : (
               <span>&nbsp;</span>
             )}
             <div className="usage-bar-actions">
               {!hasSubscription && (
                 <Link to="/app/pricing" className="usage-bar-link">
-                  Subscribe
+                  Get Credits
                 </Link>
               )}
             </div>
@@ -253,8 +282,15 @@ export function DashboardPage() {
               </div>
               <h3 className="empty-title">No activity yet</h3>
               <p className="empty-message">
-                Start creating with Mixar to see your usage history here.
+                {hasSubscription
+                  ? "Start creating with Mixar to see your usage history here."
+                  : "Subscribe to a plan and start creating with Mixar."}
               </p>
+              {!hasSubscription && (
+                <Link to="/app/pricing" className="empty-state-cta">
+                  View Plans
+                </Link>
+              )}
             </div>
           )}
         </div>

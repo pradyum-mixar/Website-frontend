@@ -85,6 +85,9 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
           plans.map((plan) => {
             const price = plan.price_monthly;
             const isCurrent = isAuthenticated && plan.id === currentPlanId;
+            const costPerCredit = plan.credits_per_month > 0
+              ? (price / plan.credits_per_month).toFixed(3)
+              : null;
 
             return (
               <div key={plan.id} className={`pricing-card${plan.highlight ? " featured" : ""}${isCurrent ? " current" : ""}`}>
@@ -100,6 +103,9 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
 
                 <div className="pricing-credits">
                   {plan.credits_per_month.toLocaleString()} credits / month
+                  {costPerCredit && (
+                    <span className="pricing-per-credit">${costPerCredit} per credit</span>
+                  )}
                 </div>
 
                 <ul className="pricing-features">
@@ -121,7 +127,9 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
                   </button>
                 ) : (
                   <button className="pricing-cta" onClick={() => handleBuy(plan)}>
-                    {isAuthenticated ? plan.cta_label : plan.price_monthly === 0 ? "Get Started" : plan.cta_label}
+                    {plan.price_monthly === 0
+                      ? "Get Started Free"
+                      : `Start ${plan.name}`}
                   </button>
                 )}
               </div>
@@ -129,6 +137,11 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
           })
         )}
       </div>
+
+      {/* Trust signal */}
+      <p className="pricing-trust">
+        Cancel anytime. Credits never expire. Secure checkout via Dodo Payments.
+      </p>
     </div>
   );
 }
