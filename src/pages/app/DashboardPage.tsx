@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { apiClient, type SubscriptionStatus } from "../../lib/api-client";
 import { useAuth } from "../../features/auth/AuthContext";
 
-
 type UsageEvent = {
   id: string;
   mode: string;
@@ -20,175 +19,248 @@ type UsageResponse = {
 
 export function DashboardPage() {
   const { user } = useAuth();
-  
+
   const usage = useQuery({
-    queryKey: ["usage"],
-    queryFn: async () => (await apiClient.instance.get<UsageResponse>("/users/user-usage-logs/?skip=0&limit=20")).data,
+    queryKey: ["usage", user?.id],
+    queryFn: async () =>
+      (
+        await apiClient.instance.get<UsageResponse>(
+          "/users/user-usage-logs/?skip=0&limit=20"
+        )
+      ).data,
+    enabled: !!user,
+    refetchInterval: 60_000,
   });
 
   const subscriptionStatus = useQuery<SubscriptionStatus>({
-    queryKey: ["subscriptionStatus"],
+    queryKey: ["subscriptionStatus", user?.id],
     queryFn: () => apiClient.getSubscriptionStatus(),
     enabled: (user?.subscription_type ?? 0) > 0,
     retry: false,
+    refetchInterval: 60_000,
   });
 
   const getModeLabel = (mode: string) => {
     const labels: Record<string, string> = {
-        'ideation': 'Image Generation',
-        'texture': 'Texture Painting',
-        'ask': 'AI Chat',
-        'generate_3d': '3D Model Generation',
-        'lookdev': 'Look Development',
-        'segment': 'Mesh Segmentation',
-        'agent': 'Blender Agent'
+      ideation: "Image Generation",
+      texture: "Texture Painting",
+      ask: "AI Chat",
+      generate_3d: "3D Model Generation",
+      lookdev: "Look Development",
+      segment: "Mesh Segmentation",
+      agent: "Blender Agent",
     };
     return labels[mode] || mode;
-  }
-
-  const getIcon = (mode: string) => {
-    switch(mode) {
-      case 'ideation':
-        return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>;
-      case 'generate_3d':
-        return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>;
-      case 'texture':
-        return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9.06 11.9l8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/></svg>;
-      default:
-        return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>;
-    }
-  }
+  };
 
   const usageData = usage.data?.data ?? [];
   const totalGenerations = usageData.length;
-  const imagesGenerated = usageData.filter(u => u.mode === 'ideation').length;
-  const modelsGenerated = usageData.filter(u => u.mode === 'generate_3d').length;
+
+  const creditsRemaining = user?.credits ?? 0;
+  const creditsPerMonth = subscriptionStatus.data?.credits_per_month ?? 0;
+  const hasSubscription = (user?.subscription_type ?? 0) > 0;
+
+  // Credit usage percentage (how much remains of plan allocation)
+  let remainingPct = 100;
+  if (hasSubscription && creditsPerMonth > 0) {
+    remainingPct = Math.min(
+      100,
+      Math.max(0, (creditsRemaining / creditsPerMonth) * 100)
+    );
+  }
+
+  // Generation breakdown by mode
+  const modeBreakdown = usageData.reduce(
+    (acc, u) => {
+      acc[u.mode] = (acc[u.mode] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
+
+  const sortedModes = Object.entries(modeBreakdown).sort(
+    ([, a], [, b]) => b - a
+  );
 
   return (
     <>
       <div className="dashboard-header">
-          <h1 className="dashboard-title">Welcome, <span>{user?.name?.split(' ')[0] || user?.email.split('@')[0]}</span>!</h1>
-          <p className="dashboard-subtitle">Manage your credits and view your usage history</p>
-          {subscriptionStatus.data && (
-            <div className="billing-cycle-badge">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M12 6v6l4 2"/>
-              </svg>
-              {subscriptionStatus.data.subscription_expires_at
-                ? `${subscriptionStatus.data.plan_name} Plan · Expires in ${subscriptionStatus.data.days_left} days`
-                : `${subscriptionStatus.data.plan_name} Plan · ${subscriptionStatus.data.days_left} days left in cycle`}
+        <h1 className="dashboard-title">
+          Welcome,{" "}
+          <span>
+            {user?.name?.split(" ")[0] || user?.email.split("@")[0]}
+          </span>
+          !
+        </h1>
+        <p className="dashboard-subtitle">
+          Manage your credits and view your usage history
+        </p>
+        {subscriptionStatus.data && (
+          <div className="billing-cycle-badge">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 6v6l4 2" />
+            </svg>
+            {subscriptionStatus.data.subscription_expires_at
+              ? `${subscriptionStatus.data.plan_name} · Expires in ${subscriptionStatus.data.days_left} days`
+              : `${subscriptionStatus.data.plan_name} · ${subscriptionStatus.data.days_left} days left in cycle`}
+          </div>
+        )}
+      </div>
+
+      {/* Usage Bars - Claude Code style */}
+      <div className="usage-section">
+        {/* Credits Usage Bar */}
+        <div className="usage-bar-card">
+          <div className="usage-bar-header">
+            <span className="usage-bar-label">Credits</span>
+            <span className="usage-bar-value">
+              {hasSubscription
+                ? `${creditsRemaining.toLocaleString()} / ${creditsPerMonth.toLocaleString()}`
+                : `${creditsRemaining.toLocaleString()} available`}
+            </span>
+          </div>
+          <div className="usage-bar-track">
+            <div
+              className={`usage-bar-fill${remainingPct < 20 ? " critical" : remainingPct < 50 ? " warning" : ""}`}
+              style={{
+                width: `${hasSubscription ? remainingPct : 100}%`,
+              }}
+            />
+          </div>
+          <div className="usage-bar-footer">
+            {hasSubscription ? (
+              <span>{Math.round(remainingPct)}% remaining</span>
+            ) : (
+              <span>&nbsp;</span>
+            )}
+            <div className="usage-bar-actions">
+              <Link to="/app/buy-credits" className="usage-bar-link">
+                Buy Credits
+              </Link>
+              {!hasSubscription && (
+                <Link to="/app/pricing" className="usage-bar-link">
+                  Upgrade
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Generation Breakdown Bars */}
+        {sortedModes.map(([mode, count]) => {
+          const pct =
+            totalGenerations > 0
+              ? Math.round((count / totalGenerations) * 100)
+              : 0;
+          return (
+            <div className="usage-bar-card compact" key={mode}>
+              <div className="usage-bar-header">
+                <span className="usage-bar-label">{getModeLabel(mode)}</span>
+                <span className="usage-bar-value">
+                  {count} generation{count !== 1 ? "s" : ""} · {pct}%
+                </span>
+              </div>
+              <div className="usage-bar-track">
+                <div className="usage-bar-fill" style={{ width: `${pct}%` }} />
+              </div>
+            </div>
+          );
+        })}
+
+        {sortedModes.length === 0 && (
+          <div className="usage-bar-card compact">
+            <div className="usage-bar-header">
+              <span className="usage-bar-label">Generations</span>
+              <span className="usage-bar-value">No activity yet</span>
+            </div>
+            <div className="usage-bar-track">
+              <div className="usage-bar-fill" style={{ width: "0%" }} />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Recent Activity */}
+      <div className="section">
+        <div className="section-header">
+          <h2 className="section-title">Recent Activity</h2>
+        </div>
+
+        <div className="usage-table-container">
+          {usageData.length > 0 ? (
+            <table className="usage-table">
+              <thead>
+                <tr>
+                  <th>Activity</th>
+                  <th>Credits Used</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {usageData.map((event) => (
+                  <tr key={event.id}>
+                    <td>
+                      <div className="usage-type">
+                        <div className="usage-type-info">
+                          <span>{getModeLabel(event.mode)}</span>
+                          {event.model_name && (
+                            <small className="usage-model">
+                              {event.model_name}
+                            </small>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="usage-credits">
+                      {event.credits_used > 0
+                        ? `-${event.credits_used}`
+                        : "0"}
+                    </td>
+                    <td className="usage-date">
+                      {new Date(
+                        event.created_at || ""
+                      ).toLocaleDateString()}
+                    </td>
+                    <td>
+                      <span className="usage-status completed">
+                        Completed
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="empty-state">
+              <div className="empty-icon">
+                <svg
+                  width="40"
+                  height="40"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 6v6l4 2" />
+                </svg>
+              </div>
+              <h3 className="empty-title">No activity yet</h3>
+              <p className="empty-message">
+                Start creating with Mixar to see your usage history here.
+              </p>
             </div>
           )}
-      </div>
-
-      <div className="stats-grid">
-          <div className="stat-card highlight">
-              <div className="stat-header">
-                  <div className="stat-icon">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <circle cx="12" cy="12" r="10"/>
-                          <path d="M12 6v6l4 2"/>
-                      </svg>
-                  </div>
-                  <span className="stat-badge">Available</span>
-              </div>
-              <div className="stat-value">{user?.credits ?? "--"}</div>
-              <div className="stat-label">Credits Balance</div>
-              <Link to="/app/buy-credits" className="btn-buy-credits">Buy Credits</Link>
-          </div>
-
-          <div className="stat-card">
-              <div className="stat-header">
-                  <div className="stat-icon">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                          <path d="M2 17l10 5 10-5"/>
-                          <path d="M2 12l10 5 10-5"/>
-                      </svg>
-                  </div>
-              </div>
-              <div className="stat-value">{totalGenerations}</div>
-              <div className="stat-label">Total Generations</div>
-          </div>
-
-          <div className="stat-card">
-              <div className="stat-header">
-                  <div className="stat-icon">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                          <circle cx="8.5" cy="8.5" r="1.5"/>
-                          <path d="M21 15l-5-5L5 21"/>
-                      </svg>
-                  </div>
-              </div>
-              <div className="stat-value">{imagesGenerated}</div>
-              <div className="stat-label">Images Generated</div>
-          </div>
-
-          <div className="stat-card">
-              <div className="stat-header">
-                  <div className="stat-icon">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-                      </svg>
-                  </div>
-              </div>
-              <div className="stat-value">{modelsGenerated}</div>
-              <div className="stat-label">3D Models Generated</div>
-          </div>
-      </div>
-
-      <div className="section">
-          <div className="section-header">
-              <h2 className="section-title">Recent Activity</h2>
-          </div>
-
-          <div className="usage-table-container">
-              {usageData.length > 0 ? (
-                <table className="usage-table">
-                    <thead>
-                        <tr>
-                            <th>Activity</th>
-                            <th>Credits Used</th>
-                            <th>Date</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                      {usageData.map((event) => (
-                        <tr key={event.id}>
-                          <td>
-                              <div className="usage-type">
-                                  <div className="usage-type-icon">
-                                      {getIcon(event.mode)}
-                                  </div>
-                                  <div className="usage-type-info">
-                                      <span>{getModeLabel(event.mode)}</span>
-                                      {event.model_name && <small className="usage-model">{event.model_name}</small>}
-                                  </div>
-                              </div>
-                          </td>
-                          <td className="usage-credits">{event.credits_used > 0 ? `-${event.credits_used}` : '0'}</td>
-                          <td className="usage-date">{new Date(event.created_at || '').toLocaleDateString()}</td>
-                          <td><span className={`usage-status completed`}>Completed</span></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                </table>
-              ) : (
-                <div className="empty-state">
-                    <div className="empty-icon">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <circle cx="12" cy="12" r="10"/>
-                            <path d="M12 6v6l4 2"/>
-                        </svg>
-                    </div>
-                    <h3 className="empty-title">No activity yet</h3>
-                    <p className="empty-message">Start creating with Mixar to see your usage history here.</p>
-                </div>
-              )}
-          </div>
+        </div>
       </div>
     </>
   );

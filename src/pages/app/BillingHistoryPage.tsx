@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient, type PaymentHistoryItem } from "../../lib/api-client";
+import { useAuth } from "../../features/auth/AuthContext";
 
 const PAGE_SIZE = 20;
 
@@ -34,12 +35,14 @@ function statusClass(status: string): string {
 }
 
 export function BillingHistoryPage() {
+  const { user } = useAuth();
   const [page, setPage] = useState(0);
   const [downloading, setDownloading] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["billing-history", page],
+    queryKey: ["billing-history", page, user?.id],
     queryFn: () => apiClient.getPaymentHistory(page * PAGE_SIZE, PAGE_SIZE),
+    enabled: !!user,
   });
 
   const items = data?.data ?? [];

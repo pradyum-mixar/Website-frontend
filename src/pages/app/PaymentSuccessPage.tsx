@@ -22,9 +22,9 @@ export function PaymentSuccessPage() {
     const MAX_ATTEMPTS = 10;
 
     const poll = async () => {
-      await refreshUser();
+      const me = await refreshUser();
       attempts++;
-      const updated = user?.credits !== initialCredits || (user?.subscription_type ?? 0) > 0;
+      const updated = me && (me.credits !== initialCredits || me.subscription_type > 0);
       if (updated || attempts >= MAX_ATTEMPTS) {
         if (pollRef.current) clearInterval(pollRef.current);
         setSynced(true);
