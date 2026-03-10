@@ -101,8 +101,8 @@ export function PaymentSuccessPage() {
           <Link to="/app" className="btn-payment active">
             Go to Dashboard
           </Link>
-          <Link to="/app/buy-credits" className="btn-back">
-            Buy More Credits
+          <Link to="/app/pricing" className="btn-back">
+            View Plans
           </Link>
         </div>
       </div>

@@ -499,13 +499,15 @@
 
 /* Responsive */
 @media (max-width: 1024px) {
+    .pricing-nav {
+        padding: 1rem 1.5rem;
+    }
+}
+
+@media (max-width: 680px) {
     .pricing-grid {
         grid-template-columns: 1fr;
         max-width: 400px;
-    }
-
-    .pricing-nav {
-        padding: 1rem 1.5rem;
     }
 }
 

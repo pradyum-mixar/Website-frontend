@@ -142,12 +142,9 @@ export function DashboardPage() {
               <span>&nbsp;</span>
             )}
             <div className="usage-bar-actions">
-              <Link to="/app/buy-credits" className="usage-bar-link">
-                Buy Credits
-              </Link>
               {!hasSubscription && (
                 <Link to="/app/pricing" className="usage-bar-link">
-                  Upgrade
+                  Subscribe
                 </Link>
               )}
             </div>

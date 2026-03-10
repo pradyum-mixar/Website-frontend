@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { apiClient, type Plan } from "../../lib/api-client";
@@ -51,7 +50,6 @@ type PricingContentProps = {
 };
 
 function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveSubscription, subscriptionLabel }: PricingContentProps) {
-  const [yearly, setYearly] = useState(false);
   const navigate = useNavigate();
 
   const { data, isLoading } = useQuery({
@@ -61,21 +59,12 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
 
   const plans: Plan[] = data?.data ?? [];
 
-  // Compute the max savings % across paid plans for the toggle badge
-  const savePct = plans.reduce((max, p) => {
-    const full = p.price_monthly * 12;
-    if (full === 0) return max;
-    const pct = Math.round(((full - p.price_yearly) / full) * 100);
-    return pct > max ? pct : max;
-  }, 0);
-
   const handleBuy = (plan: Plan) => {
     if (!isAuthenticated) {
       navigate("/auth/signup");
       return;
     }
-    const billing = yearly ? "yearly" : "monthly";
-    navigate(`/app/order?plan=${plan.id}&billing=${billing}`);
+    navigate(`/app/order?plan=${plan.id}&billing=monthly`);
   };
 
   return (
@@ -83,19 +72,6 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
       <div className="dashboard-header">
         <h1 className="dashboard-title">Pricing Plans</h1>
         <p className="dashboard-subtitle">Choose the plan that fits your creative workflow</p>
-      </div>
-
-      <div className="pricing-toggle">
-        <span className={!yearly ? "active" : ""}>Monthly</span>
-        <button
-          className={`toggle-switch${yearly ? " active" : ""}`}
-          onClick={() => setYearly(!yearly)}
-          aria-label="Toggle yearly billing"
-        >
-          <span className="toggle-knob" />
-        </button>
-        <span className={yearly ? "active" : ""}>Yearly</span>
-        {savePct > 0 && <span className="pricing-save-badge">Save {savePct}%</span>}
       </div>
 
       <div className="pricing-grid">
@@ -107,10 +83,7 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
           </>
         ) : (
           plans.map((plan) => {
-            const price = yearly ? plan.price_yearly : plan.price_monthly;
-            const period = yearly ? "/yr" : "/mo";
-            const fullYearlyPrice = plan.price_monthly * 12;
-            const hasDiscount = yearly && fullYearlyPrice > 0 && fullYearlyPrice > plan.price_yearly;
+            const price = plan.price_monthly;
             const isCurrent = isAuthenticated && plan.id === currentPlanId;
 
             return (
@@ -120,12 +93,9 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
                 <div className="pricing-card-tagline">{plan.tagline}</div>
 
                 <div className="pricing-price">
-                  {hasDiscount && (
-                    <span className="price-original">${fullYearlyPrice}</span>
-                  )}
                   <span className="currency">$</span>
                   <span className="amount">{price}</span>
-                  <span className="period">{period}</span>
+                  <span className="period">/mo</span>
                 </div>
 
                 <div className="pricing-credits">
