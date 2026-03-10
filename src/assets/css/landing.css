@@ -361,6 +361,7 @@ h1, h2, h3, h4, h5, h6 {
   border: none;
   padding: 8px 20px;
   border-radius: 100px;
+  text-decoration: none;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -1043,7 +1044,7 @@ Button */
   margin-left: 60px;
 }
 
-.card-header {
+.philosophy-card .card-header {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1057,7 +1058,7 @@ Button */
   border-radius: 50%;
 }
 
-.card-title {
+.philosophy-card .card-title {
   font-weight: 600;
   font-size: 16px;
   color: white;
