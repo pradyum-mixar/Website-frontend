@@ -415,10 +415,10 @@ export function LandingPage() {
             The End of <span className="highlight">Grunt Work</span>
           </p>
           <div className="actions">
-            <a href="https://mixar.app/signup/frontend/signup.html" className="btn-download">
+            <a href="/auth/signup" className="btn-download">
               Sign Up
             </a>
-            <a href="https://mixar.app/signup/frontend/signup.html" className="btn-arrow">
+            <a href="/auth/signup" className="btn-arrow">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
                   d="M5 12H19"
@@ -1046,7 +1046,7 @@ export function LandingPage() {
             <h2>Try Mixar Now</h2>
             <p>Join our Beta, build the future of agentic 3D with us!</p>
             <div className="try-mixar-buttons">
-              <a href="https://mixar.app/signup/frontend/signup.html" className="btn-waitlist">
+              <a href="/auth/signup" className="btn-waitlist">
                 Sign Up
               </a>
               <a
