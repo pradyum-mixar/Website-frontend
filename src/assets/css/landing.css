@@ -626,6 +626,7 @@ Button */
   font-weight: 500;
   cursor: pointer;
   transition: transform 0.2s, opacity 0.2s;
+  text-decoration: none;
 }
 
 .btn-download:hover {
@@ -646,6 +647,7 @@ Button */
   cursor: pointer;
   transition: transform 0.2s, opacity 0.2s;
   color: #010000;
+  text-decoration: none;
 }
 
 .btn-arrow:hover {
