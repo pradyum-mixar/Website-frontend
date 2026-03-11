@@ -284,20 +284,6 @@ export function DashboardPage() {
       </div>
 
       <div className="stats-grid">
-          <div className="stat-card highlight">
-              <div className="stat-header">
-                  <div className="stat-icon">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <circle cx="12" cy="12" r="10"/>
-                          <path d="M12 6v6l4 2"/>
-                      </svg>
-                  </div>
-                  <span className="stat-badge">Available</span>
-              </div>
-              <div className="stat-value">{stats.data?.data.total_generations ?? 0}</div>
-              <div className="stat-label">Total Generations</div>
-          </div>
-
           <div className="stat-card">
               <div className="stat-header">
                   <div className="stat-icon">
