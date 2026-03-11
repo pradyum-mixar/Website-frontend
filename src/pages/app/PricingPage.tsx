@@ -106,11 +106,10 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
                 </div>
 
                 <div className="pricing-credits">
-                  {plan.credits_per_month.toLocaleString()} usage / month
-                  {multiplier !== null && (
-                    <span className="pricing-per-credit">
-                      <span className="pricing-multiplier">{multiplier}x more usage than Basic</span>
-                    </span>
+                  {multiplier !== null ? (
+                    <span className="pricing-multiplier">{multiplier}x more usage than Basic</span>
+                  ) : (
+                    <span>&nbsp;</span>
                   )}
                 </div>
 
