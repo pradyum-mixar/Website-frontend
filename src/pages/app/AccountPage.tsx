@@ -17,7 +17,6 @@ export function AccountPage() {
         <p>Email: {user?.email}</p>
         <p>Name: {user?.name ?? "-"}</p>
         <p>Verified: {String(user?.is_verified ?? false)}</p>
-        <p>Credits: {user?.credits ?? 0}</p>
       </section>
 
       <section className="card" style={{ marginTop: "1rem" }}>

@@ -58,6 +58,9 @@ export function AppRouter() {
             </Route>
           </Route>
         </Route>
+
+        {/* Catch-all: redirect unknown routes to landing page */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

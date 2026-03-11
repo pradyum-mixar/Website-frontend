@@ -71,9 +71,7 @@ export function OrderSummaryPage() {
     );
   }
 
-  const isYearly = billing === "yearly";
-  const price = isYearly ? plan.price_yearly : plan.price_monthly;
-  const period = isYearly ? "Yearly" : "Monthly";
+  const price = plan.price_monthly;
 
   return (
     <div className="order-summary">
@@ -92,16 +90,11 @@ export function OrderSummaryPage() {
         </div>
         <div className="order-row">
           <span className="label">Billing Cycle</span>
-          <span className="value">{period}</span>
+          <span className="value">Monthly</span>
         </div>
-        <div className="order-row">
-          <span className="label">Credits</span>
-          <span className="value">{plan.credits_per_month.toLocaleString()} / month</span>
-        </div>
-
         <div className="order-total">
           <span className="label">Total</span>
-          <span className="value">${price} / {isYearly ? "yr" : "mo"}</span>
+          <span className="value">${price} / mo</span>
         </div>
 
         <div className="order-actions">
