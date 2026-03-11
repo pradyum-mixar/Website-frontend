@@ -176,7 +176,7 @@ function OverviewTab({ planLabel, hasSub, alreadyCancelled, subscriptionStatus, 
                   color: subscriptionStatus.usage_pct >= 100 ? "var(--error-color)" :
                          subscriptionStatus.usage_pct >= 80 ? "#f59e0b" : undefined,
                 }}>
-                  {subscriptionStatus.usage_pct}% used · {Math.round(100 - subscriptionStatus.usage_pct)}% remaining
+                  {subscriptionStatus.usage_pct}% used
                 </span>
               </div>
               <div style={{ width: "100%", height: "6px", borderRadius: "3px", background: "var(--border-color, #333)", overflow: "hidden" }}>
