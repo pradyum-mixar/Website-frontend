@@ -127,10 +127,10 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
                   <span className="currency">$</span>
                   <span className="amount">{plan.price_monthly}</span>
                   <span className="period">/mo</span>
-                  {plan.id === "pro" && (
-                    <span className="pricing-discount-badge">GDC 2026</span>
-                  )}
                 </div>
+                {plan.id === "pro" && (
+                  <div className="pricing-discount-badge">GDC 2026 Offer</div>
+                )}
 
                 <div className="pricing-credits">
                   {multiplier !== null ? (
