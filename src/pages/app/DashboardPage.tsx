@@ -93,7 +93,7 @@ export function DashboardPage() {
           !
         </h1>
         <p className="dashboard-subtitle">
-          Manage your credits and view your usage history
+          Manage your usage and activity
         </p>
         {subscriptionStatus.data && (
           <div className="billing-cycle-badge">
@@ -122,7 +122,7 @@ export function DashboardPage() {
             <div className="upgrade-banner-text">
               <h3 className="upgrade-banner-title">Unlock the full power of Mixar</h3>
               <p className="upgrade-banner-desc">
-                Get monthly credits for AI image generation, 3D modeling, texture painting, and the Blender agent.
+                Get monthly usage for AI image generation, 3D modeling, texture painting, and the Blender agent.
                 Teams using Mixar ship 3D assets 10x faster.
               </p>
               <div className="upgrade-banner-features">
@@ -144,14 +144,14 @@ export function DashboardPage() {
 
       {/* Usage Bars - Claude Code style */}
       <div className="usage-section">
-        {/* Credits Usage Bar */}
+        {/* Usage Bar */}
         <div className="usage-bar-card">
           <div className="usage-bar-header">
-            <span className="usage-bar-label">Credits</span>
+            <span className="usage-bar-label">Usage</span>
             <span className="usage-bar-value">
               {hasSubscription
                 ? `${Math.round(100 - remainingPct)}% used`
-                : creditsRemaining > 0 ? "Available" : "No credits"}
+                : creditsRemaining > 0 ? "Available" : "No usage"}
             </span>
           </div>
           <div className="usage-bar-track">
@@ -166,14 +166,14 @@ export function DashboardPage() {
             {hasSubscription ? (
               <span>{Math.round(remainingPct)}% remaining this cycle</span>
             ) : creditsRemaining === 0 ? (
-              <span className="usage-bar-nudge">Subscribe to get monthly credits</span>
+              <span className="usage-bar-nudge">Subscribe to get monthly usage</span>
             ) : (
               <span>&nbsp;</span>
             )}
             <div className="usage-bar-actions">
               {!hasSubscription && (
                 <Link to="/app/pricing" className="usage-bar-link">
-                  Get Credits
+                  Subscribe
                 </Link>
               )}
             </div>
