@@ -41,7 +41,7 @@ export type PaymentHistoryItem = {
 export type PaymentHistoryResponse = {
   status: string;
   data: PaymentHistoryItem[];
-  pagination: { skip: number; limit: number; total: number };
+  pagination: { page_no: number; page_size: number; total: number };
 };
 
 export type SubscriptionStatus = {
@@ -49,10 +49,21 @@ export type SubscriptionStatus = {
   plan_name: string;
   billing_interval: string;
   credits_per_month: number;
+  balance_cents: number;
+  plan_value_cents: number;
+  usage_pct: number;
   cycle_start: string;
   cycle_end: string;
   days_left: number;
   subscription_expires_at: string | null;
+};
+
+export type UpgradePreview = {
+  immediate_charge_amount: number;
+  immediate_charge_currency: string;
+  new_plan_id: string;
+  new_plan_name: string;
+  new_credits_per_month: number;
 };
 
 class ApiClient {
@@ -95,6 +106,7 @@ class ApiClient {
         } catch {
           authStorage.clearTokens();
           authStorage.clearUser();
+          window.location.href = "/auth/login";
           return Promise.reject(error);
         }
       },
@@ -206,9 +218,9 @@ class ApiClient {
     return response.data;
   }
 
-  async getPaymentHistory(skip = 0, limit = 20): Promise<PaymentHistoryResponse> {
+  async getPaymentHistory(page_no = 1, page_size = 20): Promise<PaymentHistoryResponse> {
     const response = await this.client.get<PaymentHistoryResponse>(
-      `/subscriptions/history?skip=${skip}&limit=${limit}`
+      `/subscriptions/history?page_no=${page_no}&page_size=${page_size}`
     );
     return response.data;
   }
@@ -227,7 +239,33 @@ class ApiClient {
   }
 
   async getSubscriptionStatus(): Promise<SubscriptionStatus> {
-    const response = await this.client.get<SubscriptionStatus>("/subscriptions/status");
+    const response = await this.client.get<{ status: string; data: SubscriptionStatus }>("/subscriptions/status");
+    return response.data.data;
+  }
+
+  async previewUpgrade(planId: string): Promise<UpgradePreview> {
+    const response = await this.client.post<UpgradePreview>("/subscriptions/upgrade/preview", { plan_id: planId });
+    return response.data;
+  }
+
+  async upgradeSubscription(planId: string): Promise<{ status: string; message: string }> {
+    const response = await this.client.post<{ status: string; message: string }>("/subscriptions/upgrade", { plan_id: planId });
+    return response.data;
+  }
+
+  async getAvailableDownloads(): Promise<{
+    status: string;
+    data: { platform: string; version: string; size_bytes: number; installer_type: string | null }[];
+  }> {
+    const response = await this.client.get("/downloads");
+    return response.data;
+  }
+
+  async getDownloadUrl(platform: string): Promise<{
+    status: string;
+    data: { url: string; platform: string; version: string; size_bytes: number; sha256: string; installer_type: string | null };
+  }> {
+    const response = await this.client.get(`/downloads/${platform}`);
     return response.data;
   }
 

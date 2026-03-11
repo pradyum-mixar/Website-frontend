@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../features/auth/AuthContext";
+import { PublicNavbar } from "../components/PublicNavbar";
 import "../assets/css/landing.css";
 
 // Critical above-fold images — must be loaded before we reveal the hero section.
@@ -24,31 +25,9 @@ function preloadImage(url: string): Promise<void> {
 }
 
 export function LandingPage() {
-  const { user, isAuthenticated, logout } = useAuth();
-  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [isReady, setIsReady] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
-  const profileRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
-        setProfileOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const handleLogout = async () => {
-    setProfileOpen(false);
-    await logout();
-    navigate("/");
-  };
-
-  const initials = user?.name
-    ? user.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
-    : user?.email?.split("@")[0].substring(0, 2).toUpperCase() ?? "";
 
   // Wait for critical above-fold images + custom fonts, then reveal.
   // 5-second hard fallback so slow connections are never permanently blocked.
@@ -72,28 +51,6 @@ export function LandingPage() {
     return () => {
       cancelled = true;
       clearTimeout(fallback);
-    };
-  }, []);
-
-  // --- Navbar scroll effect ---
-  useEffect(() => {
-    const navbar = document.querySelector(".navbar");
-    if (!navbar) return;
-
-    function handleScroll() {
-      const scrollY = window.scrollY;
-      if (scrollY > 50) {
-        navbar!.classList.add("scrolled");
-      } else {
-        navbar!.classList.remove("scrolled");
-      }
-    }
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
@@ -156,6 +113,16 @@ export function LandingPage() {
     const stickyFeaturesContent = document.querySelector<HTMLElement>(".sticky-features-content");
 
     if (!architectureContainer || !centralLineCurrent || !centralLineContainer) return;
+
+    // On mobile the connecting-line is hidden, so the scroll-driven animation
+    // that reveals .sticky-features-content never fires.  Just show it immediately.
+    const isMobileView = window.matchMedia("(max-width: 768px)").matches;
+    if (isMobileView && stickyFeaturesContent) {
+      stickyFeaturesContent.classList.add("cards-visible");
+      if (stickyHeader) {
+        stickyHeader.classList.add("text-visible");
+      }
+    }
 
     let animationTriggered = false;
 
@@ -223,18 +190,11 @@ export function LandingPage() {
 
             headerGlowDot.classList.add("active");
             stickyHeader.classList.add("glowing");
+            stickyHeader.classList.add("text-visible");
 
-            setTimeout(() => {
-              if (headerGlowDot.classList.contains("active")) {
-                stickyHeader.classList.add("text-visible");
-              }
-            }, 300);
-
-            setTimeout(() => {
-              if (stickyFeaturesContent && headerGlowDot.classList.contains("active")) {
-                stickyFeaturesContent.classList.add("cards-visible");
-              }
-            }, 2000);
+            if (stickyFeaturesContent) {
+              stickyFeaturesContent.classList.add("cards-visible");
+            }
           } else if (connectProgress < 0.9) {
             animationTriggered = false;
             headerGlowDot.classList.remove("active");
@@ -258,8 +218,12 @@ export function LandingPage() {
     };
   }, []);
 
-  // --- Sticky features fade effect ---
+  // --- Sticky features fade effect (desktop only) ---
   useEffect(() => {
+    // On mobile the sticky-scroll layout is disabled, so this cross-fade
+    // effect would just hide sections via inline opacity as you scroll past.
+    if (window.matchMedia("(max-width: 768px)").matches) return;
+
     const header = document.querySelector<HTMLElement>(".sticky-features-header");
     const rows = document.querySelectorAll<HTMLElement>(".feature-showcase, .feature-grid-section");
     if (rows.length < 2) return;
@@ -270,6 +234,7 @@ export function LandingPage() {
     function updateFade() {
       const viewportHeight = window.innerHeight;
 
+      // Fade the sticky header as the second card approaches
       if (header && secondRow) {
         const secondRect = secondRow.getBoundingClientRect();
         const fadeStart = viewportHeight * 0.9;
@@ -285,22 +250,27 @@ export function LandingPage() {
         }
       }
 
+      // Gently dim (not hide) each row as the next one overlaps it
       rowsArray.forEach((row, index) => {
-        if (index === rowsArray.length - 1) return;
+        if (index === rowsArray.length - 1) {
+          row.style.opacity = "1";
+          return;
+        }
 
         const nextRow = rowsArray[index + 1];
         const nextRect = nextRow.getBoundingClientRect();
 
-        const fadeStart = viewportHeight * 0.9;
-        const fadeEnd = viewportHeight * 0.7;
+        const fadeStart = viewportHeight * 0.8;
+        const fadeEnd = viewportHeight * 0.4;
 
         if (nextRect.top > fadeStart) {
           row.style.opacity = "1";
         } else if (nextRect.top <= fadeStart && nextRect.top > fadeEnd) {
           const progress = (fadeStart - nextRect.top) / (fadeStart - fadeEnd);
-          row.style.opacity = String(Math.max(0, 1 - progress));
+          // Only dim to 0.15 — never fully invisible
+          row.style.opacity = String(Math.max(0.15, 1 - progress * 0.85));
         } else {
-          row.style.opacity = "0";
+          row.style.opacity = "0.15";
         }
       });
     }
@@ -350,61 +320,7 @@ export function LandingPage() {
         <img src="/assets/Logomark.svg" alt="" className="lp-overlay-logo" />
       </div>
 
-      <nav className="navbar">
-        <div className="navbar-content">
-          <Link to="/" className="logo">
-            <img src="https://d2znch1yzypu23.cloudfront.net/Logo-Primary_light.png" alt="Mixar" />
-          </Link>
-          <div className="nav-links">
-            <a href="/about">About</a>
-            <a href="#features">Features</a>
-            <Link to="/pricing">Pricing</Link>
-            <Link to="/app/downloads">Download</Link>
-          </div>
-          <div className="nav-buttons">
-            <a
-              href="https://discord.gg/YVqvkQx8rX"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-nav-secondary"
-            >
-              Join Discord
-            </a>
-            {isAuthenticated ? (
-              <div className="avatar-dropdown" ref={profileRef}>
-                <button className="user-avatar" onClick={() => setProfileOpen((o) => !o)}>
-                  {initials}
-                </button>
-                {profileOpen && (
-                  <div className="avatar-menu">
-                    <Link to="/app" className="avatar-menu-item" onClick={() => setProfileOpen(false)}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <rect x="3" y="3" width="7" height="7" />
-                        <rect x="14" y="3" width="7" height="7" />
-                        <rect x="14" y="14" width="7" height="7" />
-                        <rect x="3" y="14" width="7" height="7" />
-                      </svg>
-                      Dashboard
-                    </Link>
-                    <button className="avatar-menu-item" onClick={handleLogout}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                        <polyline points="16 17 21 12 16 7" />
-                        <line x1="21" y1="12" x2="9" y2="12" />
-                      </svg>
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <Link to="/auth/login" className="btn-nav-primary">
-                Sign In
-              </Link>
-            )}
-          </div>
-        </div>
-      </nav>
+      <PublicNavbar />
 
       <div className="hero-wrapper">
         <header>
@@ -415,10 +331,10 @@ export function LandingPage() {
             The End of <span className="highlight">Grunt Work</span>
           </p>
           <div className="actions">
-            <a href="/auth/signup" className="btn-download">
-              Sign Up
-            </a>
-            <a href="/auth/signup" className="btn-arrow">
+            <Link to={isAuthenticated ? "/app" : "/auth/signup"} className="btn-download">
+              {isAuthenticated ? "Dashboard" : "Sign Up"}
+            </Link>
+            <Link to={isAuthenticated ? "/app" : "/auth/signup"} className="btn-arrow">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
                   d="M5 12H19"
@@ -435,7 +351,7 @@ export function LandingPage() {
                   strokeLinejoin="round"
                 />
               </svg>
-            </a>
+            </Link>
           </div>
         </header>
         <main className="lp-main">
@@ -925,7 +841,7 @@ export function LandingPage() {
                 </p>
               </div>
               <div className="feature-showcase-visual">
-                <img loading="lazy" src="https://d2znch1yzypu23.cloudfront.net/webgif_UV_Unwrap_V1.gif" alt="Meet Mixie" className="showcase-gif" />
+                <img loading="eager" src="https://d2znch1yzypu23.cloudfront.net/webgif_UV_Unwrap_V1.gif" alt="Meet Mixie" className="showcase-gif" />
               </div>
             </div>
           </section>
@@ -946,7 +862,7 @@ export function LandingPage() {
                     </p>
                   </div>
                   <div className="feature-grid-card-visual">
-                    <img loading="lazy" src="https://d2znch1yzypu23.cloudfront.net/webgif_UI_V1.gif" alt="UI Feature" />
+                    <img loading="eager" src="https://d2znch1yzypu23.cloudfront.net/webgif_UI_V1.gif" alt="UI Feature" />
                   </div>
                 </div>
 
@@ -960,7 +876,7 @@ export function LandingPage() {
                     </p>
                   </div>
                   <div className="feature-grid-card-visual">
-                    <img loading="lazy" src="https://d2znch1yzypu23.cloudfront.net/webgif_tex_V1.gif" alt="Texture Feature" />
+                    <img loading="eager" src="https://d2znch1yzypu23.cloudfront.net/webgif_tex_V1.gif" alt="Texture Feature" />
                   </div>
                 </div>
 
@@ -974,7 +890,7 @@ export function LandingPage() {
                     </p>
                   </div>
                   <div className="feature-grid-card-visual">
-                    <img loading="lazy" src="https://d2znch1yzypu23.cloudfront.net/webgif_moodboard_v1.gif" alt="Integrated Moodboard" />
+                    <img loading="eager" src="https://d2znch1yzypu23.cloudfront.net/webgif_moodboard_v1.gif" alt="Integrated Moodboard" />
                   </div>
                 </div>
               </div>
@@ -995,7 +911,7 @@ export function LandingPage() {
                     </p>
                   </div>
                   <div className="feature-grid-card-visual">
-                    <img loading="lazy" src="https://d2znch1yzypu23.cloudfront.net/webgif_image_to_3D_V1.gif" alt="Image to 3D Feature" />
+                    <img loading="eager" src="https://d2znch1yzypu23.cloudfront.net/webgif_image_to_3D_V1.gif" alt="Image to 3D Feature" />
                   </div>
                 </div>
 
@@ -1009,7 +925,7 @@ export function LandingPage() {
                     </p>
                   </div>
                   <div className="feature-grid-card-visual">
-                    <img loading="lazy" src="https://d2znch1yzypu23.cloudfront.net/webgif_Pbr_V1.gif" alt="PBR Generation Feature" />
+                    <img loading="eager" src="https://d2znch1yzypu23.cloudfront.net/webgif_Pbr_V1.gif" alt="PBR Generation Feature" />
                   </div>
                 </div>
               </div>
@@ -1022,7 +938,7 @@ export function LandingPage() {
         <div className="features-learn-more">
           <div className="features-learn-more-bg">
             <img
-              loading="lazy"
+              loading="eager"
               src="https://d2znch1yzypu23.cloudfront.net/skate_back.webp"
               alt=""
             />
@@ -1046,9 +962,9 @@ export function LandingPage() {
             <h2>Try Mixar Now</h2>
             <p>Join our Beta, build the future of agentic 3D with us!</p>
             <div className="try-mixar-buttons">
-              <a href="/auth/signup" className="btn-waitlist">
-                Sign Up
-              </a>
+              <Link to={isAuthenticated ? "/app" : "/auth/signup"} className="btn-waitlist">
+                {isAuthenticated ? "Dashboard" : "Sign Up"}
+              </Link>
               <a
                 href="https://discord.gg/YVqvkQx8rX"
                 target="_blank"
@@ -1061,7 +977,7 @@ export function LandingPage() {
           </div>
           <div className="try-mixar-visual">
             <img
-              loading="lazy"
+              loading="eager"
               src="https://d2znch1yzypu23.cloudfront.net/Join%20US.svg"
               alt="Join Mixar Beta"
             />
@@ -1231,7 +1147,7 @@ export function LandingPage() {
           </div>
           <div className="footer-logomark">
             <img
-              loading="lazy"
+              loading="eager"
               src="https://d2znch1yzypu23.cloudfront.net/Logomark.svg"
               alt="Mixar"
             />
@@ -1279,20 +1195,20 @@ export function LandingPage() {
           <div className="footer-top">
             <div className="footer-links">
               <div className="footer-links-column">
-                <a href="#" className="footer-link">
-                  Technology
+                <a href="/about" className="footer-link">
+                  About
                 </a>
-                <a href="#" className="footer-link">
-                  Resources
+                <a href="#features" className="footer-link">
+                  Features
                 </a>
               </div>
               <div className="footer-links-column">
-                <a href="#" className="footer-link">
-                  Expertise
-                </a>
-                <a href="#" className="footer-link">
-                  Key features
-                </a>
+                <Link to="/pricing" className="footer-link">
+                  Pricing
+                </Link>
+                <Link to="/app/downloads" className="footer-link">
+                  Download
+                </Link>
               </div>
             </div>
 

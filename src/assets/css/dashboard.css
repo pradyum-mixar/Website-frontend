@@ -1,7 +1,7 @@
 /* Dashboard Page Styles */
 .dashboard-container {
     min-height: 100vh;
-    padding: 6rem 2rem 2rem;
+    padding: 7.5rem 2rem 2rem;
 }
 
 .dashboard-content {
@@ -142,13 +142,47 @@
 .section-header {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     margin-bottom: 1.5rem;
 }
 
 .section-title {
     font-size: 1.5rem;
     font-weight: 600;
+}
+
+/* Activity Filter */
+.activity-filter {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+}
+
+.activity-filter-select {
+    appearance: none;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 0.5rem 2rem 0.5rem 0.75rem;
+    font-family: inherit;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s ease;
+    background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='rgba(255,255,255,0.5)' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+}
+
+.activity-filter-select:focus {
+    border-color: var(--primary-cyan);
+}
+
+.activity-filter-select option {
+    background: #1a1a1a;
+    color: var(--text-primary);
 }
 
 /* Usage Table */
@@ -730,15 +764,115 @@
     text-decoration: underline;
 }
 
+/* ─── Manage Subscription Tabs ─── */
+.sub-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    justify-content: center;
+}
+
+.sub-tab {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.25rem;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 100px;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sub-tab:hover {
+    color: var(--text-primary);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.sub-tab.active {
+    background: rgba(0, 192, 199, 0.1);
+    border-color: var(--primary-cyan);
+    color: var(--primary-cyan);
+}
+
+.sub-overview {
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+.sub-plan-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 2rem;
+    backdrop-filter: blur(20px);
+}
+
+.sub-plan-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.sub-plan-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+}
+
+.sub-plan-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sub-plan-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.sub-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+}
+
+.sub-detail-row:not(:last-child) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.sub-detail-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.sub-detail-value {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+
 /* Responsive */
 @media (max-width: 1024px) {
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 768px) {
+    .dashboard-container { padding-left: 1rem; padding-right: 1rem; }
     .dashboard-title { font-size: 2rem; }
     .stats-grid { grid-template-columns: 1fr; }
     .stat-value { font-size: 2rem; }
+    .usage-table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .usage-table { min-width: 500px; }
     .usage-table th, .usage-table td { padding: 0.75rem 1rem; }
     .account-info { flex-direction: column; text-align: center; }
     .account-actions { justify-content: center; }
@@ -748,4 +882,12 @@
     .usage-bar-header { flex-direction: column; align-items: flex-start; gap: 0.25rem; }
     .upgrade-banner-content { flex-direction: column; text-align: center; }
     .upgrade-banner-features { justify-content: center; }
+    .sub-tabs { flex-wrap: wrap; }
+    .sub-plan-header { flex-direction: column; gap: 1rem; text-align: center; }
+}
+
+@media (max-width: 480px) {
+    .section-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+    .activity-filter { width: 100%; }
+    .activity-filter-select { flex: 1; }
 }

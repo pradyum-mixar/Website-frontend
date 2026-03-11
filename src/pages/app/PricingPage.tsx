@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { apiClient, type Plan } from "../../lib/api-client";
 import { useAuth } from "../../features/auth/AuthContext";
-import { SUBSCRIPTION_TYPE_TO_SLUG, SUBSCRIPTION_TYPE_TO_LABEL } from "../../features/auth/types";
+import { PublicNavbar } from "../../components/PublicNavbar";
+import "../../assets/css/landing.css";
 import "../../assets/css/pricing.css";
 
 function CheckIcon() {
@@ -29,33 +30,20 @@ function SkeletonCard() {
   );
 }
 
-function PricingNav() {
-  return (
-    <nav className="pricing-nav">
-      <Link to="/" className="pricing-nav-brand">
-        <img src="https://d2znch1yzypu23.cloudfront.net/Logo-Primary_light.png" alt="Mixar" />
-      </Link>
-      <div className="pricing-nav-links">
-        <Link to="/auth/login" className="pricing-nav-signin">Sign In</Link>
-      </div>
-    </nav>
-  );
-}
 
 type PricingContentProps = {
   standalone?: boolean;
   isAuthenticated: boolean;
   currentPlanId: string | null;
   hasActiveSubscription: boolean;
-  subscriptionLabel: string;
 };
 
-function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveSubscription, subscriptionLabel }: PricingContentProps) {
+function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveSubscription }: PricingContentProps) {
   const navigate = useNavigate();
   const [switchingPlan, setSwitchingPlan] = useState<string | null>(null);
   const [switchError, setSwitchError] = useState<string | null>(null);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["plans"],
     queryFn: () => apiClient.getPlans(),
   });
@@ -83,6 +71,19 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
     }
   };
 
+  if (isError) {
+    return (
+      <div className={`pricing-page${standalone ? " pricing-standalone" : ""}`}>
+        <div className="dashboard-header">
+          <h1 className="dashboard-title">Pricing Plans</h1>
+        </div>
+        <p style={{ color: "var(--text-secondary)", textAlign: "center", marginTop: "2rem" }}>
+          Failed to load plans. Please refresh the page.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className={`pricing-page${standalone ? " pricing-standalone" : ""}`}>
       <div className="dashboard-header">
@@ -99,7 +100,6 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
           </>
         ) : (
           plans.map((plan) => {
-            const price = plan.price_monthly;
             const isCurrent = isAuthenticated && plan.id === currentPlanId;
 
             // Find the basic plan's credits to compute usage multiplier
@@ -117,7 +117,7 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
 
                 <div className="pricing-price">
                   <span className="currency">$</span>
-                  <span className="amount">{price}</span>
+                  <span className="amount">{plan.price_monthly}</span>
                   <span className="period">/mo</span>
                 </div>
 
@@ -148,7 +148,7 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
                     onClick={() => handleSwitch(plan)}
                     disabled={switchingPlan !== null}
                   >
-                    {switchingPlan === plan.id ? "Switching…" : `Switch to ${plan.name}`}
+                    {switchingPlan === plan.id ? "Switching\u2026" : `Switch to ${plan.name}`}
                   </button>
                 ) : (
                   <button className="pricing-cta" onClick={() => handleBuy(plan)}>
@@ -177,10 +177,20 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
 
 /** Public pricing page — includes its own nav bar */
 export function PublicPricingPage() {
+  const { user, isAuthenticated } = useAuth();
+  const subType = user?.subscription_type ?? 0;
+  const hasActiveSubscription = isAuthenticated && subType > 0;
+  const currentPlanId = hasActiveSubscription ? (user?.plan_slug ?? null) : null;
+
   return (
     <>
-      <PricingNav />
-      <PricingContent standalone isAuthenticated={false} currentPlanId={null} hasActiveSubscription={false} subscriptionLabel="" />
+      <PublicNavbar activePage="pricing" />
+      <PricingContent
+        standalone
+        isAuthenticated={isAuthenticated}
+        currentPlanId={currentPlanId}
+        hasActiveSubscription={hasActiveSubscription}
+      />
     </>
   );
 }
@@ -190,15 +200,13 @@ export function PricingPage() {
   const { user } = useAuth();
   const subType = user?.subscription_type ?? 0;
   const hasActiveSubscription = subType > 0;
-  const currentPlanId = hasActiveSubscription ? (SUBSCRIPTION_TYPE_TO_SLUG[subType] ?? null) : null;
-  const subscriptionLabel = SUBSCRIPTION_TYPE_TO_LABEL[subType] ?? "";
+  const currentPlanId = hasActiveSubscription ? (user?.plan_slug ?? null) : null;
 
   return (
     <PricingContent
       isAuthenticated
       currentPlanId={currentPlanId}
       hasActiveSubscription={hasActiveSubscription}
-      subscriptionLabel={subscriptionLabel}
     />
   );
 }

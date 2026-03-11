@@ -1,13 +1,23 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../features/auth/AuthContext";
-import { SUBSCRIPTION_TYPE_TO_LABEL } from "../features/auth/types";
+
 import "../assets/css/dashboard.css";
 
 export function AppShell() {
   const { user, logout, isSuperuser } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isOnDashboard = location.pathname === "/app" || location.pathname === "/app/";
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
 
   const handleLogout = async () => {
+    setMenuOpen(false);
     await logout();
     navigate("/");
   };
@@ -18,48 +28,56 @@ export function AppShell() {
 
   return (
     <>
-      <nav className="nav">
-        <NavLink to="/app" className="nav-brand">
-          <img src="/assets/Logo-Primary_light.png" alt="Mixar" className="brand-logo" />
-        </NavLink>
-        <div className="user-menu">
-          {isSuperuser && (
-            <NavLink to="/app/admin" className="nav-link admin-link">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-              </svg>
-              Admin
-            </NavLink>
-          )}
-          <NavLink to="/app/downloads" className="nav-link">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-            Download
+      <nav className="app-navbar">
+        <div className={`app-navbar-content${menuOpen ? " menu-open" : ""}`}>
+          <NavLink to="/" className="logo">
+            <img src="/assets/Logo-Primary_light.png" alt="Mixar" />
           </NavLink>
-          <NavLink to="/app/pricing" className="nav-link">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="12" y1="1" x2="12" y2="23" />
-              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-            </svg>
-            Pricing
-          </NavLink>
-          <NavLink to="/app/billing" className="nav-link">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
-              <line x1="1" y1="10" x2="23" y2="10" />
-            </svg>
-            Billing
-          </NavLink>
-          <div className="user-avatar">
-            {initials}
-            {user && user.subscription_type > 0 && (
-              <span className={`avatar-plan-badge plan-${user.subscription_type}`}>
-                {SUBSCRIPTION_TYPE_TO_LABEL[user.subscription_type]}
-              </span>
+
+          <div className="app-nav-links">
+            {isSuperuser && (
+              <NavLink to="/app/admin" className="app-nav-link admin-link">Admin</NavLink>
             )}
+            {isOnDashboard ? (
+              <NavLink to="/" className="app-nav-link">Home</NavLink>
+            ) : (
+              <NavLink to="/app" end className="app-nav-link">Dashboard</NavLink>
+            )}
+            <NavLink to="/app/downloads" className="app-nav-link">Download</NavLink>
+            <NavLink to="/app/manage-subscription" className="app-nav-link">Manage Subscription</NavLink>
+          </div>
+
+          <div className="app-nav-actions">
+            <div className="user-avatar">
+              {initials}
+              {user && user.subscription_type > 0 && (
+                <span className={`avatar-plan-badge plan-${user.plan_slug}`}>
+                  {user.plan_name}
+                </span>
+              )}
+            </div>
+
+            {/* Hamburger toggle — visible only on mobile */}
+            <button
+              className="app-hamburger"
+              onClick={() => setMenuOpen((o) => !o)}
+              aria-label="Toggle menu"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                {menuOpen ? (
+                  <>
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </>
+                ) : (
+                  <>
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <line x1="3" y1="12" x2="21" y2="12" />
+                    <line x1="3" y1="18" x2="21" y2="18" />
+                  </>
+                )}
+              </svg>
+            </button>
           </div>
           <button className="nav-link" onClick={handleLogout} style={{ cursor: "pointer", background: "none", border: "none" }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -70,6 +88,24 @@ export function AppShell() {
             Logout
           </button>
         </div>
+
+        {/* Mobile menu dropdown */}
+        {menuOpen && (
+          <div className="app-mobile-menu">
+            {isSuperuser && (
+              <NavLink to="/app/admin" className="app-nav-link admin-link">Admin</NavLink>
+            )}
+            {isOnDashboard ? (
+              <NavLink to="/" className="app-nav-link">Home</NavLink>
+            ) : (
+              <NavLink to="/app" end className="app-nav-link">Dashboard</NavLink>
+            )}
+            <NavLink to="/app/downloads" className="app-nav-link">Download</NavLink>
+            <NavLink to="/app/manage-subscription" className="app-nav-link">Manage Subscription</NavLink>
+            <div className="mobile-menu-divider" />
+            <button className="app-nav-link" onClick={handleLogout} style={{ background: "none", border: "none", cursor: "pointer", textAlign: "left", padding: 0 }}>Logout</button>
+          </div>
+        )}
       </nav>
 
       <main className="dashboard-container">

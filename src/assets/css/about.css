@@ -1,0 +1,396 @@
+/* About Page Styles */
+
+.about-page {
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+/* Hero Section */
+.about-hero {
+  position: relative;
+  padding: 100px 48px 0;
+}
+
+.about-hero-image-container {
+  position: relative;
+  width: 100%;
+  border-radius: 0 0 50px 50px;
+  overflow: visible;
+}
+
+.about-hero-image-container::after {
+  content: '';
+  position: absolute;
+  bottom: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 300px;
+  background: radial-gradient(ellipse at center,
+    rgba(0, 192, 199, 0.4) 0%,
+    rgba(112, 198, 45, 0.2) 40%,
+    transparent 70%);
+  filter: blur(100px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.about-hero-image-container img {
+  width: 100%;
+  height: auto;
+  max-height: 70vh;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  position: relative;
+  z-index: 1;
+  border-radius: 0 0 50px 50px;
+}
+
+.about-hero-text-overlay {
+  position: absolute;
+  bottom: 80px;
+  left: 60px;
+  max-width: 500px;
+  z-index: 2;
+}
+
+.about-hero-text-overlay h1 {
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 500;
+  color: white;
+  line-height: 1.2;
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Mission Section */
+.about-mission {
+  padding: 120px 48px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 100px;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.about-mission::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(0, 192, 199, 0.12) 0%, transparent 70%);
+  filter: blur(60px);
+  pointer-events: none;
+}
+
+.about-mission-left {
+  position: relative;
+}
+
+.about-mission-left::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent-teal), var(--accent-green));
+  border-radius: 2px;
+}
+
+.about-mission-left h2 {
+  font-size: 38px;
+  font-weight: 400;
+  color: white;
+  line-height: 1.35;
+  padding-top: 28px;
+}
+
+.about-mission-right {
+  display: flex;
+  align-items: center;
+}
+
+.about-mission-right p {
+  font-weight: 400;
+  font-size: 17px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.8;
+}
+
+.about-mission-right .about-highlight {
+  color: var(--accent-teal);
+  font-weight: 500;
+}
+
+/* Philosophy Section */
+.about-philosophy {
+  padding: 80px 48px 120px;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.about-section-label {
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--accent-teal);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  letter-spacing: 0.05em;
+}
+
+.about-section-title {
+  font-size: 36px;
+  font-weight: 400;
+  color: white;
+  margin-bottom: 20px;
+}
+
+.about-section-description {
+  font-weight: 400;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.7);
+  max-width: 600px;
+  line-height: 1.6;
+  margin-bottom: 60px;
+}
+
+.about-philosophy-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.about-philosophy-card {
+  background: linear-gradient(145deg, rgba(30, 35, 32, 0.9), rgba(20, 25, 22, 0.95));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 28px 32px;
+  max-width: 500px;
+  backdrop-filter: blur(10px);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  cursor: default;
+}
+
+.about-philosophy-card:hover {
+  border-color: rgba(0, 192, 199, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 192, 199, 0.15),
+              0 0 0 1px rgba(0, 192, 199, 0.1);
+}
+
+.about-philosophy-card:nth-child(2) {
+  margin-left: 120px;
+}
+
+.about-philosophy-card:nth-child(3) {
+  margin-left: 40px;
+}
+
+.about-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.about-card-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent-green);
+  border-radius: 50%;
+}
+
+.about-card-title {
+  font-weight: 600;
+  font-size: 16px;
+  color: white;
+}
+
+.about-card-description {
+  font-weight: 400;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.5;
+}
+
+/* Join Section */
+.about-join {
+  padding: 100px 48px 140px;
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+}
+
+.about-join::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  height: 400px;
+  background: radial-gradient(ellipse at center,
+    rgba(0, 192, 199, 0.1) 0%,
+    rgba(112, 198, 45, 0.05) 40%,
+    transparent 70%);
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+.about-join-description {
+  font-weight: 400;
+  font-size: 17px;
+  color: rgba(255, 255, 255, 0.7);
+  max-width: 700px;
+  margin: 0 auto 48px;
+  line-height: 1.8;
+}
+
+.about-join-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.about-btn-primary {
+  background: var(--gradient-primary);
+  color: #010000;
+  border: none;
+  padding: 16px 48px;
+  border-radius: 100px;
+  font-size: 18px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  text-decoration: none;
+}
+
+.about-btn-primary:hover {
+  transform: scale(1.05);
+}
+
+.about-btn-outline {
+  background: rgba(10, 10, 10, 0.4);
+  color: var(--text);
+  border: 1px solid rgba(0, 192, 199, 0.4);
+  padding: 16px 48px;
+  border-radius: 100px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(20px);
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(0, 192, 199, 0.15);
+  text-decoration: none;
+}
+
+.about-btn-outline:hover {
+  background: rgba(0, 192, 199, 0.1);
+  border-color: rgba(0, 192, 199, 0.7);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 32px rgba(0, 192, 199, 0.25);
+}
+
+/* Text gradient */
+.about-text-gradient {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .about-mission {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    padding: 80px 48px;
+  }
+
+  .about-hero-text-overlay {
+    bottom: 60px;
+    left: 40px;
+    max-width: 400px;
+  }
+
+  .about-philosophy-card:nth-child(2) {
+    margin-left: 60px;
+  }
+
+  .about-philosophy-card:nth-child(3) {
+    margin-left: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .about-hero {
+    padding: 80px 24px 0;
+  }
+
+  .about-hero-image-container {
+    border-radius: 0 0 30px 30px;
+  }
+
+  .about-hero-image-container img {
+    border-radius: 0 0 30px 30px;
+    max-height: 50vh;
+  }
+
+  .about-hero-text-overlay {
+    bottom: 40px;
+    left: 24px;
+    max-width: 280px;
+  }
+
+  .about-mission {
+    padding: 60px 24px;
+  }
+
+  .about-mission-left h2 {
+    font-size: 28px;
+  }
+
+  .about-philosophy {
+    padding: 60px 24px;
+  }
+
+  .about-section-title {
+    font-size: 28px;
+  }
+
+  .about-philosophy-card {
+    max-width: 100%;
+  }
+
+  .about-philosophy-card:nth-child(1),
+  .about-philosophy-card:nth-child(2),
+  .about-philosophy-card:nth-child(3) {
+    margin-left: 0;
+  }
+
+  .about-join {
+    padding: 60px 24px 80px;
+  }
+
+  .about-join-description {
+    font-size: 15px;
+  }
+
+  .about-join-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .about-btn-primary,
+  .about-btn-outline {
+    padding: 14px 36px;
+    font-size: 16px;
+  }
+}

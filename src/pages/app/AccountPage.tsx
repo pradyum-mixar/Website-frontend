@@ -1,11 +1,9 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../../features/auth/AuthContext";
-import { SUBSCRIPTION_TYPE_TO_LABEL } from "../../features/auth/types";
-
 export function AccountPage() {
   const { user } = useAuth();
 
-  const planLabel = user ? (SUBSCRIPTION_TYPE_TO_LABEL[user.subscription_type] ?? "Free") : "Free";
+  const planLabel = user?.plan_name ?? "Free";
   const isFree = !user || user.subscription_type === 0;
 
   const expiresAt = user?.subscription_expires_at

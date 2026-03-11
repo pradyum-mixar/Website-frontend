@@ -38,10 +38,11 @@ export function BillingHistoryPage() {
   const { user } = useAuth();
   const [page, setPage] = useState(0);
   const [downloading, setDownloading] = useState<string | null>(null);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["billing-history", page, user?.id],
-    queryFn: () => apiClient.getPaymentHistory(page * PAGE_SIZE, PAGE_SIZE),
+    queryFn: () => apiClient.getPaymentHistory(page + 1, PAGE_SIZE),
     enabled: !!user,
   });
 
@@ -50,11 +51,12 @@ export function BillingHistoryPage() {
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   const handleDownload = async (paymentId: string) => {
+    setDownloadError(null);
     setDownloading(paymentId);
     try {
       await apiClient.downloadInvoice(paymentId);
     } catch {
-      // silently fail — user sees no file downloaded
+      setDownloadError("Failed to download invoice. Please try again.");
     } finally {
       setDownloading(null);
     }
@@ -71,6 +73,10 @@ export function BillingHistoryPage() {
         <div className="loading">
           <div className="spinner" />
         </div>
+      ) : isError ? (
+        <div className="billing-error" style={{ color: "var(--text-secondary)", textAlign: "center", padding: "2rem" }}>
+          Failed to load billing history. Please refresh the page.
+        </div>
       ) : items.length === 0 ? (
         <div className="usage-table-container">
           <div className="empty-state">
@@ -86,6 +92,9 @@ export function BillingHistoryPage() {
         </div>
       ) : (
         <>
+          {downloadError && (
+            <p style={{ color: "var(--error-color)", marginBottom: "1rem" }}>{downloadError}</p>
+          )}
           <div className="usage-table-container">
             <table className="usage-table">
               <thead>
