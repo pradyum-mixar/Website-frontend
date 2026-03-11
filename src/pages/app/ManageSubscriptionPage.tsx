@@ -468,7 +468,12 @@ function UpgradeTab({ currentPlanSlug, onUpgraded }: { currentPlanSlug: string |
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <span style={{ fontWeight: 600 }}>{plan.name}</span>
-                <span>${plan.price_monthly}/mo — ${(plan.credits_per_month / 100).toFixed(0)} usage</span>
+                <span>${plan.price_monthly}/mo{(() => {
+                  const basic = plans.find(p => p.price_monthly > 0 && p.price_monthly < 15);
+                  const m = basic && basic.credits_per_month > 0 && plan.credits_per_month > basic.credits_per_month
+                    ? Math.round(plan.credits_per_month / basic.credits_per_month) : null;
+                  return m ? ` — ${m}x usage` : "";
+                })()}</span>
               </div>
             </button>
           ))}
@@ -488,10 +493,17 @@ function UpgradeTab({ currentPlanSlug, onUpgraded }: { currentPlanSlug: string |
               <span className="sub-detail-label">New plan</span>
               <span className="sub-detail-value">{preview.new_plan_name}</span>
             </div>
-            <div className="sub-detail-row">
-              <span className="sub-detail-label">New monthly usage</span>
-              <span className="sub-detail-value">${(preview.new_credits_per_month / 100).toFixed(0)}</span>
-            </div>
+            {(() => {
+              const basic = plans.find(p => p.price_monthly > 0 && p.price_monthly < 15);
+              const m = basic && basic.credits_per_month > 0 && preview.new_credits_per_month > basic.credits_per_month
+                ? Math.round(preview.new_credits_per_month / basic.credits_per_month) : null;
+              return m ? (
+                <div className="sub-detail-row">
+                  <span className="sub-detail-label">New monthly usage</span>
+                  <span className="sub-detail-value">{m}x more than Basic</span>
+                </div>
+              ) : null;
+            })()}
           </div>
         )}
 
