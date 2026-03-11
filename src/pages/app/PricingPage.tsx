@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { apiClient, type Plan } from "../../lib/api-client";
 import { useAuth } from "../../features/auth/AuthContext";
 import { PublicNavbar } from "../../components/PublicNavbar";
@@ -39,6 +40,8 @@ type PricingContentProps = {
 
 function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveSubscription }: PricingContentProps) {
   const navigate = useNavigate();
+  const [switchingPlan, setSwitchingPlan] = useState<string | null>(null);
+  const [switchError, setSwitchError] = useState<string | null>(null);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["plans"],
@@ -53,6 +56,24 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
       return;
     }
     navigate(`/app/order?plan=${plan.id}&billing=monthly`);
+  };
+
+  const handleSwitch = async (plan: Plan) => {
+    const confirmed = window.confirm(
+      `Switch to ${plan.name} ($${plan.price_monthly}/mo)?\n\nThe price difference will be charged immediately (prorated for the remaining days in your current cycle).`
+    );
+    if (!confirmed) return;
+
+    setSwitchError(null);
+    setSwitchingPlan(plan.id);
+    try {
+      await apiClient.upgradeSubscription(plan.id);
+      // Refresh user data to reflect new plan
+      window.location.href = "/app/payment-success?status=succeeded";
+    } catch {
+      setSwitchError("Failed to switch plan. Please try again.");
+      setSwitchingPlan(null);
+    }
   };
 
   if (isError) {
@@ -86,6 +107,13 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
           plans.map((plan) => {
             const isCurrent = isAuthenticated && plan.id === currentPlanId;
 
+            // Find the basic plan's credits to compute usage multiplier
+            const basicPlan = plans.find(p => p.price_monthly > 0 && p.price_monthly < 15);
+            const basicCredits = basicPlan?.credits_per_month ?? 0;
+            const multiplier = basicCredits > 0 && plan.credits_per_month > basicCredits
+              ? Math.round(plan.credits_per_month / basicCredits)
+              : null;
+
             return (
               <div key={plan.id} className={`pricing-card${plan.highlight ? " featured" : ""}${isCurrent ? " current" : ""}`}>
                 {isCurrent && <span className="pricing-current-badge">Your Plan</span>}
@@ -99,7 +127,11 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
                 </div>
 
                 <div className="pricing-credits">
-                  ${(plan.credits_per_month / 100).toFixed(0)} usage / month
+                  {multiplier !== null ? (
+                    <span className="pricing-multiplier">{multiplier}x more usage than Basic</span>
+                  ) : (
+                    <span>&nbsp;</span>
+                  )}
                 </div>
 
                 <ul className="pricing-features">
@@ -116,12 +148,18 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
                     Current Plan
                   </button>
                 ) : hasActiveSubscription ? (
-                  <Link to="/app/manage-subscription?tab=upgrade" className="pricing-cta switch">
-                    Switch to {plan.name}
-                  </Link>
+                  <button
+                    className="pricing-cta"
+                    onClick={() => handleSwitch(plan)}
+                    disabled={switchingPlan !== null}
+                  >
+                    {switchingPlan === plan.id ? "Switching\u2026" : `Switch to ${plan.name}`}
+                  </button>
                 ) : (
                   <button className="pricing-cta" onClick={() => handleBuy(plan)}>
-                    {isAuthenticated ? plan.cta_label : plan.price_monthly === 0 ? "Get Started" : plan.cta_label}
+                    {plan.price_monthly === 0
+                      ? "Get Started Free"
+                      : `Start ${plan.name}`}
                   </button>
                 )}
               </div>
@@ -129,6 +167,15 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
           })
         )}
       </div>
+
+      {switchError && (
+        <p className="checkout-error" style={{ textAlign: "center", marginBottom: "1rem" }}>{switchError}</p>
+      )}
+
+      {/* Trust signal */}
+      <p className="pricing-trust">
+        Cancel anytime. Credits never expire. Secure checkout via Dodo Payments.
+      </p>
     </div>
   );
 }

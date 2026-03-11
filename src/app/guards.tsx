@@ -1,12 +1,21 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../features/auth/AuthContext";
 import { LandingPage } from "../pages/LandingPage";
+import "../assets/css/landing.css";
+
+function SessionLoader() {
+  return (
+    <div className="lp-overlay" aria-hidden="true">
+      <img src="/assets/Logomark.svg" alt="" className="lp-overlay-logo" />
+    </div>
+  );
+}
 
 export function RequireAuth() {
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
 
-  if (isLoading) return <p>Loading session...</p>;
+  if (isLoading) return <SessionLoader />;
   if (!isAuthenticated) {
     const returnTo = encodeURIComponent(location.pathname + location.search);
     return <Navigate to={`/auth/login?returnTo=${returnTo}`} replace />;
@@ -24,7 +33,6 @@ export function RequireAdmin() {
 export function LandingRoute() {
   const { isLoading } = useAuth();
 
-  // Return null during auth init to avoid a flash of the landing page for logged-in users.
-  if (isLoading) return null;
+  if (isLoading) return <SessionLoader />;
   return <LandingPage />;
 }

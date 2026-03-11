@@ -125,7 +125,7 @@
 /* Grid */
 .pricing-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
     margin: 0 auto 3rem;
     max-width: 1100px;
@@ -242,6 +242,36 @@
     margin-bottom: 2rem;
     padding-bottom: 1.5rem;
     border-bottom: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.pricing-per-credit {
+    font-size: 0.75rem;
+    color: var(--primary-green);
+    font-weight: 500;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.pricing-multiplier {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    background: rgba(133, 196, 73, 0.12);
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--primary-green);
+    width: fit-content;
+}
+
+.pricing-trust {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: -1rem;
 }
 
 /* Features */
@@ -511,13 +541,17 @@
 
 /* Responsive */
 @media (max-width: 1024px) {
+    .pricing-nav {
+        padding: 1rem 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
     .pricing-grid {
         grid-template-columns: 1fr;
         max-width: 400px;
-    }
-
-    .pricing-nav {
-        padding: 1rem 1.5rem;
+        margin-left: auto;
+        margin-right: auto;
     }
 }
 

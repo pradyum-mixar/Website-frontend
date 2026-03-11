@@ -6,20 +6,6 @@ import "../../assets/css/pricing.css";
 
 type SyncState = "polling" | "synced" | "sync-failed";
 
-function readPreCheckoutBaseline(): { credits: number; subscription_type: number } {
-  try {
-    const raw = sessionStorage.getItem("pre_checkout_user");
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      return {
-        credits: parsed.credits ?? 0,
-        subscription_type: parsed.subscription_type ?? 0,
-      };
-    }
-  } catch { /* ignore */ }
-  return { credits: 0, subscription_type: 0 };
-}
-
 export function PaymentSuccessPage() {
   const [searchParams] = useSearchParams();
   const paymentId = searchParams.get("payment_id");
@@ -28,18 +14,15 @@ export function PaymentSuccessPage() {
   const [syncState, setSyncState] = useState<SyncState>("polling");
   const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Poll until user data reflects the payment (webhook delivery may lag).
+  // Works for both status=succeeded and status=processing/pending/missing.
+  // Stops when subscription_type > 0 or credits change, or after 60s.
   useEffect(() => {
-    if (status !== "succeeded" && status !== "active") return;
-
-    // Read pre-payment baseline from sessionStorage (set before checkout redirect).
-    // This avoids a race where RequireAuth's refreshUser() already updates the user
-    // context with post-payment values before this component mounts.
-    const baseline = readPreCheckoutBaseline();
-    const initialCredits = baseline.credits;
-    const initialSubType = baseline.subscription_type;
+    const initialCredits = user?.credits ?? 0;
+    const initialSubType = user?.subscription_type ?? 0;
 
     let attempts = 0;
-    const MAX_ATTEMPTS = 15;
+    const MAX_ATTEMPTS = 40; // ~60s with 1.5s intervals
     let cancelled = false;
 
     const poll = async () => {
@@ -51,10 +34,9 @@ export function PaymentSuccessPage() {
 
         const credits = freshUser?.credits ?? 0;
         const subType = freshUser?.subscription_type ?? 0;
-        const updated = credits > initialCredits || subType > initialSubType;
+        const updated = credits !== initialCredits || subType > initialSubType;
 
         if (updated) {
-          sessionStorage.removeItem("pre_checkout_user");
           setSyncState("synced");
           return;
         }
@@ -65,19 +47,18 @@ export function PaymentSuccessPage() {
       attempts++;
 
       if (attempts >= MAX_ATTEMPTS) {
-        sessionStorage.removeItem("pre_checkout_user");
         setSyncState("sync-failed");
         return;
       }
 
-      // Schedule next poll — prevents overlapping requests unlike setInterval
+      // Schedule next poll
       if (!cancelled) {
-        pollRef.current = setTimeout(poll, 2500);
+        pollRef.current = setTimeout(poll, 1500);
       }
     };
 
-    // Give the backend a moment to process the webhook before first poll
-    pollRef.current = setTimeout(poll, 1500);
+    // Start polling immediately
+    poll();
 
     return () => {
       cancelled = true;
@@ -93,15 +74,16 @@ export function PaymentSuccessPage() {
   const isSubscribed = user && user.subscription_type > 0;
   const planLabel = user?.plan_name ?? null;
 
-  const successMessage = isSubscribed
-    ? `Your ${planLabel} plan is now active. Your credits have been added.`
-    : "Your credits have been added to your account.";
+  // Build success message based on state
+  const successMessage = syncState === "synced" && isSubscribed
+    ? `Your ${planLabel} plan is now active.`
+    : "Your payment was received. Your plan status will update shortly.";
 
   return (
     <div className="order-summary">
       <div className="order-card" style={{ textAlign: "center" }}>
 
-        {/* ── SUCCESS ── */}
+        {/* -- SUCCEEDED -- */}
         {isSucceeded && (
           <>
             <svg
@@ -132,7 +114,7 @@ export function PaymentSuccessPage() {
           </>
         )}
 
-        {/* ── FAILED ── */}
+        {/* -- FAILED -- */}
         {isFailed && (
           <>
             <svg
@@ -156,7 +138,7 @@ export function PaymentSuccessPage() {
           </>
         )}
 
-        {/* ── TIMED OUT / EXPIRED ── */}
+        {/* -- TIMED OUT / EXPIRED -- */}
         {isTimedOut && (
           <>
             <svg
@@ -179,7 +161,7 @@ export function PaymentSuccessPage() {
           </>
         )}
 
-        {/* ── UNKNOWN (no status, user navigated here directly, or unexpected status) ── */}
+        {/* -- UNKNOWN (no status, user navigated here directly, or unexpected status) -- */}
         {isUnknown && (
           <>
             <svg
@@ -187,20 +169,30 @@ export function PaymentSuccessPage() {
               height="64"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#94a3b8"
+              stroke="#eab308"
               strokeWidth="2"
               style={{ margin: "0 auto 1.5rem" }}
             >
               <circle cx="12" cy="12" r="10" />
-              <path d="M12 8v4" />
-              <circle cx="12" cy="16" r="0.5" fill="#94a3b8" />
+              <path d="M12 6v6l4 2" />
             </svg>
-            <h2>No Payment Found</h2>
+            <h2>{syncState === "synced" ? "Payment Received" : "Processing Payment"}</h2>
             <p className="order-tagline">
-              {status
-                ? `Your payment returned with status "${status}". If you were charged, please contact support.`
-                : "It looks like you navigated here without completing a payment. If you believe this is an error, please check your billing history or contact support."}
+              {syncState === "synced"
+                ? successMessage
+                : "Confirming your payment, this may take a few seconds..."}
             </p>
+            {syncState === "polling" && (
+              <div style={{ margin: "1rem auto", width: 28, height: 28 }}>
+                <div className="spinner" style={{ width: 28, height: 28, borderWidth: 3 }} />
+              </div>
+            )}
+            {syncState === "sync-failed" && (
+              <p style={{ fontSize: "0.85rem", color: "#eab308" }}>
+                Account sync is taking longer than usual. Your plan status will update shortly.
+                Try refreshing in a minute.
+              </p>
+            )}
           </>
         )}
 
@@ -211,14 +203,11 @@ export function PaymentSuccessPage() {
         )}
 
         <div className="order-actions" style={{ marginTop: "2rem" }}>
-          {/* Show retry for failed/timeout/unknown states */}
+          {/* Show retry for failed/timeout states */}
           {(isFailed || isTimedOut) && (
             <>
               <Link to="/app/pricing" className="btn-payment active">
                 Retry Payment
-              </Link>
-              <Link to="/app/buy-credits" className="btn-back">
-                Buy Credits Instead
               </Link>
               <Link to="/app" className="btn-back">
                 Go to Dashboard
@@ -226,20 +215,8 @@ export function PaymentSuccessPage() {
             </>
           )}
 
-          {/* Show dashboard + buy more for success */}
+          {/* Show dashboard + plans for success */}
           {isSucceeded && (
-            <>
-              <Link to="/app" className="btn-payment active">
-                Go to Dashboard
-              </Link>
-              <Link to="/app/buy-credits" className="btn-back">
-                Buy More Credits
-              </Link>
-            </>
-          )}
-
-          {/* Unknown/no-status — direct them to pricing or dashboard */}
-          {isUnknown && (
             <>
               <Link to="/app" className="btn-payment active">
                 Go to Dashboard
@@ -247,11 +224,17 @@ export function PaymentSuccessPage() {
               <Link to="/app/pricing" className="btn-back">
                 View Plans
               </Link>
-              <Link
-                to="/app/manage-subscription?tab=billing"
-                className="btn-back"
-              >
-                Check Billing History
+            </>
+          )}
+
+          {/* Unknown/no-status — direct them to dashboard or pricing */}
+          {isUnknown && (
+            <>
+              <Link to="/app" className="btn-payment active">
+                Go to Dashboard
+              </Link>
+              <Link to="/app/pricing" className="btn-back">
+                View Plans
               </Link>
             </>
           )}

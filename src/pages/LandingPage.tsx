@@ -1240,7 +1240,7 @@ export function LandingPage() {
           <div className="footer-divider"></div>
 
           <div className="footer-bottom">
-            <p className="copyright">&copy; 2025 mixar. All rights reserved.</p>
+            <p className="copyright">mixar. All rights reserved.</p>
 
             <div className="social-icons">
               <a

@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { apiClient } from "../../lib/api-client";
+import { queryClient } from "../../app/providers";
 import { authStorage } from "./storage";
 import type { CurrentUser } from "./types";
 
@@ -35,6 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const login = async (email: string, password: string) => {
+    queryClient.clear();
     await apiClient.login(email, password);
     await refreshUser();
   };
@@ -42,6 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     await apiClient.logout();
     setUser(null);
+    queryClient.clear();
   };
 
   useEffect(() => {

@@ -13,6 +13,7 @@ type UsageLog = {
   status: string;
   error?: string | null;
   created_at: string;
+  model_name?: string;
 };
 type UsageLogsResponse = {
   status: string;
@@ -105,7 +106,7 @@ export function DashboardPage() {
   const [modeFilter, setModeFilter] = useState("");
 
   const usage = useQuery({
-    queryKey: ["usage", page, modeFilter],
+    queryKey: ["usage", page, modeFilter, user?.id],
     queryFn: async () => {
       const params = new URLSearchParams({
         page: String(page),
@@ -114,18 +115,23 @@ export function DashboardPage() {
       if (modeFilter) params.set("mode", modeFilter);
       return (await apiClient.instance.get<UsageLogsResponse>(`/users/user-usage-logs/?${params}`)).data;
     },
+    enabled: !!user,
+    refetchInterval: 60_000,
   });
 
   const stats = useQuery({
-    queryKey: ["usageStats"],
+    queryKey: ["usageStats", user?.id],
     queryFn: async () => (await apiClient.instance.get<UsageStatsResponse>("/users/usage-stats")).data,
+    enabled: !!user,
+    refetchInterval: 60_000,
   });
 
   const subscriptionStatus = useQuery<SubscriptionStatus>({
-    queryKey: ["subscriptionStatus"],
+    queryKey: ["subscriptionStatus", user?.id],
     queryFn: () => apiClient.getSubscriptionStatus(),
     enabled: (user?.subscription_type ?? 0) > 0,
     retry: false,
+    refetchInterval: 60_000,
   });
 
   const getModeLabel = (mode: string) =>
@@ -160,6 +166,19 @@ export function DashboardPage() {
   const total = usage.data?.pagination.total ?? 0;
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
+  const hasSubscription = (user?.subscription_type ?? 0) > 0;
+  const creditsPerMonth = subscriptionStatus.data?.credits_per_month ?? 0;
+  const creditsRemaining = user?.credits ?? 0;
+
+  // Credit usage percentage (how much remains of plan allocation)
+  let remainingPct = 100;
+  if (hasSubscription && creditsPerMonth > 0) {
+    remainingPct = Math.min(
+      100,
+      Math.max(0, (creditsRemaining / creditsPerMonth) * 100)
+    );
+  }
+
   const handleFilterChange = (value: string) => {
     setModeFilter(value);
     setPage(1);
@@ -168,37 +187,103 @@ export function DashboardPage() {
   return (
     <>
       <div className="dashboard-header">
-          <h1 className="dashboard-title">Welcome, <span>{user?.name?.split(' ')[0] || user?.email.split('@')[0]}</span>!</h1>
-          <p className="dashboard-subtitle">Manage your credits and view your usage history</p>
-          {subscriptionStatus.data && (
-            <div className="billing-cycle-badge">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M12 6v6l4 2"/>
-              </svg>
-              {subscriptionStatus.data.subscription_expires_at
-                ? `${subscriptionStatus.data.plan_name} Plan · Expires in ${subscriptionStatus.data.days_left} days`
-                : `${subscriptionStatus.data.plan_name} Plan · ${subscriptionStatus.data.days_left} days left in cycle`}
+        <h1 className="dashboard-title">
+          Welcome,{" "}
+          <span>
+            {user?.name?.split(" ")[0] || user?.email.split("@")[0]}
+          </span>
+          !
+        </h1>
+        <p className="dashboard-subtitle">
+          Manage your usage and activity
+        </p>
+        {subscriptionStatus.data && (
+          <div className="billing-cycle-badge">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 6v6l4 2" />
+            </svg>
+            {subscriptionStatus.data.subscription_expires_at
+              ? `${subscriptionStatus.data.plan_name} · Expires in ${subscriptionStatus.data.days_left} days`
+              : `${subscriptionStatus.data.plan_name} · ${subscriptionStatus.data.days_left} days left in cycle`}
+          </div>
+        )}
+      </div>
+
+      {/* Upgrade Banner — only for free users (loss aversion + value framing) */}
+      {!hasSubscription && (
+        <div className="upgrade-banner">
+          <div className="upgrade-banner-content">
+            <div className="upgrade-banner-text">
+              <h3 className="upgrade-banner-title">Unlock the full power of Mixar</h3>
+              <p className="upgrade-banner-desc">
+                Get monthly usage for AI image generation, 3D modeling, texture painting, and the Blender agent.
+                Teams using Mixar ship 3D assets 10x faster.
+              </p>
+              <div className="upgrade-banner-features">
+                <span>Image Generation</span>
+                <span>3D Model Creation</span>
+                <span>Texture Painting</span>
+                <span>AI Blender Agent</span>
+              </div>
             </div>
-          )}
+            <Link to="/app/pricing" className="upgrade-banner-cta">
+              View Plans
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Usage Bars - Claude Code style */}
+      <div className="usage-section">
+        {/* Usage Bar */}
+        <div className="usage-bar-card">
+          <div className="usage-bar-header">
+            <span className="usage-bar-label">Usage</span>
+            <span className="usage-bar-value">
+              {hasSubscription
+                ? `${Math.round(100 - remainingPct)}% used`
+                : creditsRemaining > 0 ? "Available" : "No usage"}
+            </span>
+          </div>
+          <div className="usage-bar-track">
+            <div
+              className={`usage-bar-fill${remainingPct < 20 ? " critical" : remainingPct < 50 ? " warning" : ""}`}
+              style={{
+                width: `${hasSubscription ? remainingPct : (creditsRemaining > 0 ? 100 : 0)}%`,
+              }}
+            />
+          </div>
+          <div className="usage-bar-footer">
+            {hasSubscription ? (
+              <span>{Math.round(remainingPct)}% remaining this cycle</span>
+            ) : creditsRemaining === 0 ? (
+              <span className="usage-bar-nudge">Subscribe to get monthly usage</span>
+            ) : (
+              <span>&nbsp;</span>
+            )}
+            <div className="usage-bar-actions">
+              {!hasSubscription && (
+                <Link to="/app/pricing" className="usage-bar-link">
+                  Subscribe
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="stats-grid">
-          <div className="stat-card highlight">
-              <div className="stat-header">
-                  <div className="stat-icon">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <circle cx="12" cy="12" r="10"/>
-                          <path d="M12 6v6l4 2"/>
-                      </svg>
-                  </div>
-                  <span className="stat-badge">Available</span>
-              </div>
-              <div className="stat-value">{user?.credits ?? "--"}</div>
-              <div className="stat-label">Credits Balance</div>
-              <Link to="/app/buy-credits" className="btn-buy-credits">Buy Credits</Link>
-          </div>
-
           <div className="stat-card">
               <div className="stat-header">
                   <div className="stat-icon">
@@ -267,7 +352,6 @@ export function DashboardPage() {
                     <thead>
                         <tr>
                             <th>Activity</th>
-                            <th>Credits Used</th>
                             <th>Date</th>
                             <th>Status</th>
                         </tr>
@@ -286,8 +370,7 @@ export function DashboardPage() {
                                   </div>
                               </div>
                           </td>
-                          <td className="usage-credits">{event.status === "success" && event.credits > 0 ? event.credits : '0'}</td>
-                          <td className="usage-date">{new Date(event.created_at).toLocaleDateString()}</td>
+                          <td className="usage-date">{new Date(event.created_at).toLocaleString(undefined, { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</td>
                           <td><span className={`usage-status ${event.status === "success" ? "completed" : "failed"}`}>{event.status === "success" ? "Completed" : "Failed"}</span></td>
                         </tr>
                       ))}
@@ -305,8 +388,15 @@ export function DashboardPage() {
                     <p className="empty-message">
                       {modeFilter
                         ? "Try selecting a different feature filter."
-                        : "Start creating with Mixar to see your usage history here."}
+                        : hasSubscription
+                          ? "Start creating with Mixar to see your usage history here."
+                          : "Subscribe to a plan and start creating with Mixar."}
                     </p>
+                    {!hasSubscription && !modeFilter && (
+                      <Link to="/app/pricing" className="empty-state-cta">
+                        View Plans
+                      </Link>
+                    )}
                 </div>
               )}
           </div>
