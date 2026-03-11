@@ -370,7 +370,7 @@ export function DashboardPage() {
                                   </div>
                               </div>
                           </td>
-                          <td className="usage-date">{new Date(event.created_at).toLocaleDateString()}</td>
+                          <td className="usage-date">{new Date(event.created_at).toLocaleString(undefined, { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</td>
                           <td><span className={`usage-status ${event.status === "success" ? "completed" : "failed"}`}>{event.status === "success" ? "Completed" : "Failed"}</span></td>
                         </tr>
                       ))}
