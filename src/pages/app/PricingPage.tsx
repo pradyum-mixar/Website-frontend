@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { apiClient, type Plan } from "../../lib/api-client";
@@ -51,6 +52,8 @@ type PricingContentProps = {
 
 function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveSubscription, subscriptionLabel }: PricingContentProps) {
   const navigate = useNavigate();
+  const [switchingPlan, setSwitchingPlan] = useState<string | null>(null);
+  const [switchError, setSwitchError] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["plans"],
@@ -65,6 +68,19 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
       return;
     }
     navigate(`/app/order?plan=${plan.id}&billing=monthly`);
+  };
+
+  const handleSwitch = async (plan: Plan) => {
+    setSwitchError(null);
+    setSwitchingPlan(plan.id);
+    try {
+      await apiClient.cancelSubscription();
+      const result = await apiClient.createCheckout(plan.id, "monthly");
+      window.location.href = result.data.payment_link;
+    } catch {
+      setSwitchError("Failed to switch plan. Please try again.");
+      setSwitchingPlan(null);
+    }
   };
 
   return (
@@ -127,8 +143,12 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
                     Current Plan
                   </button>
                 ) : hasActiveSubscription ? (
-                  <button className="pricing-cta" disabled title={`Cancel your ${subscriptionLabel} plan first to switch`}>
-                    Cancel {subscriptionLabel} to switch
+                  <button
+                    className="pricing-cta"
+                    onClick={() => handleSwitch(plan)}
+                    disabled={switchingPlan !== null}
+                  >
+                    {switchingPlan === plan.id ? "Switching…" : `Switch to ${plan.name}`}
                   </button>
                 ) : (
                   <button className="pricing-cta" onClick={() => handleBuy(plan)}>
@@ -142,6 +162,10 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
           })
         )}
       </div>
+
+      {switchError && (
+        <p className="checkout-error" style={{ textAlign: "center", marginBottom: "1rem" }}>{switchError}</p>
+      )}
 
       {/* Trust signal */}
       <p className="pricing-trust">
