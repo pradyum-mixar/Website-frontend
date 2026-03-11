@@ -8,7 +8,8 @@
 /* Hero Section */
 .about-hero {
   position: relative;
-  padding: 100px 48px 0;
+  padding: 0;
+  margin-top: -80px;
 }
 
 .about-hero-image-container {
@@ -38,7 +39,8 @@
 .about-hero-image-container img {
   width: 100%;
   height: auto;
-  max-height: 70vh;
+  min-height: 70vh;
+  max-height: 85vh;
   object-fit: cover;
   object-position: center;
   display: block;
@@ -331,7 +333,8 @@
 
 @media (max-width: 768px) {
   .about-hero {
-    padding: 80px 24px 0;
+    padding: 0;
+    margin-top: -70px;
   }
 
   .about-hero-image-container {
