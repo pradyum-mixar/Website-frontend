@@ -219,9 +219,24 @@
     font-size: 1.25rem;
     font-weight: 500;
     color: var(--text-secondary);
+    -webkit-text-fill-color: var(--text-secondary);
     text-decoration: line-through;
     margin-right: 0.5rem;
     opacity: 0.6;
+}
+
+.pricing-discount-badge {
+    display: inline-block;
+    margin-left: 0.5rem;
+    padding: 0.15rem 0.5rem;
+    background: rgba(133, 196, 73, 0.15);
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--primary-green);
+    -webkit-text-fill-color: var(--primary-green);
+    letter-spacing: 0.5px;
+    vertical-align: middle;
 }
 
 .pricing-price .currency {
