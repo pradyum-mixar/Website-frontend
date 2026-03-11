@@ -150,8 +150,8 @@ export function DashboardPage() {
             <span className="usage-bar-label">Credits</span>
             <span className="usage-bar-value">
               {hasSubscription
-                ? `${creditsRemaining.toLocaleString()} / ${creditsPerMonth.toLocaleString()}`
-                : `${creditsRemaining.toLocaleString()} available`}
+                ? `${Math.round(100 - remainingPct)}% used`
+                : creditsRemaining > 0 ? "Available" : "No credits"}
             </span>
           </div>
           <div className="usage-bar-track">
@@ -164,7 +164,7 @@ export function DashboardPage() {
           </div>
           <div className="usage-bar-footer">
             {hasSubscription ? (
-              <span>{Math.round(remainingPct)}% remaining</span>
+              <span>{Math.round(remainingPct)}% remaining this cycle</span>
             ) : creditsRemaining === 0 ? (
               <span className="usage-bar-nudge">Subscribe to get monthly credits</span>
             ) : (
@@ -226,7 +226,6 @@ export function DashboardPage() {
               <thead>
                 <tr>
                   <th>Activity</th>
-                  <th>Credits Used</th>
                   <th>Date</th>
                   <th>Status</th>
                 </tr>
@@ -245,11 +244,6 @@ export function DashboardPage() {
                           )}
                         </div>
                       </div>
-                    </td>
-                    <td className="usage-credits">
-                      {event.credits_used > 0
-                        ? `-${event.credits_used}`
-                        : "0"}
                     </td>
                     <td className="usage-date">
                       {new Date(
