@@ -92,11 +92,6 @@ export function OrderSummaryPage() {
           <span className="label">Billing Cycle</span>
           <span className="value">Monthly</span>
         </div>
-        <div className="order-row">
-          <span className="label">Credits</span>
-          <span className="value">{plan.credits_per_month.toLocaleString()} / month</span>
-        </div>
-
         <div className="order-total">
           <span className="label">Total</span>
           <span className="value">${price} / mo</span>
