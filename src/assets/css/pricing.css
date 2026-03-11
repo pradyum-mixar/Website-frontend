@@ -125,8 +125,7 @@
 /* Grid */
 .pricing-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 340px));
-    justify-content: center;
+    grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
     margin: 0 auto 3rem;
     max-width: 1040px;
@@ -534,10 +533,12 @@
     }
 }
 
-@media (max-width: 680px) {
+@media (max-width: 768px) {
     .pricing-grid {
         grid-template-columns: 1fr;
         max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
     }
 }
 
