@@ -148,12 +148,14 @@ export function BillingHistoryPage() {
                           className="btn-download-invoice"
                           onClick={async () => {
                             try {
-                              const result = await apiClient.createCheckout(item.plan_id!, "monthly");
-                              window.location.href = result.data.payment_link;
-                            } catch { /* silently fail */ }
+                              await apiClient.retryPayment();
+                              alert("A payment update link has been sent to your email.");
+                            } catch {
+                              alert("Failed to send update link. Please try again.");
+                            }
                           }}
                         >
-                          Retry
+                          Update Payment
                         </button>
                       ) : (
                         "--"
