@@ -366,7 +366,6 @@ export function DashboardPage() {
                     <thead>
                         <tr>
                             <th>Activity</th>
-                            <th>Credits Used</th>
                             <th>Date</th>
                             <th>Status</th>
                         </tr>
@@ -385,7 +384,6 @@ export function DashboardPage() {
                                   </div>
                               </div>
                           </td>
-                          <td className="usage-credits">{event.status === "success" && event.credits > 0 ? event.credits : '0'}</td>
                           <td className="usage-date">{new Date(event.created_at).toLocaleDateString()}</td>
                           <td><span className={`usage-status ${event.status === "success" ? "completed" : "failed"}`}>{event.status === "success" ? "Completed" : "Failed"}</span></td>
                         </tr>

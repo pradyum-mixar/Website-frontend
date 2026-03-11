@@ -99,7 +99,6 @@ export function ManageSubscriptionPage() {
           subscriptionStatus={subscriptionStatus}
           statusLoading={statusLoading}
           statusError={statusError}
-          user={user}
         />
       )}
       {activeTab === "billing" && <BillingTab />}
@@ -125,14 +124,13 @@ export function ManageSubscriptionPage() {
   );
 }
 
-function OverviewTab({ planLabel, hasSub, alreadyCancelled, subscriptionStatus, statusLoading, statusError, user }: {
+function OverviewTab({ planLabel, hasSub, alreadyCancelled, subscriptionStatus, statusLoading, statusError }: {
   planLabel: string;
   hasSub: boolean;
   alreadyCancelled: boolean;
   subscriptionStatus?: SubscriptionStatus;
   statusLoading?: boolean;
   statusError?: boolean;
-  user: ReturnType<typeof useAuth>["user"];
 }) {
   return (
     <div className="sub-overview">
@@ -171,20 +169,14 @@ function OverviewTab({ planLabel, hasSub, alreadyCancelled, subscriptionStatus, 
                   : `${subscriptionStatus.days_left} days left in cycle`}
               </span>
             </div>
-            <div className="sub-detail-row">
-              <span className="sub-detail-label">Usage this cycle</span>
-              <span className="sub-detail-value">
-                ${((subscriptionStatus.plan_value_cents - subscriptionStatus.balance_cents) / 100).toFixed(2)} of ${(subscriptionStatus.plan_value_cents / 100).toFixed(2)} used
-              </span>
-            </div>
             <div className="sub-detail-row" style={{ flexDirection: "column", gap: "0.4rem" }}>
               <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
-                <span className="sub-detail-label">Balance remaining</span>
+                <span className="sub-detail-label">Usage this cycle</span>
                 <span className="sub-detail-value" style={{
                   color: subscriptionStatus.usage_pct >= 100 ? "var(--error-color)" :
                          subscriptionStatus.usage_pct >= 80 ? "#f59e0b" : undefined,
                 }}>
-                  ${(subscriptionStatus.balance_cents / 100).toFixed(2)} ({(100 - subscriptionStatus.usage_pct).toFixed(1)}%)
+                  {subscriptionStatus.usage_pct}% used · {Math.round(100 - subscriptionStatus.usage_pct)}% remaining
                 </span>
               </div>
               <div style={{ width: "100%", height: "6px", borderRadius: "3px", background: "var(--border-color, #333)", overflow: "hidden" }}>
@@ -211,8 +203,8 @@ function OverviewTab({ planLabel, hasSub, alreadyCancelled, subscriptionStatus, 
         {!hasSub && (
           <div className="sub-plan-details">
             <div className="sub-detail-row">
-              <span className="sub-detail-label">Balance</span>
-              <span className="sub-detail-value">${((user?.credits ?? 0) / 100).toFixed(2)}</span>
+              <span className="sub-detail-label">Usage</span>
+              <span className="sub-detail-value">No active plan</span>
             </div>
           </div>
         )}
