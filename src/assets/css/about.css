@@ -38,9 +38,7 @@
 
 .about-hero-image-container img {
   width: 100%;
-  height: auto;
-  min-height: 70vh;
-  max-height: 85vh;
+  height: 100vh;
   object-fit: cover;
   object-position: center;
   display: block;
