@@ -121,9 +121,15 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
                 <div className="pricing-card-tagline">{plan.tagline}</div>
 
                 <div className="pricing-price">
+                  {plan.id === "pro" && (
+                    <span className="price-original">$39.99</span>
+                  )}
                   <span className="currency">$</span>
                   <span className="amount">{plan.price_monthly}</span>
                   <span className="period">/mo</span>
+                  {plan.id === "pro" && (
+                    <span className="pricing-discount-badge">GDC 2026</span>
+                  )}
                 </div>
 
                 <div className="pricing-credits">
