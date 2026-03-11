@@ -181,24 +181,24 @@ function OverviewTab({ planLabel, hasSub, alreadyCancelled, subscriptionStatus, 
               <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
                 <span className="sub-detail-label">Usage this cycle</span>
                 <span className="sub-detail-value" style={{
-                  color: subscriptionStatus.usage_pct >= 100 ? "var(--error-color)" :
-                         subscriptionStatus.usage_pct >= 80 ? "#f59e0b" : undefined,
+                  color: Math.max(0, Math.min(100, subscriptionStatus.usage_pct)) >= 100 ? "var(--error-color)" :
+                         Math.max(0, Math.min(100, subscriptionStatus.usage_pct)) >= 80 ? "#f59e0b" : undefined,
                 }}>
-                  {subscriptionStatus.usage_pct}% used
+                  {Math.max(0, Math.min(100, subscriptionStatus.usage_pct))}% used
                 </span>
               </div>
               <div style={{ width: "100%", height: "6px", borderRadius: "3px", background: "var(--border-color, #333)", overflow: "hidden" }}>
                 <div style={{
                   height: "100%",
-                  width: `${Math.min(subscriptionStatus.usage_pct, 100)}%`,
+                  width: `${Math.max(0, Math.min(subscriptionStatus.usage_pct, 100))}%`,
                   borderRadius: "3px",
-                  background: subscriptionStatus.usage_pct >= 100 ? "var(--error-color)" :
-                              subscriptionStatus.usage_pct >= 80 ? "#f59e0b" : "var(--accent-color, #6366f1)",
+                  background: Math.max(0, Math.min(100, subscriptionStatus.usage_pct)) >= 100 ? "var(--error-color)" :
+                              Math.max(0, Math.min(100, subscriptionStatus.usage_pct)) >= 80 ? "#f59e0b" : "var(--accent-color, #6366f1)",
                   transition: "width 0.3s ease",
                 }} />
               </div>
             </div>
-            {subscriptionStatus.usage_pct >= 100 && (
+            {Math.max(0, Math.min(100, subscriptionStatus.usage_pct)) >= 100 && (
               <div style={{ marginTop: "0.75rem" }}>
                 <Link to="/app/manage-subscription?tab=upgrade" className="btn-buy-credits" style={{ display: "inline-block" }}>
                   Upgrade for more usage
