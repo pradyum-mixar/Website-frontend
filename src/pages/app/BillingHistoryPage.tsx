@@ -143,6 +143,20 @@ export function BillingHistoryPage() {
                             </>
                           )}
                         </button>
+                      ) : item.status === "failed" && item.plan_id ? (
+                        <button
+                          className="btn-download-invoice"
+                          onClick={async () => {
+                            try {
+                              await apiClient.retryPayment();
+                              alert("A payment update link has been sent to your email.");
+                            } catch {
+                              alert("Failed to send update link. Please try again.");
+                            }
+                          }}
+                        >
+                          Update Payment
+                        </button>
                       ) : (
                         "--"
                       )}

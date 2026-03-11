@@ -253,6 +253,11 @@ class ApiClient {
     return response.data;
   }
 
+  async retryPayment(): Promise<{ status: string; message: string }> {
+    const response = await this.client.post<{ status: string; message: string }>("/subscriptions/retry-payment");
+    return response.data;
+  }
+
   async getAvailableDownloads(): Promise<{
     status: string;
     data: { platform: string; version: string; size_bytes: number; installer_type: string | null }[];
