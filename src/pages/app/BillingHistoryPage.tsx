@@ -143,6 +143,18 @@ export function BillingHistoryPage() {
                             </>
                           )}
                         </button>
+                      ) : item.status === "failed" && item.plan_id ? (
+                        <button
+                          className="btn-download-invoice"
+                          onClick={async () => {
+                            try {
+                              const result = await apiClient.createCheckout(item.plan_id!, "monthly");
+                              window.location.href = result.data.payment_link;
+                            } catch { /* silently fail */ }
+                          }}
+                        >
+                          Retry
+                        </button>
                       ) : (
                         "--"
                       )}
