@@ -107,13 +107,6 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
           plans.map((plan) => {
             const isCurrent = isAuthenticated && plan.id === currentPlanId;
 
-            // Find the basic plan's credits to compute usage multiplier
-            const basicPlan = plans.find(p => p.price_monthly > 0 && p.price_monthly < 15);
-            const basicCredits = basicPlan?.credits_per_month ?? 0;
-            const multiplier = basicCredits > 0 && plan.credits_per_month > basicCredits
-              ? Math.round(plan.credits_per_month / basicCredits)
-              : null;
-
             return (
               <div key={plan.id} className={`pricing-card${plan.highlight ? " featured" : ""}${isCurrent ? " current" : ""}`}>
                 {isCurrent && <span className="pricing-current-badge">Your Plan</span>}
@@ -132,13 +125,7 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
                   <div className="pricing-discount-badge">GDC 2026 Offer</div>
                 )}
 
-                <div className="pricing-credits">
-                  {multiplier !== null ? (
-                    <span className="pricing-multiplier">{multiplier}x more usage than Basic</span>
-                  ) : (
-                    <span>&nbsp;</span>
-                  )}
-                </div>
+                <div className="pricing-credits">&nbsp;</div>
 
                 <ul className="pricing-features">
                   {plan.features.map((feature) => (
