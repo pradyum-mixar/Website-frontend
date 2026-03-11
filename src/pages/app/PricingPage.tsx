@@ -85,8 +85,20 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
           plans.map((plan) => {
             const price = plan.price_monthly;
             const isCurrent = isAuthenticated && plan.id === currentPlanId;
-            const costPerCredit = plan.credits_per_month > 0
-              ? (price / plan.credits_per_month).toFixed(3)
+
+            // Calculate usage value per $1: (credits_per_month / 100) / price
+            // credits are in cents internally, so credits_per_month/100 = dollar value of usage
+            const usageValuePerDollar = price > 0
+              ? ((plan.credits_per_month / 100) / price).toFixed(2)
+              : null;
+
+            // Find the basic plan's value to compute multiplier
+            const basicPlan = plans.find(p => p.price_monthly > 0 && p.price_monthly < 15);
+            const basicValuePerDollar = basicPlan && basicPlan.price_monthly > 0
+              ? (basicPlan.credits_per_month / 100) / basicPlan.price_monthly
+              : null;
+            const multiplier = usageValuePerDollar && basicValuePerDollar && basicValuePerDollar > 0
+              ? parseFloat(usageValuePerDollar) / basicValuePerDollar
               : null;
 
             return (
@@ -102,9 +114,14 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
                 </div>
 
                 <div className="pricing-credits">
-                  {plan.credits_per_month.toLocaleString()} credits / month
-                  {costPerCredit && (
-                    <span className="pricing-per-credit">${costPerCredit} per credit</span>
+                  ${(plan.credits_per_month / 100).toFixed(2)} usage / month
+                  {usageValuePerDollar && (
+                    <span className="pricing-per-credit">
+                      ${usageValuePerDollar} usage per $1 paid
+                      {multiplier !== null && multiplier > 1.1 && (
+                        <span className="pricing-multiplier">{multiplier.toFixed(1)}x more value than Basic</span>
+                      )}
+                    </span>
                   )}
                 </div>
 
