@@ -99,6 +99,7 @@ export function ManageSubscriptionPage() {
           subscriptionStatus={subscriptionStatus}
           statusLoading={statusLoading}
           statusError={statusError}
+          onChangePlan={() => setTab("upgrade")}
         />
       )}
       {activeTab === "billing" && <BillingTab />}
@@ -124,13 +125,14 @@ export function ManageSubscriptionPage() {
   );
 }
 
-function OverviewTab({ planLabel, hasSub, alreadyCancelled, subscriptionStatus, statusLoading, statusError }: {
+function OverviewTab({ planLabel, hasSub, alreadyCancelled, subscriptionStatus, statusLoading, statusError, onChangePlan }: {
   planLabel: string;
   hasSub: boolean;
   alreadyCancelled: boolean;
   subscriptionStatus?: SubscriptionStatus;
   statusLoading?: boolean;
   statusError?: boolean;
+  onChangePlan: () => void;
 }) {
   return (
     <div className="sub-overview">
@@ -148,9 +150,15 @@ function OverviewTab({ planLabel, hasSub, alreadyCancelled, subscriptionStatus, 
               )}
             </div>
           </div>
-          <Link to="/app/pricing" className="btn-buy-credits">
-            {hasSub ? "Change Plan" : "Upgrade"}
-          </Link>
+          {hasSub && !alreadyCancelled ? (
+            <button className="btn-buy-credits" onClick={onChangePlan} style={{ cursor: "pointer", border: "none" }}>
+              Change Plan
+            </button>
+          ) : (
+            <Link to="/app/pricing" className="btn-buy-credits">
+              Upgrade
+            </Link>
+          )}
         </div>
 
         {statusError && (
