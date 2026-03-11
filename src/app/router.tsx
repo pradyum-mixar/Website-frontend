@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { LandingRoute, RequireAdmin, RequireAuth } from "./guards";
 import { AppShell } from "../layouts/AppShell";
 import { LoginPage } from "../pages/auth/LoginPage";
@@ -49,6 +49,9 @@ export function AppRouter() {
             </Route>
           </Route>
         </Route>
+
+        {/* Catch-all: redirect unknown routes to landing page */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );
