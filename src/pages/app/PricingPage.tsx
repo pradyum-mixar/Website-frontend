@@ -59,12 +59,17 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
   };
 
   const handleSwitch = async (plan: Plan) => {
+    const confirmed = window.confirm(
+      `Switch to ${plan.name} ($${plan.price_monthly}/mo)?\n\nThe price difference will be charged immediately (prorated for the remaining days in your current cycle).`
+    );
+    if (!confirmed) return;
+
     setSwitchError(null);
     setSwitchingPlan(plan.id);
     try {
-      await apiClient.cancelSubscription();
-      const result = await apiClient.createCheckout(plan.id, "monthly");
-      window.location.href = result.data.payment_link;
+      await apiClient.upgradeSubscription(plan.id);
+      // Refresh user data to reflect new plan
+      window.location.href = "/app/payment-success?status=succeeded";
     } catch {
       setSwitchError("Failed to switch plan. Please try again.");
       setSwitchingPlan(null);

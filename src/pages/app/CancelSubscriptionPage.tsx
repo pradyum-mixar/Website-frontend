@@ -19,6 +19,12 @@ export function CancelSubscriptionPage() {
 
   const handleCancel = async () => {
     if (loading) return;
+
+    const confirmed = window.confirm(
+      `Are you sure you want to cancel your ${planLabel} plan?\n\nYou'll keep access until the end of your current billing period, then revert to the Free plan.`
+    );
+    if (!confirmed) return;
+
     setError(null);
     setLoading(true);
     try {
