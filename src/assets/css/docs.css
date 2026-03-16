@@ -1,0 +1,499 @@
+/* Documentation Page Styles */
+
+.docs-page {
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+/* ─── Layout ─── */
+.docs-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 140px 48px 120px;
+  gap: 64px;
+}
+
+/* ─── Sidebar / Table of Contents ─── */
+.docs-sidebar {
+  position: sticky;
+  top: 140px;
+  align-self: start;
+  max-height: calc(100vh - 180px);
+  overflow-y: auto;
+  padding-right: 16px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+}
+
+.docs-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.docs-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+}
+
+.docs-toc-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 20px;
+}
+
+.docs-toc-section {
+  margin-bottom: 24px;
+}
+
+.docs-toc-section-title {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  margin-bottom: 8px;
+  transition: color 0.15s ease;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  text-align: left;
+}
+
+.docs-toc-section-title:hover {
+  color: var(--accent-teal);
+}
+
+.docs-toc-link {
+  display: block;
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.45);
+  text-decoration: none;
+  padding: 4px 0 4px 16px;
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.15s ease;
+  cursor: pointer;
+  background: none;
+  border-right: none;
+  border-top: none;
+  border-bottom: none;
+  font-family: inherit;
+  text-align: left;
+  width: 100%;
+}
+
+.docs-toc-link:hover,
+.docs-toc-link.active {
+  color: var(--accent-teal);
+  border-left-color: var(--accent-teal);
+}
+
+/* ─── Main Content ─── */
+.docs-content {
+  min-width: 0;
+}
+
+/* Hero / Page Header */
+.docs-header {
+  margin-bottom: 64px;
+  padding-bottom: 48px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.docs-header-label {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent-teal);
+  margin-bottom: 16px;
+}
+
+.docs-header h1 {
+  font-size: clamp(36px, 4vw, 48px);
+  font-weight: 500;
+  color: white;
+  line-height: 1.2;
+  margin-bottom: 20px;
+}
+
+.docs-header-description {
+  font-size: 17px;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.7;
+  max-width: 640px;
+}
+
+/* ─── Section Styles ─── */
+.docs-section {
+  margin-bottom: 80px;
+  scroll-margin-top: 120px;
+}
+
+.docs-section-title {
+  font-size: 32px;
+  font-weight: 500;
+  color: white;
+  margin-bottom: 12px;
+  position: relative;
+  padding-top: 12px;
+}
+
+.docs-section-title::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40px;
+  height: 3px;
+  background: var(--gradient-primary);
+  border-radius: 2px;
+}
+
+.docs-section-intro {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.7;
+  margin-bottom: 48px;
+  max-width: 720px;
+}
+
+/* ─── Feature Block ─── */
+.docs-feature {
+  margin-bottom: 56px;
+  scroll-margin-top: 120px;
+}
+
+.docs-feature-title {
+  font-size: 22px;
+  font-weight: 500;
+  color: white;
+  margin-bottom: 16px;
+}
+
+.docs-feature p {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.75;
+  margin-bottom: 20px;
+  max-width: 720px;
+}
+
+.docs-feature strong {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+}
+
+/* ─── Subsection headings ─── */
+.docs-subheading {
+  font-size: 15px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  margin-top: 28px;
+  margin-bottom: 12px;
+}
+
+/* ─── Ordered Steps ─── */
+.docs-steps {
+  list-style: none;
+  counter-reset: docs-step;
+  padding: 0;
+  margin: 0 0 24px 0;
+}
+
+.docs-steps li {
+  counter-increment: docs-step;
+  position: relative;
+  padding-left: 40px;
+  margin-bottom: 14px;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.65;
+}
+
+.docs-steps li::before {
+  content: counter(docs-step);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 24px;
+  height: 24px;
+  background: rgba(0, 192, 199, 0.12);
+  border: 1px solid rgba(0, 192, 199, 0.25);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-teal);
+}
+
+.docs-steps li strong {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+}
+
+/* ─── Bullet Lists ─── */
+.docs-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px 0;
+}
+
+.docs-list li {
+  position: relative;
+  padding-left: 20px;
+  margin-bottom: 10px;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.65;
+}
+
+.docs-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 6px;
+  height: 6px;
+  background: var(--accent-green);
+  border-radius: 50%;
+}
+
+.docs-list li strong {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+}
+
+/* ─── Tip / Callout Boxes ─── */
+.docs-tip {
+  background: linear-gradient(145deg, rgba(30, 35, 32, 0.7), rgba(20, 25, 22, 0.8));
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-left: 3px solid var(--accent-green);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin: 24px 0;
+}
+
+.docs-tip-title {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent-green);
+  margin-bottom: 10px;
+}
+
+.docs-tip p,
+.docs-tip li {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.65;
+}
+
+.docs-tip .docs-list {
+  margin-bottom: 0;
+}
+
+.docs-tip .docs-list li:last-child {
+  margin-bottom: 0;
+}
+
+/* ─── Comparison Table ─── */
+.docs-table-wrapper {
+  overflow-x: auto;
+  margin: 24px 0;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.docs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.docs-table th {
+  text-align: left;
+  padding: 14px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.docs-table td {
+  padding: 12px 20px;
+  color: rgba(255, 255, 255, 0.55);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.docs-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* ─── Workflow Cards ─── */
+.docs-workflow-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin: 32px 0;
+}
+
+.docs-workflow-card {
+  background: linear-gradient(145deg, rgba(30, 35, 32, 0.7), rgba(20, 25, 22, 0.8));
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 28px;
+  transition: border-color 0.2s ease;
+}
+
+.docs-workflow-card:hover {
+  border-color: rgba(0, 192, 199, 0.25);
+}
+
+.docs-workflow-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 16px;
+}
+
+.docs-workflow-card .docs-steps {
+  margin-bottom: 0;
+}
+
+.docs-workflow-card .docs-steps li {
+  font-size: 14px;
+  padding-left: 36px;
+  margin-bottom: 10px;
+}
+
+.docs-workflow-card .docs-steps li::before {
+  width: 22px;
+  height: 22px;
+  font-size: 11px;
+}
+
+/* ─── Keyboard shortcuts table ─── */
+.docs-shortcuts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin: 24px 0;
+}
+
+.docs-shortcuts-group h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 16px;
+}
+
+.docs-shortcut-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.docs-shortcut-label {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.docs-shortcut-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.docs-shortcut-key kbd {
+  display: inline-block;
+  padding: 3px 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  font-family: 'Inter', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.4;
+}
+
+/* ─── Divider ─── */
+.docs-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  margin: 64px 0;
+  border: none;
+}
+
+/* ─── Highlight / accent text ─── */
+.docs-accent {
+  color: var(--accent-teal);
+  font-weight: 500;
+}
+
+.docs-text-gradient {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 1024px) {
+  .docs-layout {
+    grid-template-columns: 220px 1fr;
+    gap: 40px;
+    padding: 120px 32px 80px;
+  }
+}
+
+@media (max-width: 768px) {
+  .docs-layout {
+    grid-template-columns: 1fr;
+    padding: 100px 24px 60px;
+    gap: 0;
+  }
+
+  .docs-sidebar {
+    position: relative;
+    top: 0;
+    max-height: none;
+    margin-bottom: 40px;
+    padding: 20px;
+    background: linear-gradient(145deg, rgba(30, 35, 32, 0.5), rgba(20, 25, 22, 0.6));
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+  }
+
+  .docs-header h1 {
+    font-size: 32px;
+  }
+
+  .docs-section-title {
+    font-size: 26px;
+  }
+
+  .docs-feature-title {
+    font-size: 20px;
+  }
+
+  .docs-shortcuts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .docs-workflow-grid {
+    grid-template-columns: 1fr;
+  }
+}
