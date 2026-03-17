@@ -52,7 +52,7 @@ export function AppShell() {
               {initials}
               {user && user.subscription_type > 0 && (
                 <span className={`avatar-plan-badge plan-${user.plan_slug}`}>
-                  {user.plan_name}
+                  {user.plan_slug === "trial" ? "Trial" : user.plan_name}
                 </span>
               )}
             </div>

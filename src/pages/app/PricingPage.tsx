@@ -36,12 +36,15 @@ type PricingContentProps = {
   isAuthenticated: boolean;
   currentPlanId: string | null;
   hasActiveSubscription: boolean;
+  trialUtilized?: boolean;
 };
 
-function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveSubscription }: PricingContentProps) {
+function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveSubscription, trialUtilized }: PricingContentProps) {
+  const trialEligible = !hasActiveSubscription && !trialUtilized;
   const navigate = useNavigate();
   const [switchingPlan, setSwitchingPlan] = useState<string | null>(null);
   const [switchError, setSwitchError] = useState<string | null>(null);
+  const [confirmPlan, setConfirmPlan] = useState<Plan | null>(null);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["plans"],
@@ -58,18 +61,27 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
     navigate(`/app/order?plan=${plan.id}&billing=monthly`);
   };
 
-  const handleSwitch = async (plan: Plan) => {
-    const confirmed = window.confirm(
-      `Switch to ${plan.name} ($${plan.price_monthly}/mo)?\n\nThe price difference will be charged immediately (prorated for the remaining days in your current cycle).`
-    );
-    if (!confirmed) return;
+  const handleSwitch = (plan: Plan) => {
+    setConfirmPlan(plan);
+    setSwitchError(null);
+  };
+
+  const handleConfirmSwitch = async () => {
+    if (!confirmPlan || switchingPlan) return;
+    const currentPlan = plans.find((p) => p.id === currentPlanId);
+    const isDowngrade = currentPlan && confirmPlan.price_monthly < currentPlan.price_monthly;
 
     setSwitchError(null);
-    setSwitchingPlan(plan.id);
+    setSwitchingPlan(confirmPlan.id);
     try {
-      await apiClient.upgradeSubscription(plan.id);
-      // Refresh user data to reflect new plan
-      window.location.href = "/app/payment-success?status=succeeded";
+      await apiClient.upgradeSubscription(confirmPlan.id);
+      if (isDowngrade) {
+        setSwitchingPlan(null);
+        setConfirmPlan(null);
+        window.location.reload();
+      } else {
+        window.location.href = "/app/payment-success?status=succeeded";
+      }
     } catch {
       setSwitchError("Failed to switch plan. Please try again.");
       setSwitchingPlan(null);
@@ -125,6 +137,12 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
                   <div className="pricing-discount-badge">GDC 2026 Offer</div>
                 )}
 
+                {plan.trial_period_days > 0 && trialEligible && (
+                  <div className="pricing-trial-badge">
+                    {plan.trial_period_days}-day free trial
+                  </div>
+                )}
+
                 <div className="pricing-credits">&nbsp;</div>
 
                 <ul className="pricing-features">
@@ -152,7 +170,9 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
                   <button className="pricing-cta" onClick={() => handleBuy(plan)}>
                     {plan.price_monthly === 0
                       ? "Get Started Free"
-                      : `Start ${plan.name}`}
+                      : plan.trial_period_days > 0
+                        ? `Start ${plan.trial_period_days}-day free trial`
+                        : `Start ${plan.name}`}
                   </button>
                 )}
               </div>
@@ -161,9 +181,57 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
         )}
       </div>
 
-      {switchError && (
-        <p className="checkout-error" style={{ textAlign: "center", marginBottom: "1rem" }}>{switchError}</p>
-      )}
+      {confirmPlan && (() => {
+        const currentPlan = plans.find((p) => p.id === currentPlanId);
+        const isDowngrade = currentPlan && confirmPlan.price_monthly < currentPlan.price_monthly;
+        return (
+          <div style={{
+            maxWidth: 480,
+            margin: "0 auto 1.5rem",
+            padding: "1.5rem",
+            background: "var(--bg-card)",
+            border: "1px solid var(--border-color)",
+            borderRadius: "16px",
+            textAlign: "center",
+          }}>
+            <p style={{ fontWeight: 600, fontSize: "1rem", marginBottom: "0.5rem" }}>
+              {isDowngrade ? `Switch to ${confirmPlan.name}?` : `Upgrade to ${confirmPlan.name}?`}
+            </p>
+            <p style={{ color: "var(--text-secondary)", fontSize: "0.875rem", marginBottom: "1.25rem" }}>
+              {isDowngrade
+                ? "Your current plan stays active until the end of your billing cycle. The new plan takes effect at your next renewal."
+                : `The price difference ($${confirmPlan.price_monthly - (currentPlan?.price_monthly ?? 0)}/mo) will be charged immediately, prorated for the remaining days.`}
+            </p>
+            {switchError && (
+              <p className="checkout-error" style={{ marginBottom: "1rem" }}>{switchError}</p>
+            )}
+            <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center" }}>
+              <button
+                className="pricing-cta"
+                style={{ flex: 1, maxWidth: 180 }}
+                onClick={() => { setConfirmPlan(null); setSwitchError(null); }}
+                disabled={!!switchingPlan}
+              >
+                Cancel
+              </button>
+              <button
+                className="pricing-cta"
+                style={{
+                  flex: 1,
+                  maxWidth: 180,
+                  background: "linear-gradient(135deg, var(--primary-cyan) 0%, var(--primary-green) 100%)",
+                  color: "var(--bg-dark)",
+                  borderColor: "transparent",
+                }}
+                onClick={handleConfirmSwitch}
+                disabled={!!switchingPlan}
+              >
+                {switchingPlan ? "Switching\u2026" : "Confirm"}
+              </button>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Trust signal */}
       <p className="pricing-trust">
@@ -176,8 +244,9 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
 /** Public pricing page — includes its own nav bar */
 export function PublicPricingPage() {
   const { user, isAuthenticated } = useAuth();
+  const isTrial = user?.plan_slug === "trial";
   const subType = user?.subscription_type ?? 0;
-  const hasActiveSubscription = isAuthenticated && subType > 0;
+  const hasActiveSubscription = isAuthenticated && subType > 0 && !isTrial;
   const currentPlanId = hasActiveSubscription ? (user?.plan_slug ?? null) : null;
 
   return (
@@ -188,6 +257,7 @@ export function PublicPricingPage() {
         isAuthenticated={isAuthenticated}
         currentPlanId={currentPlanId}
         hasActiveSubscription={hasActiveSubscription}
+        trialUtilized={user?.trial_utilized}
       />
     </>
   );
@@ -196,8 +266,9 @@ export function PublicPricingPage() {
 /** Authenticated pricing page — rendered inside AppShell */
 export function PricingPage() {
   const { user } = useAuth();
+  const isTrial = user?.plan_slug === "trial";
   const subType = user?.subscription_type ?? 0;
-  const hasActiveSubscription = subType > 0;
+  const hasActiveSubscription = subType > 0 && !isTrial;
   const currentPlanId = hasActiveSubscription ? (user?.plan_slug ?? null) : null;
 
   return (
@@ -205,6 +276,7 @@ export function PricingPage() {
       isAuthenticated
       currentPlanId={currentPlanId}
       hasActiveSubscription={hasActiveSubscription}
+      trialUtilized={user?.trial_utilized}
     />
   );
 }

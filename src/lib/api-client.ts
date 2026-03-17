@@ -22,6 +22,8 @@ export type Plan = {
   features: string[];
   highlight: boolean;
   cta_label: string;
+  trial_period_days: number;
+  trial_credits: number;
 };
 
 export type PaymentHistoryItem = {

@@ -197,16 +197,17 @@ export function DashboardPage() {
         <p className="dashboard-subtitle">
           Manage your usage and activity
         </p>
-        {subscriptionStatus.data && (
+        {user?.plan_slug === "trial" && user.trial_days_remaining != null ? (
           <div className="billing-cycle-badge">
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 6v6l4 2" />
+            </svg>
+            {`${user.plan_name} · ${user.trial_days_remaining} days left`}
+          </div>
+        ) : subscriptionStatus.data ? (
+          <div className="billing-cycle-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10" />
               <path d="M12 6v6l4 2" />
             </svg>
@@ -214,7 +215,7 @@ export function DashboardPage() {
               ? `${subscriptionStatus.data.plan_name} · Expires in ${subscriptionStatus.data.days_left} days`
               : `${subscriptionStatus.data.plan_name} · ${subscriptionStatus.data.days_left} days left in cycle`}
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* Upgrade Banner — only for free users (loss aversion + value framing) */}

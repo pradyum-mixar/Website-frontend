@@ -225,6 +225,22 @@
     opacity: 0.6;
 }
 
+.pricing-trial-badge {
+    display: inline-block;
+    margin: 0.5rem auto 0;
+    padding: 0.25rem 0.75rem;
+    background: linear-gradient(135deg, rgba(133, 196, 73, 0.15), rgba(133, 196, 73, 0.08));
+    border: 1px solid rgba(133, 196, 73, 0.3);
+    border-radius: 100px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--primary-green);
+    -webkit-text-fill-color: var(--primary-green);
+    letter-spacing: 0.5px;
+    text-align: center;
+    text-transform: uppercase;
+}
+
 .pricing-discount-badge {
     display: inline-block;
     margin: 0.5rem auto 0;
