@@ -34,7 +34,8 @@ export function PaymentSuccessPage() {
 
         const credits = freshUser?.credits ?? 0;
         const subType = freshUser?.subscription_type ?? 0;
-        const updated = credits !== initialCredits || subType > initialSubType;
+        const planSlug = freshUser?.plan_slug ?? "free";
+        const updated = credits !== initialCredits || subType > initialSubType || planSlug === "trial" || subType > 0;
 
         if (updated) {
           setSyncState("synced");
@@ -75,8 +76,11 @@ export function PaymentSuccessPage() {
   const planLabel = user?.plan_name ?? null;
 
   // Build success message based on state
+  const isTrial = user?.plan_slug === "trial";
   const successMessage = syncState === "synced" && isSubscribed
-    ? `Your ${planLabel} plan is now active.`
+    ? isTrial
+      ? `Your ${planLabel} trial is now active!`
+      : `Your ${planLabel} plan is now active.`
     : "Your payment was received. Your plan status will update shortly.";
 
   return (

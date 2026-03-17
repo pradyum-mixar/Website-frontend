@@ -10,7 +10,9 @@ export function CancelSubscriptionPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (!user || user.subscription_type === 0) {
+  const isTrial = user?.plan_slug === "trial";
+
+  if (!user || user.subscription_type === 0 || isTrial) {
     return <Navigate to="/app/pricing" replace />;
   }
 
@@ -19,12 +21,6 @@ export function CancelSubscriptionPage() {
 
   const handleCancel = async () => {
     if (loading) return;
-
-    const confirmed = window.confirm(
-      `Are you sure you want to cancel your ${planLabel} plan?\n\nYou'll keep access until the end of your current billing period, then revert to the Free plan.`
-    );
-    if (!confirmed) return;
-
     setError(null);
     setLoading(true);
     try {
@@ -85,7 +81,7 @@ export function CancelSubscriptionPage() {
             </div>
             <div className="order-row">
               <span className="label">Credits</span>
-              <span className="value">Remaining credits are kept</span>
+              <span className="value">Credits expire when subscription ends</span>
             </div>
 
             <div className="order-actions">

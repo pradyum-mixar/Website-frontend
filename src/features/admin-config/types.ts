@@ -103,6 +103,8 @@ export type AdminPlan = {
   highlight: boolean;
   cta_label: string;
   dodo_product_id?: string;
+  trial_period_days: number;
+  trial_credits: number;
   enabled: boolean;
   sort_order: number;
 };

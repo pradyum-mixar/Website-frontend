@@ -347,9 +347,13 @@
   }
 
   .about-hero-text-overlay {
-    bottom: 40px;
+    bottom: 20px;
     left: 24px;
     max-width: 280px;
+  }
+
+  .about-hero-text-overlay h1 {
+    font-size: 24px;
   }
 
   .about-mission {

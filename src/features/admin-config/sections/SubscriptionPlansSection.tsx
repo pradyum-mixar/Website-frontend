@@ -16,6 +16,8 @@ const fields: FieldConfig[] = [
   { name: "credits_per_month", label: "Credits / Month", type: "number" },
   { name: "cta_label", label: "CTA Label", type: "text" },
   { name: "dodo_product_id", label: "Dodo Product ID", type: "text" },
+  { name: "trial_period_days", label: "Trial Period (days)", type: "number" },
+  { name: "trial_credits", label: "Trial Credits", type: "number" },
   { name: "sort_order", label: "Sort Order", type: "number" },
   { name: "highlight", label: "Highlight", type: "boolean" },
   { name: "enabled", label: "Enabled", type: "boolean" },

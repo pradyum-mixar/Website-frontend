@@ -1201,6 +1201,9 @@ export function LandingPage() {
                 <a href="#features" className="footer-link">
                   Features
                 </a>
+                <Link to="/docs" className="footer-link">
+                  Docs
+                </Link>
               </div>
               <div className="footer-links-column">
                 <Link to="/pricing" className="footer-link">
@@ -1214,8 +1217,8 @@ export function LandingPage() {
 
             <div className="footer-cta">
               <h3>Still have questions?</h3>
-              <a href="#" className="btn-mixie-combined">
-                <span className="btn-mixie-text">Meet Mixie</span>
+              <Link to="/contact" className="btn-mixie-combined">
+                <span className="btn-mixie-text">Get in touch</span>
                 <span className="btn-mixie-arrow">
                   <svg
                     width="18"
@@ -1233,7 +1236,7 @@ export function LandingPage() {
                     />
                   </svg>
                 </span>
-              </a>
+              </Link>
             </div>
           </div>
 

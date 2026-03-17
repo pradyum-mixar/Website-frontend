@@ -50,7 +50,8 @@ export function ManageSubscriptionPage() {
 
   const planLabel = subscriptionStatus?.plan_name ?? user?.plan_name ?? "Free";
   const hasSub = (user?.subscription_type ?? 0) > 0;
-  const alreadyCancelled = !!user?.subscription_expires_at;
+  const isTrial = user?.plan_slug === "trial";
+  const alreadyCancelled = !!user?.subscription_expires_at && !isTrial;
 
   return (
     <>
@@ -73,7 +74,7 @@ export function ManageSubscriptionPage() {
           </svg>
           Billing History
         </button>
-        {hasSub && !alreadyCancelled && (
+        {hasSub && !alreadyCancelled && !isTrial && (
           <button className={`sub-tab ${activeTab === "upgrade" ? "active" : ""}`} onClick={() => setTab("upgrade")}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="17 11 12 6 7 11" /><line x1="12" y1="18" x2="12" y2="6" />
@@ -81,7 +82,7 @@ export function ManageSubscriptionPage() {
             Change Plan
           </button>
         )}
-        {hasSub && !alreadyCancelled && (
+        {hasSub && !alreadyCancelled && !isTrial && (
           <button className={`sub-tab ${activeTab === "cancel" ? "active" : ""}`} onClick={() => setTab("cancel")}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />
@@ -113,13 +114,7 @@ export function ManageSubscriptionPage() {
         />
       )}
       {activeTab === "cancel" && hasSub && !alreadyCancelled && (
-        <CancelTab
-          planLabel={planLabel}
-          onCancelled={() => {
-            refreshUser();
-            navigate("/app/manage-subscription?tab=overview");
-          }}
-        />
+        <CancelTab planLabel={planLabel} />
       )}
     </>
   );
@@ -134,6 +129,7 @@ function OverviewTab({ planLabel, hasSub, alreadyCancelled, subscriptionStatus, 
   statusError?: boolean;
   onChangePlan: () => void;
 }) {
+  const { user } = useAuth();
   return (
     <div className="sub-overview">
       <div className="sub-plan-card">
@@ -143,6 +139,8 @@ function OverviewTab({ planLabel, hasSub, alreadyCancelled, subscriptionStatus, 
             <div className="sub-plan-status">
               {alreadyCancelled ? (
                 <span className="usage-status failed">Cancelling</span>
+              ) : user?.plan_slug === "trial" ? (
+                <span className="usage-status pending">Trial</span>
               ) : hasSub ? (
                 <span className="usage-status completed">Active</span>
               ) : (
@@ -150,7 +148,7 @@ function OverviewTab({ planLabel, hasSub, alreadyCancelled, subscriptionStatus, 
               )}
             </div>
           </div>
-          {hasSub && !alreadyCancelled ? (
+          {hasSub && !alreadyCancelled && user?.plan_slug !== "trial" ? (
             <button className="btn-buy-credits" onClick={onChangePlan} style={{ cursor: "pointer", border: "none" }}>
               Change Plan
             </button>
@@ -161,10 +159,19 @@ function OverviewTab({ planLabel, hasSub, alreadyCancelled, subscriptionStatus, 
           )}
         </div>
 
-        {statusError && (
+        {statusError && !user?.plan_slug?.startsWith("trial") && (
           <p style={{ color: "var(--text-secondary)", fontSize: "0.875rem" }}>
             Could not load subscription details. Please refresh.
           </p>
+        )}
+
+        {user?.plan_slug === "trial" && user.trial_days_remaining != null && (
+          <div className="sub-plan-details">
+            <div className="sub-detail-row">
+              <span className="sub-detail-label">Trial Period</span>
+              <span className="sub-detail-value">{user.trial_days_remaining} days remaining</span>
+            </div>
+          </div>
         )}
 
         {subscriptionStatus && !statusLoading && !statusError && (
@@ -347,9 +354,10 @@ function BillingTab() {
   );
 }
 
-function CancelTab({ planLabel, onCancelled }: { planLabel: string; onCancelled: () => void }) {
+function CancelTab({ planLabel }: { planLabel: string }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   const handleCancel = async () => {
     if (loading) return;
@@ -357,7 +365,8 @@ function CancelTab({ planLabel, onCancelled }: { planLabel: string; onCancelled:
     setLoading(true);
     try {
       await apiClient.cancelSubscription();
-      onCancelled();
+      setSuccess(true);
+      setTimeout(() => window.location.replace("/app/manage-subscription?tab=overview"), 1500);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Something went wrong. Please try again.";
       setError(message);
@@ -384,15 +393,19 @@ function CancelTab({ planLabel, onCancelled }: { planLabel: string; onCancelled:
           </div>
           <div className="sub-detail-row">
             <span className="sub-detail-label">Credits</span>
-            <span className="sub-detail-value">Remaining credits are kept</span>
+            <span className="sub-detail-value">Credits expire when subscription ends</span>
           </div>
         </div>
 
         <div style={{ marginTop: "1.5rem", display: "flex", gap: "1rem", flexWrap: "wrap" }}>
           {error && <p className="checkout-error" style={{ width: "100%" }}>{error}</p>}
-          <button className="btn-cancel" disabled={loading} onClick={handleCancel}>
-            {loading ? "Cancelling..." : "Confirm Cancellation"}
-          </button>
+          {success ? (
+            <p style={{ color: "var(--success-color, #22c55e)" }}>Subscription cancelled. Redirecting...</p>
+          ) : (
+            <button className="btn-cancel" disabled={loading} onClick={handleCancel}>
+              {loading ? "Cancelling..." : "Confirm Cancellation"}
+            </button>
+          )}
         </div>
       </div>
     </div>

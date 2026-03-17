@@ -13,6 +13,8 @@ export type CurrentUser = {
   credits: number;
   subscription_type: number;
   subscription_expires_at?: string | null;
+  trial_days_remaining?: number | null;
+  trial_utilized?: boolean;
   /** Plan identifiers returned by /auth/me when subscription_type > 0 */
   plan_slug?: string;
   plan_name?: string;

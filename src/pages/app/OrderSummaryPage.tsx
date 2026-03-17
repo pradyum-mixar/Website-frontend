@@ -72,6 +72,7 @@ export function OrderSummaryPage() {
   }
 
   const price = plan.price_monthly;
+  const hasTrial = plan.trial_period_days > 0 && !(user?.subscription_type && user.subscription_type > 0) && !user?.trial_utilized;
 
   return (
     <div className="order-summary">
@@ -92,10 +93,21 @@ export function OrderSummaryPage() {
           <span className="label">Billing Cycle</span>
           <span className="value">Monthly</span>
         </div>
+        {hasTrial && (
+          <div className="order-row">
+            <span className="label">Free Trial</span>
+            <span className="value">{plan.trial_period_days} days</span>
+          </div>
+        )}
         <div className="order-total">
-          <span className="label">Total</span>
-          <span className="value">${price} / mo</span>
+          <span className="label">{hasTrial ? "Due today" : "Total"}</span>
+          <span className="value">{hasTrial ? "$0.00" : `$${price} / mo`}</span>
         </div>
+        {hasTrial && (
+          <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)", margin: "0.75rem 0 0", textAlign: "center" }}>
+            After your {plan.trial_period_days}-day trial, you'll be charged ${price}/mo. Cancel anytime.
+          </p>
+        )}
 
         <div className="order-actions">
           {error && <p className="checkout-error">{error}</p>}
@@ -104,7 +116,11 @@ export function OrderSummaryPage() {
             disabled={checkoutLoading}
             onClick={handleCheckout}
           >
-            {checkoutLoading ? "Redirecting to checkout…" : "Proceed to Payment"}
+            {checkoutLoading
+              ? "Redirecting to checkout…"
+              : hasTrial
+                ? "Start free trial"
+                : "Proceed to Payment"}
           </button>
           <Link to="/app/pricing" className="btn-back">
             Back to Pricing
