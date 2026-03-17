@@ -1201,6 +1201,9 @@ export function LandingPage() {
                 <a href="#features" className="footer-link">
                   Features
                 </a>
+                <Link to="/docs" className="footer-link">
+                  Docs
+                </Link>
               </div>
               <div className="footer-links-column">
                 <Link to="/pricing" className="footer-link">
