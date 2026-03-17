@@ -276,6 +276,33 @@ class ApiClient {
     return response.data;
   }
 
+  async submitContactForm(payload: {
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+  }): Promise<{ status: string; message: string }> {
+    const response = await this.client.post<{ status: string; message: string }>(
+      "/contact/",
+      payload
+    );
+    return response.data;
+  }
+
+  async submitBugReport(payload: {
+    name: string;
+    email: string;
+    title: string;
+    steps_to_reproduce: string;
+    expected_behavior: string;
+  }): Promise<{ status: string; message: string }> {
+    const response = await this.client.post<{ status: string; message: string }>(
+      "/bug-report/",
+      payload
+    );
+    return response.data;
+  }
+
   async downloadInvoice(paymentId: string): Promise<void> {
     const response = await this.client.get(`/subscriptions/invoices/${paymentId}`, {
       responseType: "blob",

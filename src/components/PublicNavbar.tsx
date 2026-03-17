@@ -17,7 +17,7 @@ function useIsMobile(breakpoint = 768) {
 }
 
 type PublicNavbarProps = {
-  activePage?: "about" | "pricing" | "download";
+  activePage?: "about" | "pricing" | "download" | "contact" | "bug-report";
 };
 
 export function PublicNavbar({ activePage }: PublicNavbarProps) {

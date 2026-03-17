@@ -21,6 +21,8 @@ import { ManageSubscriptionPage } from "../pages/app/ManageSubscriptionPage";
 import { DesktopLoginPage } from "../pages/auth/DesktopLoginPage";
 import { GoogleCallbackPage } from "../pages/auth/GoogleCallbackPage";
 import { AboutPage } from "../pages/AboutPage";
+import { ContactPage } from "../pages/ContactPage";
+import { BugReportPage } from "../pages/BugReportPage";
 import { DocsPage } from "../pages/DocsPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
 
@@ -30,6 +32,8 @@ export function AppRouter() {
       <Routes>
         <Route path="/" element={<LandingRoute />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/bug-report" element={<BugReportPage />} />
         <Route path="/docs" element={<DocsPage />} />
         <Route path="/auth/login" element={<LoginPage />} />
         <Route path="/auth/signup" element={<SignupPage />} />
