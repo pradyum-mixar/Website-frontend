@@ -29,6 +29,7 @@ export function SignupPage() {
     setError("");
     try {
       const url = await apiClient.getGoogleLoginUrl();
+      window.gtag?.("event", "sign_up", { method: "google" });
       window.location.href = url;
     } catch {
       setError("Failed to start Google sign-up. Please try again.");
@@ -48,6 +49,7 @@ export function SignupPage() {
       });
       setStep("otp");
       setMessage("OTP sent to your email.");
+      window.gtag?.("event", "sign_up_start", { method: "email" });
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || "Failed to send OTP.");
     } finally {
@@ -67,6 +69,7 @@ export function SignupPage() {
         otp_code: otpCode,
       });
       await refreshUser();
+      window.gtag?.("event", "sign_up", { method: "email" });
       navigate("/app");
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || "OTP verification failed.");

@@ -33,6 +33,7 @@ export function OrderSummaryPage() {
         JSON.stringify({ credits: user?.credits ?? 0, subscription_type: user?.subscription_type ?? 0 }),
       );
       const result = await apiClient.createCheckout(planId, billing);
+      window.gtag?.("event", "begin_checkout", { plan_id: planId, billing });
       window.location.href = result.data.payment_link;
     } catch (err: unknown) {
       const message =

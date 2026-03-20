@@ -25,6 +25,7 @@ export function CancelSubscriptionPage() {
     setLoading(true);
     try {
       await apiClient.cancelSubscription();
+      window.gtag?.("event", "cancel_subscription", { plan: planLabel });
       await refreshUser();
       navigate("/app/pricing");
     } catch (err: unknown) {

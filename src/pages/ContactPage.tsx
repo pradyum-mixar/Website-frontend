@@ -29,6 +29,7 @@ export function ContactPage() {
     setLoading(true);
     try {
       await apiClient.submitContactForm({ name, email, subject, message });
+      window.gtag?.("event", "contact_submit", { subject });
       setSuccess(true);
       setCooldown(true);
       setTimeout(() => setCooldown(false), 60_000);

@@ -67,6 +67,7 @@ export function DownloadsPage() {
     setDownloading(platform);
     try {
       const res = await apiClient.getDownloadUrl(platform);
+      window.gtag?.("event", "download_click", { platform });
       window.open(res.data.url, "_blank");
     } catch {
       setError(`Download failed for ${platform}`);

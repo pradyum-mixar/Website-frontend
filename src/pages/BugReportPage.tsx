@@ -28,6 +28,7 @@ export function BugReportPage() {
         steps_to_reproduce: stepsToReproduce,
         expected_behavior: expectedBehavior,
       });
+      window.gtag?.("event", "bug_report_submit");
       setSuccess(true);
       setCooldown(true);
       setTimeout(() => setCooldown(false), 60_000);

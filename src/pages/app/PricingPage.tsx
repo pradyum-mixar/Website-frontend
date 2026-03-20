@@ -58,6 +58,7 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
       navigate("/auth/signup");
       return;
     }
+    window.gtag?.("event", "select_plan", { plan_id: plan.id, plan_name: plan.name, price: plan.price_monthly });
     navigate(`/app/order?plan=${plan.id}&billing=monthly`);
   };
 
@@ -75,6 +76,11 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
     setSwitchingPlan(confirmPlan.id);
     try {
       await apiClient.upgradeSubscription(confirmPlan.id);
+      window.gtag?.("event", "plan_switch", {
+        from_plan: currentPlanId,
+        to_plan: confirmPlan.id,
+        direction: isDowngrade ? "downgrade" : "upgrade",
+      });
       if (isDowngrade) {
         setSwitchingPlan(null);
         setConfirmPlan(null);

@@ -39,6 +39,10 @@ export function PaymentSuccessPage() {
 
         if (updated) {
           setSyncState("synced");
+          window.gtag?.("event", "purchase", {
+            plan_slug: planSlug,
+            subscription_type: subType,
+          });
           return;
         }
       } catch (err) {

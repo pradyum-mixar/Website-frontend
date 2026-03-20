@@ -67,8 +67,8 @@ export function AboutPage() {
         <h2 className="about-section-title">Build the frontier of <span className="about-text-gradient">Agentic 3D</span></h2>
         <p className="about-join-description">We are a team of passionate engineers, designers and researchers, working towards building the future. If you are obsessed with collapsing the entropy of 3D creation and building the infrastructure for Physical AI, we want to hear from you.</p>
         <div className="about-join-buttons">
-          <a href="https://discord.gg/YVqvkQx8rX" target="_blank" rel="noopener noreferrer" className="about-btn-primary">Join Discord</a>
-          <Link to="/contact" className="about-btn-outline">Get in Touch</Link>
+          <a href="https://discord.gg/YVqvkQx8rX" target="_blank" rel="noopener noreferrer" className="about-btn-primary" onClick={() => window.gtag?.("event", "cta_click", { location: "about", label: "join_discord" })}>Join Discord</a>
+          <Link to="/contact" className="about-btn-outline" onClick={() => window.gtag?.("event", "cta_click", { location: "about", label: "get_in_touch" })}>Get in Touch</Link>
         </div>
       </section>
     </div>
