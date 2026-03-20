@@ -19,6 +19,7 @@ export function LoginPage() {
     setLoading(true);
     try {
       await login(email, password);
+      window.gtag?.("event", "login", { method: "email" });
       const returnTo = searchParams.get("returnTo") || "/app";
       navigate(returnTo);
     } catch (err: any) {
@@ -32,6 +33,7 @@ export function LoginPage() {
     setError("");
     try {
       const url = await apiClient.getGoogleLoginUrl();
+      window.gtag?.("event", "login", { method: "google" });
       window.location.href = url;
     } catch {
       setError("Failed to start Google sign-in. Please try again.");

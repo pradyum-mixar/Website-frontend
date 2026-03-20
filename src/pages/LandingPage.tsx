@@ -331,10 +331,10 @@ export function LandingPage() {
             The End of <span className="highlight">Grunt Work</span>
           </p>
           <div className="actions">
-            <Link to={isAuthenticated ? "/app" : "/auth/signup"} className="btn-download">
+            <Link to={isAuthenticated ? "/app" : "/auth/signup"} className="btn-download" onClick={() => window.gtag?.("event", "cta_click", { location: "hero", label: isAuthenticated ? "dashboard" : "sign_up" })}>
               {isAuthenticated ? "Dashboard" : "Sign Up"}
             </Link>
-            <Link to={isAuthenticated ? "/app" : "/auth/signup"} className="btn-arrow">
+            <Link to={isAuthenticated ? "/app" : "/auth/signup"} className="btn-arrow" onClick={() => window.gtag?.("event", "cta_click", { location: "hero", label: "arrow" })}>
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
                   d="M5 12H19"
@@ -962,7 +962,7 @@ export function LandingPage() {
             <h2>Try Mixar Now</h2>
             <p>Join our Beta, build the future of agentic 3D with us!</p>
             <div className="try-mixar-buttons">
-              <Link to={isAuthenticated ? "/app" : "/auth/signup"} className="btn-waitlist">
+              <Link to={isAuthenticated ? "/app" : "/auth/signup"} className="btn-waitlist" onClick={() => window.gtag?.("event", "cta_click", { location: "try_mixar", label: isAuthenticated ? "dashboard" : "sign_up" })}>
                 {isAuthenticated ? "Dashboard" : "Sign Up"}
               </Link>
               <a

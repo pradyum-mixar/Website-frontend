@@ -92,6 +92,13 @@ export function DocsPage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Fire GA event when the visible docs section changes
+  useEffect(() => {
+    if (activeId) {
+      window.gtag?.("event", "docs_section_view", { section: activeId });
+    }
+  }, [activeId]);
+
   return (
     <div className="docs-page">
       <PublicNavbar />

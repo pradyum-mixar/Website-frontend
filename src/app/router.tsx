@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { GoogleAnalytics } from "./GoogleAnalytics";
 import { LandingRoute, RequireAdmin, RequireAuth } from "./guards";
 import { AppShell } from "../layouts/AppShell";
 import { LoginPage } from "../pages/auth/LoginPage";
@@ -29,6 +30,7 @@ import { NotFoundPage } from "../pages/NotFoundPage";
 export function AppRouter() {
   return (
     <BrowserRouter>
+      <GoogleAnalytics />
       <Routes>
         <Route path="/" element={<LandingRoute />} />
         <Route path="/about" element={<AboutPage />} />
