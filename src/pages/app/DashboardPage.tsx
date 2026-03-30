@@ -267,7 +267,7 @@ export function DashboardPage() {
           </div>
           <div className="usage-bar-footer">
             {hasSubscription ? (
-              <span>{Math.round(100 - remainingPct)}% used this cycle</span>
+              <span>&nbsp;</span>
             ) : creditsRemaining === 0 ? (
               <span className="usage-bar-nudge">Subscribe to get monthly usage</span>
             ) : (
