@@ -261,13 +261,13 @@ export function DashboardPage() {
             <div
               className={`usage-bar-fill${remainingPct < 20 ? " critical" : remainingPct < 50 ? " warning" : ""}`}
               style={{
-                width: `${hasSubscription ? remainingPct : (creditsRemaining > 0 ? 100 : 0)}%`,
+                width: `${hasSubscription ? (100 - remainingPct) : (creditsRemaining > 0 ? 100 : 0)}%`,
               }}
             />
           </div>
           <div className="usage-bar-footer">
             {hasSubscription ? (
-              <span>{Math.round(remainingPct)}% remaining this cycle</span>
+              <span>{Math.round(100 - remainingPct)}% used this cycle</span>
             ) : creditsRemaining === 0 ? (
               <span className="usage-bar-nudge">Subscribe to get monthly usage</span>
             ) : (
