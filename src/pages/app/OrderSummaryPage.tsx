@@ -97,7 +97,7 @@ export function OrderSummaryPage() {
         {hasTrial && (
           <div className="order-row">
             <span className="label">Free Trial</span>
-            <span className="value">{plan.trial_period_days} days</span>
+            <span className="value">Included</span>
           </div>
         )}
         <div className="order-total">
@@ -106,7 +106,7 @@ export function OrderSummaryPage() {
         </div>
         {hasTrial && (
           <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)", margin: "0.75rem 0 0", textAlign: "center" }}>
-            After your {plan.trial_period_days}-day trial, you'll be charged ${price}/mo. Cancel anytime.
+            After your free trial, you'll be charged ${price}/mo. Cancel anytime.
           </p>
         )}
 

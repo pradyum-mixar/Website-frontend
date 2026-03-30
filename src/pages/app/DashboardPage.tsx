@@ -203,7 +203,7 @@ export function DashboardPage() {
               <circle cx="12" cy="12" r="10" />
               <path d="M12 6v6l4 2" />
             </svg>
-            {`${user.plan_name} · ${user.trial_days_remaining} days left`}
+            {user.plan_name}
           </div>
         ) : subscriptionStatus.data ? (
           <div className="billing-cycle-badge">

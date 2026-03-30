@@ -145,7 +145,7 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
 
                 {plan.trial_period_days > 0 && trialEligible && (
                   <div className="pricing-trial-badge">
-                    {plan.trial_period_days}-day free trial
+                    Free trial
                   </div>
                 )}
 
@@ -177,7 +177,7 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
                     {plan.price_monthly === 0
                       ? "Get Started Free"
                       : plan.trial_period_days > 0
-                        ? `Start ${plan.trial_period_days}-day free trial`
+                        ? "Start free trial"
                         : `Start ${plan.name}`}
                   </button>
                 )}
