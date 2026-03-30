@@ -165,11 +165,11 @@ function OverviewTab({ planLabel, hasSub, alreadyCancelled, subscriptionStatus, 
           </p>
         )}
 
-        {user?.plan_slug === "trial" && user.trial_days_remaining != null && (
+        {user?.plan_slug === "trial" && (
           <div className="sub-plan-details">
             <div className="sub-detail-row">
-              <span className="sub-detail-label">Trial Period</span>
-              <span className="sub-detail-value">{user.trial_days_remaining} days remaining</span>
+              <span className="sub-detail-label">Plan</span>
+              <span className="sub-detail-value">{user.plan_name}</span>
             </div>
           </div>
         )}

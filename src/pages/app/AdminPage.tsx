@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { Link } from "react-router-dom";
 import { apiClient } from "../../lib/api-client";
 import "../../assets/css/admin.css";
@@ -31,16 +31,21 @@ type AdminActivityResponse = {
   activity: AdminActivityItem[];
 };
 
+const PAGE_SIZE = 50;
+
 export function AdminPage() {
   const queryClient = useQueryClient();
-  const [selectedUser, setSelectedUser] = useState("");
+  const [page, setPage] = useState(1);
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [creditAmount, setCreditAmount] = useState(100);
   const [creditReason, setCreditReason] = useState("admin_grant");
-  const [statusMessage, setStatusMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+  const [referralAmount, setReferralAmount] = useState(100);
+  const [creditStatus, setCreditStatus] = useState<{ text: string; type: "success" | "error" } | null>(null);
+  const [referralStatus, setReferralStatus] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
   const users = useQuery({
-    queryKey: ["admin-users"],
-    queryFn: async () => (await apiClient.instance.get<AdminUsersResponse>("/admin/users?skip=0&limit=50")).data,
+    queryKey: ["admin-users", page],
+    queryFn: async () => (await apiClient.instance.get<AdminUsersResponse>(`/admin/users?skip=${(page - 1) * PAGE_SIZE}&limit=${PAGE_SIZE}`)).data,
   });
 
   const activity = useQuery({
@@ -50,29 +55,70 @@ export function AdminPage() {
 
   const grantCredits = useMutation({
     mutationFn: async () => {
-      if (!selectedUser) throw new Error("Pick a user first.");
+      if (!editingUserId) throw new Error("No user selected.");
       await apiClient.instance.post(
-        `/credits/add?user_id=${selectedUser}&amount=${creditAmount}&reason=${encodeURIComponent(creditReason)}`,
+        `/credits/add?user_id=${editingUserId}&amount=${creditAmount}&reason=${encodeURIComponent(creditReason)}`,
       );
     },
     onSuccess: async () => {
-      setStatusMessage({ text: "Credits added successfully.", type: "success" });
+      setCreditStatus({ text: "Credits added successfully.", type: "success" });
+      setEditingUserId(null);
       await queryClient.invalidateQueries({ queryKey: ["admin-users"] });
     },
-    onError: () => setStatusMessage({ text: "Failed to add credits.", type: "error" }),
+    onError: () => setCreditStatus({ text: "Failed to add credits.", type: "error" }),
   });
 
   const createReferral = useMutation({
     mutationFn: async () =>
-      (await apiClient.instance.post(`/admin/generate_referral?credit_amount=${creditAmount}`)).data as {
+      (await apiClient.instance.post(`/admin/generate_referral?credit_amount=${referralAmount}`)).data as {
         data: { referral_code: string };
       },
-    onSuccess: (data) => setStatusMessage({ text: `Referral code: ${data.data.referral_code}`, type: "success" }),
-    onError: () => setStatusMessage({ text: "Failed to create referral code.", type: "error" }),
+    onSuccess: (data) => setReferralStatus({ text: `Referral code: ${data.data.referral_code}`, type: "success" }),
+    onError: () => setReferralStatus({ text: "Failed to create referral code.", type: "error" }),
   });
 
   const userList = users.data?.users ?? [];
   const activityList = activity.data?.activity ?? [];
+  const totalPages = Math.ceil((users.data?.total_users ?? 0) / PAGE_SIZE);
+
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+    const pages: (number | "...")[] = [];
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || (i >= page - 2 && i <= page + 2)) {
+        pages.push(i);
+      } else if (pages[pages.length - 1] !== "...") {
+        pages.push("...");
+      }
+    }
+    return (
+      <div className="admin-pagination">
+        <button className="admin-page-btn" disabled={page === 1} onClick={() => setPage(page - 1)}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </button>
+        {pages.map((p, i) =>
+          p === "..." ? (
+            <span key={`ellipsis-${i}`} className="admin-page-ellipsis">&hellip;</span>
+          ) : (
+            <button
+              key={p}
+              className={`admin-page-btn${p === page ? " active" : ""}`}
+              onClick={() => setPage(p as number)}
+            >
+              {p}
+            </button>
+          ),
+        )}
+        <button className="admin-page-btn" disabled={page === totalPages} onClick={() => setPage(page + 1)}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </button>
+      </div>
+    );
+  };
 
   return (
     <>
@@ -127,80 +173,48 @@ export function AdminPage() {
         </div>
       </div>
 
-      {/* Credit Operations */}
+      {/* Generate Referral */}
       <div className="section">
         <div className="section-header">
-          <h2 className="section-title">Credit Operations</h2>
+          <h2 className="section-title">Generate Referral</h2>
         </div>
         <div className="admin-ops-card">
-          <div className="admin-ops-row">
-            <div className="admin-ops-field" style={{ flex: 2 }}>
-              <label className="admin-ops-label">User</label>
-              <select className="admin-ops-input" value={selectedUser} onChange={(e) => setSelectedUser(e.target.value)}>
-                <option value="">Select a user...</option>
-                {userList.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.email} ({user.credits} credits)
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className="admin-ops-row" style={{ alignItems: "flex-end" }}>
             <div className="admin-ops-field">
-              <label className="admin-ops-label">Amount</label>
+              <label className="admin-ops-label">Credit Amount</label>
               <input
                 type="number"
                 min={1}
                 className="admin-ops-input"
-                value={creditAmount}
-                onChange={(e) => setCreditAmount(Number(e.target.value))}
+                value={referralAmount}
+                onChange={(e) => setReferralAmount(Number(e.target.value))}
               />
             </div>
-            <div className="admin-ops-field" style={{ flex: 2 }}>
-              <label className="admin-ops-label">Reason</label>
-              <input
-                className="admin-ops-input"
-                value={creditReason}
-                onChange={(e) => setCreditReason(e.target.value)}
-                placeholder="e.g. admin_grant"
-              />
+            <div>
+              <button
+                type="button"
+                className="admin-btn admin-btn-secondary"
+                onClick={() => createReferral.mutate()}
+                disabled={createReferral.isPending}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                </svg>
+                {createReferral.isPending ? "Generating..." : "Generate Referral"}
+              </button>
             </div>
           </div>
-          <div className="admin-ops-actions">
-            <button
-              type="button"
-              className="admin-btn admin-btn-primary"
-              onClick={() => grantCredits.mutate()}
-              disabled={grantCredits.isPending}
-            >
+          {referralStatus && (
+            <div className={`admin-status-msg ${referralStatus.type}`}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="10" /><path d="M12 8v8M8 12h8" />
-              </svg>
-              {grantCredits.isPending ? "Adding..." : "Add Credits"}
-            </button>
-            <button
-              type="button"
-              className="admin-btn admin-btn-secondary"
-              onClick={() => createReferral.mutate()}
-              disabled={createReferral.isPending}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-              </svg>
-              {createReferral.isPending ? "Generating..." : "Generate Referral"}
-            </button>
-          </div>
-
-          {statusMessage && (
-            <div className={`admin-status-msg ${statusMessage.type}`}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                {statusMessage.type === "success" ? (
+                {referralStatus.type === "success" ? (
                   <><circle cx="12" cy="12" r="10" /><path d="M9 12l2 2 4-4" /></>
                 ) : (
                   <><circle cx="12" cy="12" r="10" /><path d="M15 9l-6 6M9 9l6 6" /></>
                 )}
               </svg>
-              {statusMessage.text}
+              {referralStatus.text}
             </div>
           )}
         </div>
@@ -209,9 +223,26 @@ export function AdminPage() {
       {/* Users List */}
       <div className="section">
         <div className="section-header">
-          <h2 className="section-title">Users</h2>
-          <span className="section-count">{users.data?.total_users ?? 0} total</span>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <h2 className="section-title">Users</h2>
+            <span className="section-count">{users.data?.total_users ?? 0} total</span>
+          </div>
+          {renderPagination()}
         </div>
+
+        {creditStatus && (
+          <div className={`admin-status-msg ${creditStatus.type}`} style={{ marginBottom: "1rem" }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              {creditStatus.type === "success" ? (
+                <><circle cx="12" cy="12" r="10" /><path d="M9 12l2 2 4-4" /></>
+              ) : (
+                <><circle cx="12" cy="12" r="10" /><path d="M15 9l-6 6M9 9l6 6" /></>
+              )}
+            </svg>
+            {creditStatus.text}
+          </div>
+        )}
+
         <div className="usage-table-container">
           {users.isLoading ? (
             <div className="loading"><div className="spinner" /></div>
@@ -222,33 +253,92 @@ export function AdminPage() {
                   <th>User</th>
                   <th>Credits</th>
                   <th>Role</th>
+                  <th style={{ textAlign: "right" }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {userList.map((user) => (
-                  <tr key={user.id}>
-                    <td>
-                      <div className="user-info">
-                        <div className="user-avatar-small">
-                          {user.name
-                            ? user.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
-                            : user.email.split("@")[0].substring(0, 2).toUpperCase()}
+                  <Fragment key={user.id}>
+                    <tr>
+                      <td>
+                        <div className="user-info">
+                          <div className="user-avatar-small">
+                            {user.name
+                              ? user.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
+                              : user.email.split("@")[0].substring(0, 2).toUpperCase()}
+                          </div>
+                          <div>
+                            <div className="user-name">{user.name || "—"}</div>
+                            <div className="user-email">{user.email}</div>
+                          </div>
                         </div>
-                        <div>
-                          <div className="user-name">{user.name || "—"}</div>
-                          <div className="user-email">{user.email}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <span className="admin-credit-badge">{user.credits}</span>
-                    </td>
-                    <td>
-                      {user.is_superuser
-                        ? <span className="admin-badge">Admin</span>
-                        : <span className="status-badge active">User</span>}
-                    </td>
-                  </tr>
+                      </td>
+                      <td>
+                        <span className="admin-credit-badge">{user.credits}</span>
+                      </td>
+                      <td>
+                        {user.is_superuser
+                          ? <span className="admin-badge">Admin</span>
+                          : <span className="status-badge active">User</span>}
+                      </td>
+                      <td style={{ textAlign: "right" }}>
+                        <button
+                          className={`admin-btn admin-btn-sm ${editingUserId === user.id ? "admin-btn-secondary" : "admin-btn-primary"}`}
+                          onClick={() => {
+                            if (editingUserId === user.id) {
+                              setEditingUserId(null);
+                            } else {
+                              setEditingUserId(user.id);
+                              setCreditAmount(100);
+                              setCreditReason("admin_grant");
+                              setCreditStatus(null);
+                            }
+                          }}
+                        >
+                          {editingUserId === user.id ? "Cancel" : "Add Credits"}
+                        </button>
+                      </td>
+                    </tr>
+                    {editingUserId === user.id && (
+                      <tr className="admin-credit-edit-row">
+                        <td colSpan={4}>
+                          <div className="admin-inline-credit-form">
+                            <div className="admin-ops-field">
+                              <label className="admin-ops-label">Amount</label>
+                              <input
+                                type="number"
+                                min={1}
+                                className="admin-ops-input"
+                                value={creditAmount}
+                                onChange={(e) => setCreditAmount(Number(e.target.value))}
+                              />
+                            </div>
+                            <div className="admin-ops-field" style={{ flex: 2 }}>
+                              <label className="admin-ops-label">Reason</label>
+                              <input
+                                className="admin-ops-input"
+                                value={creditReason}
+                                onChange={(e) => setCreditReason(e.target.value)}
+                                placeholder="e.g. admin_grant"
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              className="admin-btn admin-btn-primary"
+                              style={{ alignSelf: "flex-end" }}
+                              onClick={() => grantCredits.mutate()}
+                              disabled={grantCredits.isPending}
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <circle cx="12" cy="12" r="10" /><path d="M12 8v8M8 12h8" />
+                              </svg>
+                              {grantCredits.isPending ? "Adding..." : "Confirm"}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
                 ))}
               </tbody>
             </table>

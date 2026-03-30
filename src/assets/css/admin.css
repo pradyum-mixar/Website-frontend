@@ -263,6 +263,88 @@
     color: var(--text-secondary);
 }
 
+/* Pagination */
+.admin-pagination {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.admin-page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 0.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.admin-page-btn:hover:not(:disabled) {
+    border-color: var(--primary-cyan);
+    color: var(--primary-cyan);
+    background: rgba(0, 192, 199, 0.06);
+}
+
+.admin-page-btn.active {
+    background: linear-gradient(135deg, var(--primary-cyan) 0%, var(--primary-green) 100%);
+    color: var(--bg-dark);
+    border-color: transparent;
+    font-weight: 600;
+}
+
+.admin-page-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.admin-page-ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+/* Small Button Variant */
+.admin-btn-sm {
+    padding: 0.35rem 0.85rem;
+    font-size: 0.78rem;
+    border-radius: 8px;
+}
+
+/* Inline Credit Form */
+.admin-credit-edit-row td {
+    padding: 0 !important;
+}
+
+.admin-inline-credit-form {
+    display: flex;
+    align-items: flex-end;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: rgba(0, 192, 199, 0.03);
+    border-top: 1px solid rgba(0, 192, 199, 0.1);
+    border-bottom: 1px solid rgba(0, 192, 199, 0.1);
+}
+
+.admin-inline-credit-form .admin-ops-field {
+    flex: 1;
+}
+
+.admin-inline-credit-form .admin-ops-input {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
     .admin-stats-row {
@@ -314,6 +396,20 @@
     }
 
     .usage-table {
-        min-width: 500px;
+        min-width: 600px;
+    }
+
+    .admin-pagination {
+        flex-wrap: wrap;
+    }
+
+    .admin-inline-credit-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .admin-inline-credit-form .admin-btn {
+        width: 100%;
+        justify-content: center;
     }
 }

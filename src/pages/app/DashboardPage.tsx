@@ -203,7 +203,7 @@ export function DashboardPage() {
               <circle cx="12" cy="12" r="10" />
               <path d="M12 6v6l4 2" />
             </svg>
-            {`${user.plan_name} · ${user.trial_days_remaining} days left`}
+            {user.plan_name}
           </div>
         ) : subscriptionStatus.data ? (
           <div className="billing-cycle-badge">
@@ -261,13 +261,13 @@ export function DashboardPage() {
             <div
               className={`usage-bar-fill${remainingPct < 20 ? " critical" : remainingPct < 50 ? " warning" : ""}`}
               style={{
-                width: `${hasSubscription ? remainingPct : (creditsRemaining > 0 ? 100 : 0)}%`,
+                width: `${hasSubscription ? (100 - remainingPct) : (creditsRemaining > 0 ? 100 : 0)}%`,
               }}
             />
           </div>
           <div className="usage-bar-footer">
             {hasSubscription ? (
-              <span>{Math.round(remainingPct)}% remaining this cycle</span>
+              <span>&nbsp;</span>
             ) : creditsRemaining === 0 ? (
               <span className="usage-bar-nudge">Subscribe to get monthly usage</span>
             ) : (
