@@ -43,7 +43,7 @@ export function AppShell() {
             ) : (
               <NavLink to="/app" end className="app-nav-link">Dashboard</NavLink>
             )}
-            <NavLink to="/app/downloads" className="app-nav-link">Download</NavLink>
+            <NavLink to="/downloads" className="app-nav-link">Download</NavLink>
             <NavLink to="/app/manage-subscription" className="app-nav-link">Manage Subscription</NavLink>
           </div>
 
@@ -95,7 +95,7 @@ export function AppShell() {
             ) : (
               <NavLink to="/app" end className="app-nav-link">Dashboard</NavLink>
             )}
-            <NavLink to="/app/downloads" className="app-nav-link">Download</NavLink>
+            <NavLink to="/downloads" className="app-nav-link">Download</NavLink>
             <NavLink to="/app/manage-subscription" className="app-nav-link">Manage Subscription</NavLink>
             <div className="mobile-menu-divider" />
             <button className="app-nav-link" onClick={handleLogout} style={{ background: "none", border: "none", cursor: "pointer", textAlign: "left", padding: 0 }}>Logout</button>

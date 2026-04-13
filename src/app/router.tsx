@@ -25,6 +25,7 @@ import { AboutPage } from "../pages/AboutPage";
 import { ContactPage } from "../pages/ContactPage";
 import { BugReportPage } from "../pages/BugReportPage";
 import { DocsPage } from "../pages/DocsPage";
+import { ChangelogPage } from "../pages/ChangelogPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
 
 export function AppRouter() {
@@ -37,6 +38,8 @@ export function AppRouter() {
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/bug-report" element={<BugReportPage />} />
         <Route path="/docs" element={<DocsPage />} />
+        <Route path="/changelog" element={<ChangelogPage />} />
+        <Route path="/downloads" element={<DownloadsPage />} />
         <Route path="/auth/login" element={<LoginPage />} />
         <Route path="/auth/signup" element={<SignupPage />} />
         <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
@@ -49,7 +52,6 @@ export function AppRouter() {
 
         <Route element={<RequireAuth />}>
           <Route path="/app/desktop-login" element={<DesktopLoginPage />} />
-          <Route path="/app/downloads" element={<DownloadsPage />} />
           <Route path="/app" element={<AppShell />}>
             <Route index element={<DashboardPage />} />
             <Route path="account" element={<AccountPage />} />

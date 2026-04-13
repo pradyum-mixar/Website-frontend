@@ -17,7 +17,7 @@ function useIsMobile(breakpoint = 768) {
 }
 
 type PublicNavbarProps = {
-  activePage?: "about" | "pricing" | "download" | "contact" | "bug-report";
+  activePage?: "about" | "pricing" | "download" | "contact" | "bug-report" | "changelog";
 };
 
 export function PublicNavbar({ activePage }: PublicNavbarProps) {
@@ -68,7 +68,8 @@ export function PublicNavbar({ activePage }: PublicNavbarProps) {
             <div className="nav-links">
               <Link to="/about" className={activePage === "about" ? "active" : ""}>About</Link>
               <Link to="/pricing" className={activePage === "pricing" ? "active" : ""}>Pricing</Link>
-              {isAuthenticated && <Link to="/app/downloads" className={activePage === "download" ? "active" : ""}>Download</Link>}
+              <Link to="/changelog" className={activePage === "changelog" ? "active" : ""}>Changelog</Link>
+              <Link to="/downloads" className={activePage === "download" ? "active" : ""}>Download</Link>
               {isAuthenticated && <Link to="/app">Dashboard</Link>}
             </div>
 
@@ -137,7 +138,8 @@ export function PublicNavbar({ activePage }: PublicNavbarProps) {
         <div className="mobile-menu">
           <Link to="/about" className={activePage === "about" ? "active" : ""}>About</Link>
           <Link to="/pricing" className={activePage === "pricing" ? "active" : ""}>Pricing</Link>
-          {isAuthenticated && <Link to="/app/downloads" className={activePage === "download" ? "active" : ""}>Download</Link>}
+          <Link to="/changelog" className={activePage === "changelog" ? "active" : ""}>Changelog</Link>
+          <Link to="/downloads" className={activePage === "download" ? "active" : ""}>Download</Link>
           {isAuthenticated && <Link to="/app">Dashboard</Link>}
           <div className="mobile-menu-divider" />
           {isAuthenticated ? (
