@@ -1212,6 +1212,9 @@ export function LandingPage() {
                 <Link to="/downloads" className="footer-link">
                   Download
                 </Link>
+                <Link to="/changelog" className="footer-link">
+                  Changelog
+                </Link>
               </div>
             </div>
 

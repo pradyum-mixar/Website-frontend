@@ -68,7 +68,6 @@ export function PublicNavbar({ activePage }: PublicNavbarProps) {
             <div className="nav-links">
               <Link to="/about" className={activePage === "about" ? "active" : ""}>About</Link>
               <Link to="/pricing" className={activePage === "pricing" ? "active" : ""}>Pricing</Link>
-              <Link to="/changelog" className={activePage === "changelog" ? "active" : ""}>Changelog</Link>
               <Link to="/downloads" className={activePage === "download" ? "active" : ""}>Download</Link>
               {isAuthenticated && <Link to="/app">Dashboard</Link>}
             </div>
