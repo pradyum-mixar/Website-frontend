@@ -9,6 +9,41 @@ declare global {
 }
 
 const GA_ID = "G-LVNPXKJDMR";
+const UTM_KEYS = [
+  "utm_source",
+  "utm_medium",
+  "utm_campaign",
+  "utm_name",
+  "utm_term",
+  "utm_content",
+] as const;
+
+type UtmParams = Partial<Record<(typeof UTM_KEYS)[number], string>>;
+
+function readStoredUtms(): UtmParams {
+  try {
+    const raw = sessionStorage.getItem("mixar_utms");
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    const out: UtmParams = {};
+    UTM_KEYS.forEach((k) => {
+      const v = parsed[k];
+      if (typeof v === "string" && v) out[k] = v;
+    });
+    return out;
+  } catch {
+    return {};
+  }
+}
+
+function buildPageLocationWithUtms(search: string, utms: UtmParams): string {
+  const params = new URLSearchParams(search);
+  (Object.entries(utms) as [string, string][]).forEach(([k, v]) => {
+    if (!params.has(k)) params.set(k, v);
+  });
+  const qs = params.toString();
+  return window.location.origin + window.location.pathname + (qs ? `?${qs}` : "");
+}
 
 export function GoogleAnalytics() {
   const location = useLocation();
@@ -28,12 +63,14 @@ export function GoogleAnalytics() {
     }
   }, [user]);
 
-  // Track SPA page views on every route change
+  // Track SPA page views on every route change, carrying captured UTMs so GA4 can attribute
   useEffect(() => {
+    const utms = readStoredUtms();
     window.gtag?.("event", "page_view", {
       page_path: location.pathname + location.search,
-      page_location: window.location.href,
+      page_location: buildPageLocationWithUtms(location.search, utms),
       page_title: document.title,
+      ...utms,
     });
   }, [location]);
 
