@@ -32,6 +32,10 @@ export function LoginPage() {
   const handleGoogleLogin = async () => {
     setError("");
     try {
+      const returnTo = searchParams.get("returnTo");
+      if (returnTo) {
+        sessionStorage.setItem("mixar_returnTo", returnTo);
+      }
       const url = await apiClient.getGoogleLoginUrl();
       window.gtag?.("event", "login", { method: "google" });
       window.location.href = url;

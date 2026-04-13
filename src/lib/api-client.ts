@@ -68,6 +68,28 @@ export type UpgradePreview = {
   new_credits_per_month: number;
 };
 
+export type ChangelogEntry = {
+  version: string;
+  channel: string;
+  severity: string;
+  changelog_summary: string | null;
+  changelog_url: string | null;
+  release_notes: string | null;
+  platforms: string[];
+  published_at: string | null;
+};
+
+export type ChangelogResponse = {
+  status: string;
+  message: string;
+  data: {
+    releases: ChangelogEntry[];
+    total: number;
+    page: number;
+    page_size: number;
+  };
+};
+
 class ApiClient {
   private client: AxiosInstance;
 
@@ -273,6 +295,17 @@ class ApiClient {
     data: { url: string; platform: string; version: string; size_bytes: number; sha256: string; installer_type: string | null };
   }> {
     const response = await this.client.get(`/downloads/${platform}`);
+    return response.data;
+  }
+
+  async getChangelog(
+    page = 1,
+    pageSize = 20,
+    channel = "stable"
+  ): Promise<ChangelogResponse> {
+    const response = await this.client.get<ChangelogResponse>(
+      `/updates/changelog?page=${page}&page_size=${pageSize}&channel=${channel}`
+    );
     return response.data;
   }
 

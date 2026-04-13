@@ -1209,7 +1209,7 @@ export function LandingPage() {
                 <Link to="/pricing" className="footer-link">
                   Pricing
                 </Link>
-                <Link to="/app/downloads" className="footer-link">
+                <Link to="/downloads" className="footer-link">
                   Download
                 </Link>
               </div>

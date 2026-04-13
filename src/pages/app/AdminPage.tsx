@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { apiClient } from "../../lib/api-client";
 import "../../assets/css/admin.css";
@@ -10,7 +10,13 @@ type AdminUser = {
   email: string;
   name?: string;
   credits: number;
+  is_active: boolean;
   is_superuser: boolean;
+  generations_count: number;
+  plan: string;
+  created_at?: string;
+  last_login_at?: string;
+  client_version?: string;
 };
 
 type AdminUsersResponse = {
@@ -42,11 +48,60 @@ export function AdminPage() {
   const [referralAmount, setReferralAmount] = useState(100);
   const [creditStatus, setCreditStatus] = useState<{ text: string; type: "success" | "error" } | null>(null);
   const [referralStatus, setReferralStatus] = useState<{ text: string; type: "success" | "error" } | null>(null);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [planFilter, setPlanFilter] = useState("");
+  const [activeFilter, setActiveFilter] = useState<string>("");
+  const [roleFilter, setRoleFilter] = useState<string>("");
+  const [minCredits, setMinCredits] = useState<string>("");
+  const [maxCredits, setMaxCredits] = useState<string>("");
+  const [sortBy, setSortBy] = useState("created_at");
+  const [sortOrder, setSortOrder] = useState("desc");
+  const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const resetFilters = () => {
+    setSearch("");
+    setDebouncedSearch("");
+    setPlanFilter("");
+    setActiveFilter("");
+    setRoleFilter("");
+    setMinCredits("");
+    setMaxCredits("");
+    setSortBy("created_at");
+    setSortOrder("desc");
+    setPage(1);
+  };
+
+  const activeFilterCount = [planFilter, activeFilter, roleFilter, minCredits, maxCredits].filter(Boolean).length;
 
   const users = useQuery({
-    queryKey: ["admin-users", page],
-    queryFn: async () => (await apiClient.instance.get<AdminUsersResponse>(`/admin/users?skip=${(page - 1) * PAGE_SIZE}&limit=${PAGE_SIZE}`)).data,
+    queryKey: ["admin-users", page, debouncedSearch, planFilter, activeFilter, roleFilter, minCredits, maxCredits, sortBy, sortOrder],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        skip: String((page - 1) * PAGE_SIZE),
+        limit: String(PAGE_SIZE),
+        sort_by: sortBy,
+        sort_order: sortOrder,
+      });
+      if (debouncedSearch) params.set("search", debouncedSearch);
+      if (planFilter) params.set("plan", planFilter);
+      if (activeFilter) params.set("is_active", activeFilter);
+      if (roleFilter) params.set("is_superuser", roleFilter);
+      if (minCredits) params.set("min_credits", minCredits);
+      if (maxCredits) params.set("max_credits", maxCredits);
+      return (await apiClient.instance.get<AdminUsersResponse>(`/admin/users?${params}`)).data;
+    },
   });
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, planFilter, activeFilter, roleFilter, minCredits, maxCredits]);
 
   const activity = useQuery({
     queryKey: ["admin-activity"],
@@ -80,6 +135,30 @@ export function AdminPage() {
   const userList = users.data?.users ?? [];
   const activityList = activity.data?.activity ?? [];
   const totalPages = Math.ceil((users.data?.total_users ?? 0) / PAGE_SIZE);
+
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      if (sortOrder === "asc") {
+        setSortOrder("desc");
+      } else {
+        // Third click: reset to default
+        setSortBy("created_at");
+        setSortOrder("desc");
+      }
+    } else {
+      setSortBy(field);
+      setSortOrder("asc");
+    }
+  };
+
+  const SortArrow = ({ field }: { field: string }) => {
+    if (sortBy !== field) return null;
+    return (
+      <span className="admin-sort-arrow">
+        {sortOrder === "asc" ? "\u25B2" : "\u25BC"}
+      </span>
+    );
+  };
 
   const renderPagination = () => {
     if (totalPages <= 1) return null;
@@ -230,6 +309,98 @@ export function AdminPage() {
           {renderPagination()}
         </div>
 
+        {/* Search & Filter Bar */}
+        <div className="admin-filter-bar">
+          <div className="admin-search-row">
+            <div className="admin-search-input-wrap">
+              <svg className="admin-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8" />
+                <path d="M21 21l-4.35-4.35" />
+              </svg>
+              <input
+                type="text"
+                className="admin-search-input"
+                placeholder="Search by name, email, or user number..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              {search && (
+                <button className="admin-search-clear" onClick={() => setSearch("")}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+            <button
+              className={`admin-btn admin-btn-secondary admin-filter-toggle${isFilterOpen ? " active" : ""}`}
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+              </svg>
+              Filters
+              {activeFilterCount > 0 && <span className="admin-filter-count">{activeFilterCount}</span>}
+            </button>
+            {(activeFilterCount > 0 || debouncedSearch) && (
+              <button className="admin-clear-all" onClick={resetFilters}>Clear all</button>
+            )}
+          </div>
+          {isFilterOpen && (
+            <div className="admin-filter-panel">
+              <div className="admin-filter-field">
+                <label className="admin-ops-label">Plan</label>
+                <select className="admin-ops-input" value={planFilter} onChange={(e) => setPlanFilter(e.target.value)}>
+                  <option value="">All</option>
+                  <option value="free">Free</option>
+                  <option value="basic">Basic</option>
+                  <option value="pro">Pro</option>
+                  <option value="enterprise">Enterprise</option>
+                  <option value="trial">Trial</option>
+                </select>
+              </div>
+              <div className="admin-filter-field">
+                <label className="admin-ops-label">Status</label>
+                <select className="admin-ops-input" value={activeFilter} onChange={(e) => setActiveFilter(e.target.value)}>
+                  <option value="">All</option>
+                  <option value="true">Active</option>
+                  <option value="false">Inactive</option>
+                </select>
+              </div>
+              <div className="admin-filter-field">
+                <label className="admin-ops-label">Role</label>
+                <select className="admin-ops-input" value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>
+                  <option value="">All</option>
+                  <option value="true">Admin</option>
+                  <option value="false">Regular</option>
+                </select>
+              </div>
+              <div className="admin-filter-field">
+                <label className="admin-ops-label">Min Credits</label>
+                <input
+                  type="number"
+                  className="admin-ops-input"
+                  placeholder="0"
+                  min={0}
+                  value={minCredits}
+                  onChange={(e) => setMinCredits(e.target.value)}
+                />
+              </div>
+              <div className="admin-filter-field">
+                <label className="admin-ops-label">Max Credits</label>
+                <input
+                  type="number"
+                  className="admin-ops-input"
+                  placeholder="Any"
+                  min={0}
+                  value={maxCredits}
+                  onChange={(e) => setMaxCredits(e.target.value)}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
         {creditStatus && (
           <div className={`admin-status-msg ${creditStatus.type}`} style={{ marginBottom: "1rem" }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -246,20 +417,48 @@ export function AdminPage() {
         <div className="usage-table-container">
           {users.isLoading ? (
             <div className="loading"><div className="spinner" /></div>
+          ) : users.isError || userList.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+              </div>
+              <h3 className="empty-title">No users found</h3>
+              <p className="empty-message">Try adjusting your search or filters.</p>
+            </div>
           ) : (
             <table className="usage-table">
               <thead>
                 <tr>
                   <th>User</th>
-                  <th>Credits</th>
-                  <th>Role</th>
+                  <th>Plan</th>
+                  <th className="admin-th-sortable" onClick={() => handleSort("credits")}>
+                    Credits <SortArrow field="credits" />
+                  </th>
+                  <th className="admin-th-sortable" onClick={() => handleSort("generations_count")}>
+                    Generations <SortArrow field="generations_count" />
+                  </th>
+                  <th className="admin-th-sortable" onClick={() => handleSort("created_at")}>
+                    Joined <SortArrow field="created_at" />
+                  </th>
                   <th style={{ textAlign: "right" }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {userList.map((user) => (
                   <Fragment key={user.id}>
-                    <tr>
+                    <tr
+                      className={`admin-user-row${expandedUserId === user.id ? " expanded" : ""}`}
+                      onClick={(e) => {
+                        // Don't toggle expand when clicking buttons/inputs
+                        if ((e.target as HTMLElement).closest("button, input")) return;
+                        setExpandedUserId(expandedUserId === user.id ? null : user.id);
+                      }}
+                    >
                       <td>
                         <div className="user-info">
                           <div className="user-avatar-small">
@@ -268,18 +467,24 @@ export function AdminPage() {
                               : user.email.split("@")[0].substring(0, 2).toUpperCase()}
                           </div>
                           <div>
-                            <div className="user-name">{user.name || "—"}</div>
-                            <div className="user-email">{user.email}</div>
+                            <div className="user-name">{user.name || "\u2014"}</div>
+                            <div className="user-email">
+                              {user.user_no ? `#${user.user_no} \u00B7 ` : ""}{user.email}
+                            </div>
                           </div>
                         </div>
                       </td>
                       <td>
-                        <span className="admin-credit-badge">{user.credits}</span>
+                        <span className={`admin-plan-badge ${user.plan}`}>{user.plan}</span>
                       </td>
                       <td>
-                        {user.is_superuser
-                          ? <span className="admin-badge">Admin</span>
-                          : <span className="status-badge active">User</span>}
+                        <span className="admin-credit-badge">{user.credits}</span>
+                      </td>
+                      <td>{user.generations_count ?? 0}</td>
+                      <td>
+                        {user.created_at
+                          ? new Date(user.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
+                          : "\u2014"}
                       </td>
                       <td style={{ textAlign: "right" }}>
                         <button
@@ -301,7 +506,7 @@ export function AdminPage() {
                     </tr>
                     {editingUserId === user.id && (
                       <tr className="admin-credit-edit-row">
-                        <td colSpan={4}>
+                        <td colSpan={6}>
                           <div className="admin-inline-credit-form">
                             <div className="admin-ops-field">
                               <label className="admin-ops-label">Amount</label>
@@ -334,6 +539,45 @@ export function AdminPage() {
                               </svg>
                               {grantCredits.isPending ? "Adding..." : "Confirm"}
                             </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                    {expandedUserId === user.id && (
+                      <tr className="admin-detail-row">
+                        <td colSpan={6}>
+                          <div className="admin-detail-content">
+                            <div className="admin-detail-item">
+                              <span className="admin-detail-label">Status</span>
+                              <span className="admin-detail-value">
+                                {user.is_active
+                                  ? <span className="status-badge active">Active</span>
+                                  : <span className="status-badge inactive">Inactive</span>}
+                              </span>
+                            </div>
+                            <div className="admin-detail-item">
+                              <span className="admin-detail-label">Role</span>
+                              <span className="admin-detail-value">
+                                {user.is_superuser
+                                  ? <span className="admin-badge">Admin</span>
+                                  : <span className="status-badge active">User</span>}
+                              </span>
+                            </div>
+                            <div className="admin-detail-item">
+                              <span className="admin-detail-label">Last Login</span>
+                              <span className="admin-detail-value">
+                                {user.last_login_at
+                                  ? new Date(user.last_login_at).toLocaleString(undefined, {
+                                      month: "short", day: "numeric", year: "numeric",
+                                      hour: "2-digit", minute: "2-digit",
+                                    })
+                                  : "Never"}
+                              </span>
+                            </div>
+                            <div className="admin-detail-item">
+                              <span className="admin-detail-label">Client Version</span>
+                              <span className="admin-detail-value">{user.client_version || "Unknown"}</span>
+                            </div>
                           </div>
                         </td>
                       </tr>

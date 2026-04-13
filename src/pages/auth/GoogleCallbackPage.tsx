@@ -26,7 +26,9 @@ export function GoogleCallbackPage() {
       try {
         await apiClient.exchangeGoogleCode(code, state);
         await refreshUser();
-        navigate("/app", { replace: true });
+        const returnTo = sessionStorage.getItem("mixar_returnTo");
+        sessionStorage.removeItem("mixar_returnTo");
+        navigate(returnTo || "/app", { replace: true });
       } catch (err: any) {
         const message = err.response?.data?.detail?.message
           || err.response?.data?.message

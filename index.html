@@ -21,6 +21,22 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png" />
 
+    <!-- Capture UTM params on homepage BEFORE GA4 or React runs, so redirects can't erase them -->
+    <script>
+      (function () {
+        try {
+          if (window.location.pathname !== '/') return;
+          var params = new URLSearchParams(window.location.search);
+          var keys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_name', 'utm_term', 'utm_content'];
+          var utms = {};
+          keys.forEach(function (k) { var v = params.get(k); if (v) utms[k] = v; });
+          if (Object.keys(utms).length > 0) {
+            sessionStorage.setItem('mixar_utms', JSON.stringify(utms));
+          }
+        } catch (e) { /* sessionStorage blocked — ignore */ }
+      })();
+    </script>
+
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-LVNPXKJDMR"></script>
     <script>
