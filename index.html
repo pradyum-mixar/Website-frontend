@@ -21,11 +21,12 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png" />
 
-    <!-- Capture UTM params on homepage BEFORE GA4 or React runs, so redirects can't erase them -->
+    <!-- Capture UTM params BEFORE GA4 or React runs, so SPA route changes can't erase them.
+         Note: if a DNS-level apex->www redirect drops the query string, the UTMs are already
+         gone by the time this script runs. That must be fixed in the redirect config itself. -->
     <script>
       (function () {
         try {
-          if (window.location.pathname !== '/') return;
           var params = new URLSearchParams(window.location.search);
           var keys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_name', 'utm_term', 'utm_content'];
           var utms = {};
