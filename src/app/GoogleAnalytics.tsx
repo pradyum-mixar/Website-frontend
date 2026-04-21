@@ -70,7 +70,11 @@ export function GoogleAnalytics() {
       page_path: location.pathname + location.search,
       page_location: buildPageLocationWithUtms(location.search, utms),
       page_title: document.title,
-      ...utms,
+      campaign_source: utms.utm_source,
+      campaign_medium: utms.utm_medium,
+      campaign_name: utms.utm_campaign ?? utms.utm_name,
+      campaign_term: utms.utm_term,
+      campaign_content: utms.utm_content,
     });
   }, [location]);
 
