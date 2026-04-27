@@ -453,6 +453,130 @@
     transform: translateY(-4px);
 }
 
+.dashboard-book-call {
+    position: relative;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    padding: 2rem 2.5rem;
+    background: linear-gradient(135deg, rgba(0, 192, 199, 0.06) 0%, rgba(133, 196, 73, 0.06) 100%);
+    border: 1px solid rgba(0, 192, 199, 0.2);
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+}
+
+.dashboard-book-call-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.dashboard-book-call:hover .dashboard-book-call-close {
+    opacity: 1;
+}
+
+.dashboard-book-call-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+@media (max-width: 600px) {
+    .dashboard-book-call {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+.downloads-book-call {
+    margin-top: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    padding: 2rem 2.5rem;
+    background: linear-gradient(135deg, rgba(0, 192, 199, 0.06) 0%, rgba(133, 196, 73, 0.06) 100%);
+    border: 1px solid rgba(0, 192, 199, 0.2);
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+}
+
+.downloads-book-call-text h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0 0 0.75rem;
+    color: var(--text-primary);
+}
+
+.downloads-book-call-text ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.downloads-book-call-text ul li {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    padding-left: 1.1rem;
+    position: relative;
+}
+
+.downloads-book-call-text ul li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--primary-cyan);
+}
+
+.downloads-book-call-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, var(--primary-cyan) 0%, var(--primary-green) 100%);
+    color: var(--bg-dark);
+    transition: all 0.3s ease;
+}
+
+.downloads-book-call-btn:hover {
+    box-shadow: 0 8px 20px rgba(0, 192, 199, 0.3);
+    transform: translateY(-2px);
+}
+
+@media (max-width: 600px) {
+    .downloads-book-call {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .downloads-book-call-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
 .download-icon {
     width: 80px;
     height: 80px;

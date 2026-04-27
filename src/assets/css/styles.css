@@ -53,7 +53,7 @@ body {
 
 .brand-logo { height: 40px; width: auto; }
 
-.nav-links { display: flex; align-items: center; gap: 1rem; }
+.nav-links { display: flex; align-items: center; justify-content: center; gap: 1rem; }
 
 .nav-link {
     display: flex;

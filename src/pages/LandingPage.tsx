@@ -312,7 +312,7 @@ export function LandingPage() {
 
   return (
     <>
-      {/* Loading overlay — hides the page until CDN images + fonts are ready */}
+{/* Loading overlay — hides the page until CDN images + fonts are ready */}
       <div
         className={`lp-overlay${isReady ? " lp-overlay--hidden" : ""}`}
         aria-hidden="true"

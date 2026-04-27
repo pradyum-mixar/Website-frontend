@@ -114,6 +114,24 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
         <p className="dashboard-subtitle">Choose the plan that fits your creative workflow</p>
       </div>
 
+      {!isAuthenticated && <div className="pricing-trial-cta">
+        <div className="pricing-trial-cta-header">
+          <h2 className="pricing-trial-cta-title">Free Trial</h2>
+          <p className="pricing-trial-cta-subtitle">See what Mixar can do</p>
+        </div>
+        <ul className="pricing-features pricing-trial-features">
+          <li><CheckIcon />1000 free credits</li>
+          <li><CheckIcon />All Pro features</li>
+          <li><CheckIcon />No credit card required</li>
+        </ul>
+        <button
+          className="pricing-trial-cta-btn"
+          onClick={() => navigate(isAuthenticated ? "/app/order?plan=pro&billing=monthly&trial=1" : "/auth/signup")}
+        >
+          Start Free Trial
+        </button>
+      </div>}
+
       <div className="pricing-grid">
         {isLoading ? (
           <>
