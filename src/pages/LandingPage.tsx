@@ -357,45 +357,38 @@ export function LandingPage() {
         <main className="lp-main">
           <div className="stack">
             <div className="stack-base">
-              <div className="stack-layer viewport">
+              <div className="stack-layer viewport-area">
                 <img
-                  src="https://d2znch1yzypu23.cloudfront.net/Mixar-UI-Viewport.svg"
+                  src="/assets/ui-stack/viewport-1.svg"
                   alt="Viewport"
                   className="stack-item"
                 />
               </div>
-              <div className="stack-layer viewport-header">
+              <div className="stack-layer viewport-buttons">
                 <img
-                  src="https://d2znch1yzypu23.cloudfront.net/Mixar-UI-Header.svg"
-                  alt="Header"
+                  src="/assets/ui-stack/viewport-2.svg"
+                  alt="Viewport buttons"
                   className="stack-item"
                 />
               </div>
-              <div className="stack-layer mood-board">
+              <div className="stack-layer mood-board-area">
                 <img
-                  src="https://d2znch1yzypu23.cloudfront.net/Mixar-UI-Moodboard.svg"
+                  src="/assets/ui-stack/moodboard-1.svg"
                   alt="Mood board"
                   className="stack-item"
                 />
               </div>
-              <div className="stack-layer chat-window">
+              <div className="stack-layer mood-board-buttons">
                 <img
-                  src="https://d2znch1yzypu23.cloudfront.net/Mixar-UI-Chat%20Window.svg"
-                  alt="Chat Window"
+                  src="/assets/ui-stack/moodboard-2.svg"
+                  alt="Mood board buttons"
                   className="stack-item"
                 />
               </div>
-              <div className="stack-layer chat-prompt">
+              <div className="stack-layer chat-bubble">
                 <img
-                  src="https://d2znch1yzypu23.cloudfront.net/Mixar-UI-Chat_Prompt%20Window.svg"
-                  alt="Chat Prompt"
-                  className="stack-item"
-                />
-              </div>
-              <div className="stack-layer chat-message">
-                <img
-                  src="https://d2znch1yzypu23.cloudfront.net/Mixar-UI-Chat%20Message.svg"
-                  alt="Chat Message"
+                  src="/assets/ui-stack/FloatingChatBubble.svg"
+                  alt="Floating chat bubble"
                   className="stack-item"
                 />
               </div>

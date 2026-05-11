@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { apiClient, type SubscriptionStatus } from "../../lib/api-client";
@@ -104,7 +105,7 @@ export function DashboardPage() {
   const { user } = useAuth();
   const [page, setPage] = useState(1);
   const [modeFilter, setModeFilter] = useState("");
-  const [showCallBox, setShowCallBox] = useState(true);
+  const [showCallModal, setShowCallModal] = useState(true);
 
   const usage = useQuery({
     queryKey: ["usage", page, modeFilter, user?.id],
@@ -327,33 +328,45 @@ export function DashboardPage() {
           </div>
       </div>
 
-      {showCallBox && (
-        <div className="dashboard-book-call">
-          <button className="dashboard-book-call-close" onClick={() => setShowCallBox(false)} aria-label="Dismiss">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <path d="M18 6L6 18M6 6l12 12" />
-            </svg>
-          </button>
-          <div className="downloads-book-call-text">
-            <h3>New to Mixar? We'll help you get set up.</h3>
-            <ul>
+      {showCallModal && createPortal(
+        <div className="book-call-overlay">
+          <div className="book-call-modal">
+            <button className="book-call-modal-close" onClick={() => setShowCallModal(false)} aria-label="Dismiss">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+            <div className="book-call-modal-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6 6l.82-.82a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7a2 2 0 0 1 1.72 2.03z"/>
+              </svg>
+            </div>
+            <h2 className="book-call-modal-title">New to Mixar? We'll help you get set up.</h2>
+            <p className="book-call-modal-subtitle">30 minutes, free, no commitment</p>
+            <ul className="book-call-modal-list">
               <li>Personalized walkthrough for your workflow</li>
               <li>Tips on how to use the agent more effectively</li>
-              <li>30 mins, free, no commitment</li>
+              <li>Get answers to any questions you have</li>
             </ul>
+            <div className="book-call-modal-actions">
+              <a
+                href="https://calendly.com/pradyum-mixar/30min"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="book-call-modal-btn"
+              >
+                Book a Call
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </a>
+              <button className="book-call-modal-skip" onClick={() => setShowCallModal(false)}>
+                Maybe later
+              </button>
+            </div>
           </div>
-          <a
-            href="https://calendly.com/pradyum-mixar/30min"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="downloads-book-call-btn"
-          >
-            Book a Call
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
-          </a>
-        </div>
+        </div>,
+        document.body
       )}
 
       <div className="section">
