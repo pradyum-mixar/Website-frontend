@@ -32,7 +32,7 @@
 }
 
 html {
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body {
@@ -46,7 +46,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* About page body variant */
@@ -1336,10 +1336,11 @@ header {
 
 h1 {
   margin: 0;
+  font-family: 'Utility Sans', 'Manrope', ui-sans-serif, system-ui, sans-serif;
   font-size: clamp(40px, 5vw, 64px);
-  letter-spacing: -0.02em;
-  font-weight: 500;
-  line-height: 1.1;
+  letter-spacing: -0.025em;
+  font-weight: 300;
+  line-height: 1;
   opacity: 0;
   animation: fadeBlurIn 1.2s ease-out forwards;
   animation-delay: 0.3s;
@@ -1407,9 +1408,9 @@ p.sub-headline {
   position: absolute;
   left: 50%;
   top: 40%;
-  width: 125%;
-  height: 690px;
-  transform: translate(-44%, -45%) scale(1) rotateX(38deg) rotateY(15deg) rotate(330deg);
+  width: 110%;
+  height: 600px;
+  transform: translate(-40%, -55%) scale(1) rotateX(42deg) rotateY(21deg) rotate(328deg);
   border-radius: 10px;
   border: 1px solid rgba(0, 192, 199, 0.15);
   background: transparent;
@@ -1422,7 +1423,7 @@ p.sub-headline {
   position: absolute;
   opacity: 0;
   animation: entrance 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  animation-delay: calc(var(--d) + 1.8s);
+  animation-delay: calc(var(--d) + 0.6s);
   pointer-events: none;
   transform-style: preserve-3d;
 }
@@ -1437,11 +1438,11 @@ p.sub-headline {
   pointer-events: none;
 }
 
-.viewport-area { top: 5%; left: 0; right: 0; bottom: 5%; --d: 0.1s; --tilt: 0.6deg; }
-.viewport-buttons { top: 5%; left: 0; right: 0; bottom: 5%; --d: 0.7s; --tilt: -0.4deg; }
-.mood-board-area { top: 5%; left: 0; right: 0; bottom: 5%; --d: 1.1s; --tilt: -0.2deg; }
-.mood-board-buttons { top: 5%; left: 0; right: 0; bottom: 5%; --d: 1.7s; --tilt: 0.3deg; }
-.chat-bubble { top: auto; bottom: 8%; left: 32.5%; right: 32.5%; --d: 2.2s; --tilt: 0.5deg; }
+.viewport-area { top: 5%; left: 0; right: 0; bottom: 5%; --d: 0.05s; --tilt: 0.6deg; }
+.viewport-buttons { top: 5%; left: 0; right: 0; bottom: 5%; --d: 0.35s; --tilt: -0.4deg; }
+.mood-board-area { top: 5%; left: 0; right: 0; bottom: 5%; --d: 0.55s; --tilt: -0.2deg; }
+.mood-board-buttons { top: 5%; left: 0; right: 0; bottom: 5%; --d: 0.85s; --tilt: 0.3deg; }
+.chat-bubble { top: auto; bottom: 8%; left: 32.5%; right: 32.5%; --d: 1.1s; --tilt: 0.5deg; }
 .chat-bubble .stack-item { width: 100%; }
 
 .stack-item:hover { transform: scale(0.9); }
