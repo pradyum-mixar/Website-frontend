@@ -99,6 +99,7 @@ export function LandingPage() {
   }, []);
 
 
+
   return (
     <>
 {/* Loading overlay — hides the page until CDN images + fonts are ready */}

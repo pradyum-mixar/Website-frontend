@@ -426,14 +426,14 @@
   overflow: hidden;
   background: #040404;
 }
-.rd-scrolly-video video {
+.rd-scrolly-video video,
+.rd-scrolly-video img {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   transition: opacity 600ms var(--rd-ease), transform 1200ms var(--rd-ease);
-  filter: url(#rd-remove-white);
 }
 .rd-scrolly-vignette {
   position: absolute;

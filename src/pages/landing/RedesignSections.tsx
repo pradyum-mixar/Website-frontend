@@ -502,16 +502,17 @@ export function Walkthrough() {
 }
 
 /* ── 2. SCROLLY — six surfaces ──
- * Each chapter has a webm (with alpha) primary and an mp4 fallback so Safari
- * users still get a video, even if it lacks transparency.
+ * Each chapter uses the original .gif from the production CDN — those GIFs
+ * ship with real 1-bit transparency baked in (the same files the live
+ * mixar.app site uses), so they render cleanly with no chroma-key fringe.
  */
+const CDN_GIF = "https://d2znch1yzypu23.cloudfront.net";
 const CHAPTERS = [
   {
     id: "moodboard",
     num: "01",
     word: "Brief",
-    webm: "/assets/feature_cards/webgif_moodboard_v1.webm",
-    mp4: "/assets/feature_cards/webgif_moodboard_v1.mp4",
+    gif: `${CDN_GIF}/webgif_moodboard_v1.gif`,
     title: "Direct, don't describe.",
     copy:
       "Pin references, prompt directions, anchor a palette — your moodboard lives next to the work, not in another tab. Mixie reads what you collect and steers the next move.",
@@ -521,8 +522,7 @@ const CHAPTERS = [
     id: "image3d",
     num: "02",
     word: "Shape",
-    webm: "/assets/feature_cards/webgif_image_to_3D_V1.webm",
-    mp4: "/assets/feature_cards/webgif_image_to_3D_V1.mp4",
+    gif: `${CDN_GIF}/webgif_image_to_3D_V1.gif`,
     title: "From a still to a solid.",
     copy:
       "Drop a reference. You get a clean-topology mesh with a 4K bake in roughly four seconds. No retopo cleanup, no decimation hacks — it lands in the scene editable.",
@@ -532,8 +532,7 @@ const CHAPTERS = [
     id: "uv",
     num: "03",
     word: "Unwrap",
-    webm: "/assets/feature_cards/webgif_UV_Unwrap_V1.webm",
-    mp4: "/assets/feature_cards/webgif_UV_Unwrap_V1.mp4",
+    gif: `${CDN_GIF}/webgif_UV_Unwrap_V1.gif`,
     title: "UVs that pack themselves.",
     copy:
       "Seam prediction, UDIM placement, padding — all decided for you and all overridable. A 142-island mesh resolves in under a minute, grouped by material.",
@@ -543,8 +542,7 @@ const CHAPTERS = [
     id: "texturing",
     num: "04",
     word: "Paint",
-    webm: "/assets/feature_cards/webgif_tex_V1.webm",
-    mp4: "/assets/feature_cards/webgif_tex_V1.mp4",
+    gif: `${CDN_GIF}/webgif_tex_V1.gif`,
     title: "Texture like you edit photos.",
     copy:
       "Layer stacks for materials — masks, blend modes, procedural inputs. Mixie can paint a layer for you that stays fully editable by hand. Nothing is baked until you say.",
@@ -554,8 +552,7 @@ const CHAPTERS = [
     id: "pbr",
     num: "05",
     word: "Material",
-    webm: "/assets/feature_cards/webgif_Pbr_V1.webm",
-    mp4: "/assets/feature_cards/webgif_Pbr_V1.mp4",
+    gif: `${CDN_GIF}/webgif_Pbr_V1.gif`,
     title: "PBR sets, generated on brief.",
     copy:
       "Albedo, normal, roughness, metallic, height — synthesized at 4K from a sentence. Tileable, seam-free, engine-ready. Swap any channel; the rest re-derive.",
@@ -565,8 +562,7 @@ const CHAPTERS = [
     id: "ui",
     num: "06",
     word: "Ship",
-    webm: "/assets/feature_cards/webgif_UI_V1.webm",
-    mp4: "/assets/feature_cards/webgif_UI_V1.mp4",
+    gif: `${CDN_GIF}/webgif_UI_V1.gif`,
     title: "One canvas. Every room.",
     copy:
       "Modelling, UVs, texturing, lookdev, sim, export — purpose-built workbenches sharing one scene graph. No mode-switching tax, no plugin handoffs.",
@@ -576,23 +572,10 @@ const CHAPTERS = [
 
 export function Scrolly() {
   const wrapRef = useRef<HTMLElement | null>(null);
-  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const p = useScrollProgress(wrapRef);
   const activeF = p * CHAPTERS.length;
   const active = Math.min(CHAPTERS.length - 1, Math.floor(activeF));
   const localP = Math.max(0, Math.min(1, activeF - active));
-
-  useEffect(() => {
-    videoRefs.current.forEach((v, i) => {
-      if (!v) return;
-      if (i === active) {
-        v.play().catch(() => {});
-      } else {
-        v.pause();
-        v.currentTime = 0;
-      }
-    });
-  }, [active]);
 
   return (
     <section
@@ -661,80 +644,25 @@ export function Scrolly() {
             </div>
           </div>
 
-          {/* CENTER: videos */}
+          {/* CENTER: GIFs (production CDN originals carry baked-in alpha) */}
           <div className="rd-scrolly-video">
-            {/* SVG chroma key: WebM/MP4 here carry a white recording background
-                rather than a real alpha channel, so we strip near-white pixels
-                to transparent at render time. */}
-            <svg
-              aria-hidden="true"
-              style={{ position: "absolute", width: 0, height: 0, pointerEvents: "none" }}
-            >
-              <defs>
-                <filter id="rd-remove-white">
-                  {/* 1) Chroma key: brighter-than-~0.85 luminance → transparent,
-                       plus a small RGB knockdown so surviving pixels are darker. */}
-                  <feColorMatrix
-                    type="matrix"
-                    values="
-                      0.92 0 0 0 -0.04
-                      0 0.92 0 0 -0.04
-                      0 0 0.92 0 -0.04
-                      -4 -4 -4 1 9.6
-                    "
-                    result="keyed"
-                  />
-                  {/* 2) Move the resulting alpha into RGB so we can multiply. */}
-                  <feColorMatrix
-                    in="keyed"
-                    type="matrix"
-                    values="
-                      0 0 0 1 0
-                      0 0 0 1 0
-                      0 0 0 1 0
-                      0 0 0 1 0
-                    "
-                    result="alphaMap"
-                  />
-                  {/* 3) Premultiply: RGB *= alpha. This collapses the white fringe
-                       on partial-alpha edges so it reads as the page background
-                       instead of a light halo. */}
-                  <feComposite
-                    in="keyed"
-                    in2="alphaMap"
-                    operator="arithmetic"
-                    k1="1"
-                    k2="0"
-                    k3="0"
-                    k4="0"
-                  />
-                </filter>
-              </defs>
-            </svg>
             <div className="rd-scrolly-vignette" />
             {CHAPTERS.map((c, i) => {
               const isActive = i === active;
               const dir = i < active ? -1 : 1;
               return (
-                <video
+                <img
                   key={c.id}
-                  ref={(el) => {
-                    videoRefs.current[i] = el;
-                  }}
-                  muted
-                  playsInline
-                  loop
-                  preload="auto"
+                  src={c.gif}
+                  alt=""
+                  aria-hidden="true"
                   style={{
                     opacity: isActive ? 1 : 0,
                     transform: isActive
                       ? `translate3d(${(1 - localP) * -2}%, 0, 0) scale(${1 + localP * 0.04})`
                       : `translate3d(${dir * 6}%, 0, 0) scale(1.08)`,
                   }}
-                >
-                  <source src={c.webm} type="video/webm" />
-                  <source src={c.mp4} type="video/mp4" />
-                </video>
+                />
               );
             })}
             <div className="rd-scrolly-bigword">
