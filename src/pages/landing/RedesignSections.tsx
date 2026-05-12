@@ -512,6 +512,45 @@ export function Walkthrough() {
  * mixar.app site uses), so they render cleanly with no chroma-key fringe.
  */
 const CDN_GIF = "https://d2znch1yzypu23.cloudfront.net";
+
+/* Model grid shown in chapter 5 (Models) instead of a single GIF. Logos live
+ * in /public/assets/redesign/model-logos/ (or the Mixar logomark for custom
+ * workflow modifiers). */
+const ML = "/assets/redesign/model-logos";
+const MODEL_GROUPS: Array<{
+  title: string;
+  rows: Array<{ logo: string; name: string; withMixar?: boolean }>;
+}> = [
+  {
+    title: "Image gen",
+    rows: [
+      { logo: `${ML}/nanobanana.svg`, name: "Nano Banana Flash" },
+      { logo: `${ML}/nanobanana.svg`, name: "Nano Banana Pro" },
+    ],
+  },
+  {
+    title: "Image to 3D",
+    rows: [
+      { logo: `${ML}/tripo.svg`, name: "Tripo" },
+      { logo: `${ML}/hunyuan.svg`, name: "Hunyuan" },
+      { logo: `${ML}/trellis.svg`, name: "Trellis" },
+      { logo: `${ML}/rodin.svg`, name: "Rodin" },
+    ],
+  },
+  {
+    title: "PBR & Retopology",
+    rows: [
+      { logo: `${ML}/hunyuan.svg`, name: "Hunyuan", withMixar: true },
+    ],
+  },
+  {
+    title: "Agent",
+    rows: [
+      { logo: `${ML}/gemini.svg`, name: "Gemini", withMixar: true },
+      { logo: `${ML}/claude.svg`, name: "Claude", withMixar: true },
+    ],
+  },
+];
 const CHAPTERS = [
   {
     id: "agent",
@@ -645,6 +684,74 @@ export function Scrolly() {
             {CHAPTERS.map((c, i) => {
               const isActive = i === active;
               const dir = i < active ? -1 : 1;
+              if (c.id === "models") {
+                const totalCards = MODEL_GROUPS.length;
+                return (
+                  <div
+                    key={c.id}
+                    className="rd-scrolly-models"
+                    aria-hidden={!isActive}
+                    style={{
+                      opacity: isActive ? 1 : 0,
+                      transform: isActive
+                        ? `translate3d(${(1 - localP) * -2}%, 0, 0) scale(${1 + localP * 0.02})`
+                        : `translate3d(${dir * 6}%, 0, 0) scale(1.04)`,
+                    }}
+                  >
+                    {MODEL_GROUPS.map((group, gi) => (
+                      <article key={group.title} className="rd-models-card">
+                        <header className="rd-models-card-head">
+                          <span className="rd-models-card-counter">
+                            0{gi + 1} / 0{totalCards}
+                          </span>
+                          <h3 className="rd-models-card-title">
+                            {group.title}
+                          </h3>
+                        </header>
+                        <ul className="rd-models-card-list">
+                          {group.rows.map((row) => (
+                            <li key={row.name} className="rd-models-card-row">
+                              <span className="rd-models-row-logos">
+                                <span
+                                  className="rd-models-logo"
+                                  aria-hidden="true"
+                                  style={
+                                    {
+                                      "--logo": `url(${row.logo})`,
+                                    } as React.CSSProperties
+                                  }
+                                />
+                                {row.withMixar && (
+                                  <span
+                                    className="rd-models-logo"
+                                    aria-hidden="true"
+                                    style={
+                                      {
+                                        "--logo":
+                                          "url(/assets/Logomark.svg)",
+                                      } as React.CSSProperties
+                                    }
+                                  />
+                                )}
+                              </span>
+                              <span className="rd-models-row-text">
+                                <span className="rd-models-row-name">
+                                  {row.name}
+                                </span>
+                                {row.withMixar && (
+                                  <em className="rd-models-row-sub">
+                                    custom workflow
+                                  </em>
+                                )}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </article>
+                    ))}
+                  </div>
+                );
+              }
               return (
                 <img
                   key={c.id}
