@@ -473,7 +473,7 @@ export function Walkthrough() {
           </p>
         </Reveal>
 
-        <Reveal scale slow className="rd-walkthrough-frame">
+        <Reveal slow className="rd-walkthrough-frame">
           <div ref={frameRef} className="rd-walkthrough-cursor-target">
             <iframe
               src="/assets/redesign/walkthrough.html"
@@ -514,64 +514,54 @@ export function Walkthrough() {
 const CDN_GIF = "https://d2znch1yzypu23.cloudfront.net";
 const CHAPTERS = [
   {
-    id: "moodboard",
+    id: "agent",
     num: "01",
-    word: "Brief",
+    word: "Agent",
     gif: `${CDN_GIF}/webgif_moodboard_v1.gif`,
-    title: "Direct, don't describe.",
+    title: "Background agents that finish what you started.",
     copy:
-      "Pin references, prompt directions, anchor a palette — your moodboard lives next to the work, not in another tab. Mixie reads what you collect and steers the next move.",
-    spec: ["In-canvas refs", "Mixie-aware"],
+      "Dispatch Mixie to unwrap, bake, retopologize, or generate while you keep moving. The grunt work runs in the background — you stay in the flow.",
+    spec: ["Multi-task", "Non-blocking"],
   },
   {
-    id: "image3d",
+    id: "focus",
     num: "02",
-    word: "Shape",
+    word: "Focus",
     gif: `${CDN_GIF}/webgif_image_to_3D_V1.gif`,
-    title: "From a still to a solid.",
+    title: "Less UI. More work.",
     copy:
-      "Drop a reference. You get a clean-topology mesh with a 4K bake in roughly four seconds. No retopo cleanup, no decimation hacks — it lands in the scene editable.",
-    spec: ["Image → mesh", "~4s · 4K bake"],
+      "A single-pane mode that hides panels, menus, and chrome — leaving you, your scene, and your agents. Pure flow, no toolbar tax.",
+    spec: ["Zen mode", "One pane"],
   },
   {
-    id: "uv",
+    id: "scene",
     num: "03",
-    word: "Unwrap",
+    word: "Scene",
     gif: `${CDN_GIF}/webgif_UV_Unwrap_V1.gif`,
-    title: "UVs that pack themselves.",
+    title: "From prompt to populated scene.",
     copy:
-      "Seam prediction, UDIM placement, padding — all decided for you and all overridable. A 142-island mesh resolves in under a minute, grouped by material.",
-    spec: ["38s · 142 islands", "UDIM-aware"],
+      "Brief a full scene — a warehouse, a booth, a cave — and the agent assembles it. Generated props, placed by spatial logic, styled to your moodboard. You direct the room; Mixar builds it.",
+    spec: ["Multi-asset", "Moodboard-aware"],
   },
   {
-    id: "texturing",
+    id: "mood",
     num: "04",
-    word: "Paint",
-    gif: `${CDN_GIF}/webgif_tex_V1.gif`,
-    title: "Texture like you edit photos.",
-    copy:
-      "Layer stacks for materials — masks, blend modes, procedural inputs. Mixie can paint a layer for you that stays fully editable by hand. Nothing is baked until you say.",
-    spec: ["Non-destructive", "Stencil + mask"],
-  },
-  {
-    id: "pbr",
-    num: "05",
-    word: "Material",
+    word: "Mood",
     gif: `${CDN_GIF}/webgif_Pbr_V1.gif`,
-    title: "PBR sets, generated on brief.",
+    title: "The canvas your scenes are built from.",
     copy:
-      "Albedo, normal, roughness, metallic, height — synthesized at 4K from a sentence. Tileable, seam-free, engine-ready. Swap any channel; the rest re-derive.",
-    spec: ["5 maps · 4K", "Tileable · seamless"],
+      "Pin references, paste palettes, set the visual language — and Mixar's scene generation reads from it. The moodboard isn't a separate tab; it's the brief your agents follow.",
+    spec: ["Drives scene gen", "2D + 3D"],
   },
   {
-    id: "ui",
-    num: "06",
-    word: "Ship",
+    id: "models",
+    num: "05",
+    word: "Models",
     gif: `${CDN_GIF}/webgif_UI_V1.gif`,
-    title: "One canvas. Every room.",
+    title: "Powered by the best models in 3D.",
     copy:
-      "Modelling, UVs, texturing, lookdev, sim, export — purpose-built workbenches sharing one scene graph. No mode-switching tax, no plugin handoffs.",
-    spec: ["6 workbenches", "Unified state"],
+      "One license, one workflow, every model. Mixar brings together the leading models for assets, textures, and image generation — and adds the pipeline work that makes their output actually usable.",
+    spec: ["Hunyuan 3D · Tripo", "Meshy · Flux"],
   },
 ];
 
@@ -715,9 +705,9 @@ export function Scrolly() {
           <div className="rd-scrolly-text">
             <div className="rd-scrolly-text-head">
               <h2 className="rd-h2 rd-h2-small">
-                Six moves
+                Five things <span className="rd-em-grad">Mixar</span> does
                 <br />
-                from <em>brief to ship.</em>
+                that Blender can't.
               </h2>
             </div>
 
@@ -766,7 +756,7 @@ export function Scrolly() {
                 >
                   <div className="rd-scrolly-counter">
                     <span>
-                      0{i + 1} / 06
+                      0{i + 1} / 0{CHAPTERS.length}
                     </span>
                     <span className="rd-counter-rule" />
                   </div>

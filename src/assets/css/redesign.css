@@ -258,9 +258,8 @@
 }
 
 /* Physical expansion on hover — the card grows beyond its column via negative
- * horizontal margins, and the iframe inside grows taller. Nothing is being
- * scaled (no CSS transform), so iframe click coordinates remain accurate and
- * the rendered content gets crisper rather than blurrier. */
+ * horizontal margins, and the iframe inside grows taller. No CSS transforms,
+ * so iframe click coordinates remain accurate. */
 .rd-walkthrough-frame iframe {
   transition: height 650ms cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -581,7 +580,7 @@
   color: var(--rd-dim2);
   margin-bottom: 12px;
 }
-.rd-scrolly-chapters-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.rd-scrolly-chapters-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
 .rd-chapter-bar { height: 2px; border-radius: 1px; overflow: hidden; }
 .rd-chapter-bar-fill {
   height: 100%;
