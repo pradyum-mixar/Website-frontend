@@ -182,7 +182,9 @@ function useScrollScene<T extends HTMLElement>() {
     const EXIT_RANGE = Math.max(0.2, 1 - (N - 1) * STAGGER_EXIT);
 
     const state = items.map(() => 0);
-    const LERP = 0.16;
+    // Lower lerp = slower easing toward target = animation feels more
+    // deliberate / less skittish as the user scrolls past.
+    const LERP = 0.11;
 
     let raf = 0;
     const update = () => {
@@ -191,13 +193,16 @@ function useScrollScene<T extends HTMLElement>() {
       const secTop = secRect.top;
       const secBottom = secRect.bottom;
 
-      // Same centre-based strategy for every section: entry fraction climbs
-      // 0→1 as the section's centre crosses up to the viewport's centre, then
-      // the exit fraction climbs 0→1 as the centre keeps travelling to the
-      // top of the viewport. Identical timing across all sections.
+      // Centre-based with a deliberate STABLE plateau in the middle of the
+      // viewport. Entry climbs to 1 as the section's centre approaches the
+      // upper third; exit stays at 0 until the centre passes the lower
+      // third. The gap between those bounds is the reading window — every
+      // item sits at app = 1 for that entire ~30% of viewport travel.
       const center = secTop + secRect.height / 2;
-      const entryFraction = clamp01((vh - center) / (vh * 0.5));
-      const exitFraction = clamp01((vh * 0.5 - center) / (vh * 0.5));
+      const STABLE_TOP = vh * 0.65; // entry reaches 1 here
+      const STABLE_BOTTOM = vh * 0.35; // exit starts ramping here
+      const entryFraction = clamp01((vh - center) / (vh - STABLE_TOP));
+      const exitFraction = clamp01((STABLE_BOTTOM - center) / STABLE_BOTTOM);
 
       items.forEach((item, i) => {
         const entry_i = clamp01(
