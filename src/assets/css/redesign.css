@@ -608,7 +608,7 @@
 
 /* ── 3. SYSTEM ── */
 .rd-section-system {
-  padding: 180px 56px 160px;
+  padding: 150px 56px 140px;
   background: #070707;
   overflow: hidden;
 }
@@ -622,11 +622,20 @@
   pointer-events: none;
 }
 .rd-system-grid {
-  margin-top: 96px;
+  margin-top: 64px;
   display: grid;
-  grid-template-columns: 1.1fr 1fr;
-  gap: 80px;
+  grid-template-columns: 1fr 0.92fr;
+  gap: 58px;
   align-items: start;
+}
+.rd-section-system .rd-h-display {
+  font-size: clamp(44px, 5vw, 76px);
+  line-height: 0.98;
+  max-width: 940px;
+}
+.rd-section-system .rd-lead-wide {
+  margin-top: 22px;
+  max-width: 560px;
 }
 
 /* control video — replaces the outliner mock */
@@ -637,6 +646,7 @@
   border: 1px solid var(--rd-rule);
   background: #0c0c0c;
   box-shadow: 0 40px 90px rgba(0, 0, 0, 0.55);
+  max-width: 580px;
 }
 .rd-control-video video {
   display: block;
@@ -744,11 +754,11 @@
 
 /* principles */
 .rd-principle-list { display: block; }
-.rd-principle { padding: 36px 0; border-top: 1px solid var(--rd-rule); }
-.rd-principle-head { display: flex; align-items: baseline; gap: 22px; }
+.rd-principle { padding: 28px 0; border-top: 1px solid var(--rd-rule); }
+.rd-principle-head { display: flex; align-items: baseline; gap: 18px; }
 .rd-principle-n {
   font-family: var(--rd-mono);
-  font-size: 11px;
+  font-size: 10px;
   color: #666;
   letter-spacing: 0.2em;
 }
@@ -756,16 +766,16 @@
   margin: 0;
   font-family: var(--rd-display);
   font-weight: 400;
-  font-size: 30px;
+  font-size: 24px;
   line-height: 1.1;
   letter-spacing: -0.012em;
 }
 .rd-principle-copy {
-  margin: 14px 0 0 49px;
-  font-size: 15px;
-  line-height: 1.65;
+  margin: 10px 0 0 42px;
+  font-size: 14px;
+  line-height: 1.58;
   color: var(--rd-dim);
-  max-width: 480px;
+  max-width: 440px;
 }
 
 /* ── 4. MEET MIXIE ── */
@@ -902,6 +912,11 @@
   display: flex;
   flex-direction: column;
   color: var(--rd-warm-ink);
+  transition: transform 240ms ease, box-shadow 240ms ease, border-color 240ms ease;
+}
+.rd-bb-card:hover {
+  transform: scale(1.015);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.16);
 }
 .rd-bb-card-img { aspect-ratio: 4 / 3; background-color: #d4ccba; }
 .rd-bb-card-body { padding: 28px 26px 30px; }
@@ -958,6 +973,12 @@
   border: 1px solid var(--rd-rule);
   border-radius: 12px;
   overflow: hidden;
+  transition: transform 240ms ease, box-shadow 240ms ease, border-color 240ms ease;
+}
+.rd-use-card:hover {
+  transform: scale(1.015);
+  border-color: rgba(42, 188, 153, 0.28);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.24);
 }
 .rd-use-card-img { aspect-ratio: 4 / 3; background-color: #14110d; }
 .rd-use-card-body { padding: 18px 20px 22px; }
@@ -988,7 +1009,7 @@
 .rd-wave-bg {
   position: absolute;
   inset: -10% 0;
-  background: url("/assets/redesign/imagery/wave-teal.jpg") center / cover;
+  background: url("/assets/redesign/imagery/wave-teal-bg.jpg") center / cover;
   will-change: transform;
 }
 .rd-wave-overlay {
@@ -1045,6 +1066,17 @@
   max-width: 1100px;
   text-align: center;
 }
+.rd-section-cta .rd-h-display {
+  line-height: 1.08;
+  padding-bottom: 0.08em;
+}
+.rd-section-cta .rd-em-grad {
+  padding-bottom: 0.08em;
+}
+.rd-section-cta .rd-btn-row-center {
+  margin-top: 34px;
+  margin-bottom: 0;
+}
 .rd-cta-copy {
   margin: 0 auto 40px;
   font-size: 16px;
@@ -1052,11 +1084,6 @@
   max-width: 680px;
 }
 .rd-cta-strong { color: var(--rd-ink); }
-
-/* CTA section spacing — without the email form between buttons and the spec
- * line, override the generic .rd-btn-row-center bottom margin to keep the
- * stack feeling intentional. */
-.rd-cta-container .rd-btn-row-center { margin-bottom: 10px; }
 .rd-cta-foot {
   margin-top: 14px;
   font-family: var(--rd-mono);

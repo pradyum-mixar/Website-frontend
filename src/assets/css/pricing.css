@@ -145,7 +145,7 @@
 }
 
 .pricing-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-4px) scale(1.015);
     border-color: rgba(0, 192, 199, 0.3);
 }
 

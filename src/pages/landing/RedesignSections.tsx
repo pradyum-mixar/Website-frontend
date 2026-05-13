@@ -182,9 +182,31 @@ function useScrollScene<T extends HTMLElement>() {
     const EXIT_RANGE = Math.max(0.2, 1 - (N - 1) * STAGGER_EXIT);
 
     const state = items.map(() => 0);
+    const poseState = items.map(() => 1);
+    const hoverState = items.map(() => 0);
+    const hoverTarget = items.map(() => 0);
+    const isHoverCard = (item: HTMLElement) =>
+      [
+        "rd-bb-card",
+        "rd-use-card",
+      ].some((className) => item.classList.contains(className));
+    const hoverHandlers = items.map((item, i) => {
+      if (!isHoverCard(item)) return null;
+      const onEnter = () => {
+        hoverTarget[i] = 1;
+      };
+      const onLeave = () => {
+        hoverTarget[i] = 0;
+      };
+      item.addEventListener("mouseenter", onEnter);
+      item.addEventListener("mouseleave", onLeave);
+      return { item, onEnter, onLeave };
+    });
     // Lower lerp = slower easing toward target = animation feels more
     // deliberate / less skittish as the user scrolls past.
     const LERP = 0.11;
+    const POSE_LERP = 0.13;
+    const HOVER_LERP = 0.18;
 
     let raf = 0;
     const update = () => {
@@ -215,19 +237,22 @@ function useScrollScene<T extends HTMLElement>() {
         );
         const targetRaw = entry_i * (1 - exit_i);
         const target = smoothstep(Math.max(0, Math.min(1, targetRaw)));
+        const entryPose = 1 - smoothstep(entry_i);
+        const exitPose = smoothstep(exit_i);
+        const poseTarget = entryPose - exitPose;
 
         state[i] += (target - state[i]) * LERP;
+        poseState[i] += (poseTarget - poseState[i]) * POSE_LERP;
         const app = state[i];
+        const pose = poseState[i];
 
-        // Slide from below while still entering; once any exit progress has
-        // accumulated, slide upward instead.
-        const dirSign = exit_i > 0 ? -1 : 1;
-
-        const slideY = (1 - app) * 170 * dirSign;
-        const slideX = (1 - app) * 65 * (i % 2 === 0 ? -1 : 1);
-        const scale = 0.82 + 0.18 * app;
-        const blur = (1 - app) * 16;
-        const rot = (1 - app) * 4 * (i % 2 === 0 ? 1 : -1) * dirSign;
+        const slideY = pose * 170;
+        const slideX = Math.abs(pose) * 65 * (i % 2 === 0 ? -1 : 1);
+        hoverState[i] += (hoverTarget[i] - hoverState[i]) * HOVER_LERP;
+        const offscreen = Math.min(1, Math.abs(pose));
+        const scale = (1 - offscreen * 0.18) * (1 + hoverState[i] * 0.018);
+        const blur = offscreen * 16;
+        const rot = offscreen * 4 * (i % 2 === 0 ? 1 : -1) * (pose < 0 ? -1 : 1);
 
         item.style.opacity = String(app);
         item.style.transform = `translate3d(${slideX}px, ${slideY}px, 0) scale(${scale}) rotate(${rot}deg)`;
@@ -249,6 +274,11 @@ function useScrollScene<T extends HTMLElement>() {
       items.forEach((it) => {
         it.style.willChange = "";
         it.style.transition = "";
+      });
+      hoverHandlers.forEach((handler) => {
+        if (!handler) return;
+        handler.item.removeEventListener("mouseenter", handler.onEnter);
+        handler.item.removeEventListener("mouseleave", handler.onLeave);
       });
       bg.forEach((b) => {
         b.style.willChange = "";
@@ -462,6 +492,7 @@ export function Walkthrough() {
               src="/assets/redesign/walkthrough.html"
               title="Mixar walkthrough"
               allow="autoplay"
+              loading="lazy"
             />
             <div className="rd-chip rd-chip-tl">PROTOTYPE · 5 STEPS</div>
           </div>
@@ -490,18 +521,15 @@ export function Walkthrough() {
 }
 
 /* ── 2. SCROLLY — six surfaces ──
- * Each chapter uses the original .gif from the production CDN — those GIFs
- * ship with real 1-bit transparency baked in (the same files the live
- * mixar.app site uses), so they render cleanly with no chroma-key fringe.
+ * Use local MP4s where possible so the browser can stream video instead of
+ * downloading heavy animated GIFs up front.
  */
-const CDN_GIF = "https://d2znch1yzypu23.cloudfront.net";
-
 const CHAPTERS = [
   {
     id: "agent",
     num: "01",
     word: "Agent",
-    gif: `${CDN_GIF}/webgif_moodboard_v1.gif`,
+    gif: "/assets/redesign/videos/moodboard.mp4",
     title: "Background agents that finish what you started.",
     copy:
       "Dispatch Mixie to unwrap, bake, retopologize, or generate while you keep moving. The grunt work runs in the background — you stay in the flow.",
@@ -511,7 +539,7 @@ const CHAPTERS = [
     id: "focus",
     num: "02",
     word: "Focus",
-    gif: `${CDN_GIF}/webgif_image_to_3D_V1.gif`,
+    gif: "/assets/redesign/videos/image-to-3d.mp4",
     title: "Less UI. More work.",
     copy:
       "A single-pane mode that hides panels, menus, and chrome — leaving you, your scene, and your agents. Pure flow, no toolbar tax.",
@@ -521,7 +549,7 @@ const CHAPTERS = [
     id: "scene",
     num: "03",
     word: "Scene",
-    gif: `${CDN_GIF}/webgif_UV_Unwrap_V1.gif`,
+    gif: "/assets/redesign/videos/uv-unwrap.mp4",
     title: "From prompt to populated scene.",
     copy:
       "Brief a full scene — a warehouse, a booth, a cave — and the agent assembles it. Generated props, placed by spatial logic, styled to your moodboard. You direct the room; Mixar builds it.",
@@ -531,7 +559,7 @@ const CHAPTERS = [
     id: "mood",
     num: "04",
     word: "Mood",
-    gif: `${CDN_GIF}/webgif_Pbr_V1.gif`,
+    gif: "/assets/redesign/videos/pbr.mp4",
     title: "The canvas your scenes are built from.",
     copy:
       "Pin references, paste palettes, set the visual language — and Mixar's scene generation reads from it. The moodboard isn't a separate tab; it's the brief your agents follow.",
@@ -623,18 +651,37 @@ export function Scrolly() {
             </div>
           </div>
 
-          {/* CENTER: GIFs (production CDN originals carry baked-in alpha) */}
+          {/* CENTER: media */}
           <div className="rd-scrolly-video">
             <div className="rd-scrolly-vignette" />
             {CHAPTERS.map((c, i) => {
               const isActive = i === active;
               const dir = i < active ? -1 : 1;
-              return (
+              return c.gif.endsWith(".mp4") ? (
+                <video
+                  key={c.id}
+                  src={c.gif}
+                  aria-hidden="true"
+                  muted
+                  loop
+                  playsInline
+                  autoPlay={isActive}
+                  preload={isActive ? "auto" : "metadata"}
+                  style={{
+                    opacity: isActive ? 1 : 0,
+                    transform: isActive
+                      ? `translate3d(${(1 - localP) * -2}%, 0, 0) scale(${1 + localP * 0.04})`
+                      : `translate3d(${dir * 6}%, 0, 0) scale(1.08)`,
+                  }}
+                />
+              ) : (
                 <img
                   key={c.id}
                   src={c.gif}
                   alt=""
                   aria-hidden="true"
+                  loading="lazy"
+                  decoding="async"
                   className={c.id === "models" ? "rd-scrolly-models-img" : ""}
                   style={{
                     opacity: isActive ? 1 : 0,
@@ -972,21 +1019,29 @@ export function MeetMixie() {
 }
 
 /* ── 5. BLENDER, BUT BETTER ── */
-const BB_CARDS = [
+const BB_CARDS: Array<{
+  t: string;
+  d: string;
+  img: string;
+  imagePosition?: string;
+  imageFit?: string;
+}> = [
   {
     t: "Per-task workspaces",
     d: "Each workspace is a purpose-built workbench — not a layout preset. The texturing room has stencil painting, the UV room has live island packing, the modelling room has retopo overlays.",
-    img: "bronze-layers.jpg",
+    img: "workspaces-card.jpg",
+    imagePosition: "center top",
   },
   {
     t: "Layer-based texturing",
     d: "Stack PBR effects with masks, blend modes, procedural inputs. Like Photoshop for materials — and Mixie can paint a layer for you that you can still edit by hand.",
-    img: "iridescent-splash.jpg",
+    img: "layers-card.jpg",
+    imageFit: "contain",
   },
   {
     t: "Moodboard in-canvas",
     d: "No more bouncing to Pinterest. Generate references, pin style anchors, prompt scene changes — inside the editor, with the work.",
-    img: "cave-amber.jpg",
+    img: "moodboard-card.jpg",
   },
 ];
 
@@ -1006,7 +1061,10 @@ export function BlenderBetter() {
               <div
                 className="rd-bb-card-img"
                 style={{
-                  background: `url(/assets/redesign/imagery/${c.img}) center/cover`,
+                  backgroundImage: `url(/assets/redesign/imagery/${c.img})`,
+                  backgroundPosition: c.imagePosition ?? "center",
+                  backgroundSize: c.imageFit ?? "cover",
+                  backgroundRepeat: "no-repeat",
                 }}
               />
               <div className="rd-bb-card-body">
@@ -1027,17 +1085,19 @@ function UseCard({
   img,
   title,
   outcome,
+  position = "center",
 }: {
   img: string;
   title: string;
   outcome: string;
+  position?: string;
 }) {
   return (
     <article className="rd-use-card">
       <div
         className="rd-use-card-img"
         style={{
-          background: `url(/assets/redesign/imagery/${img}) center/cover`,
+          background: `url(/assets/redesign/imagery/${img}) ${position}/cover`,
         }}
       />
       <div className="rd-use-card-body">
@@ -1075,27 +1135,28 @@ export function UseCases() {
         </Reveal>
         <Reveal stagger className="rd-cases-grid rd-cases-grid-5">
           <UseCard
-            img="probe-sphere.jpg"
+            img="indie-studio.jpg"
             title="Indie game studios"
             outcome="From concept to engine-ready prop in an afternoon."
           />
           <UseCard
-            img="bronze-layers.jpg"
+            img="technical-artists.jpg"
             title="Technical artists"
             outcome="UVs, retopo, bakes — scripted in plain language."
           />
           <UseCard
-            img="dune-moon.jpg"
+            img="environment.jpg"
             title="Concept & environment"
             outcome="Mood, block-in, lookdev on one timeline."
           />
           <UseCard
-            img="twin-heads.jpg"
+            img="character-artist.jpg"
             title="Character artists"
             outcome="Auto-rig and pose-by-prompt, ready for engine."
+            position="center top"
           />
           <UseCard
-            img="iridescent-splash.jpg"
+            img="solo-artists.jpg"
             title="Solo creators"
             outcome="A whole pipeline that fits on one machine."
           />
@@ -1107,22 +1168,22 @@ export function UseCases() {
         </Reveal>
         <Reveal stagger className="rd-cases-grid rd-cases-grid-4">
           <UseCard
-            img="beacon.jpg"
+            img="exhibition.jpg"
             title="Event & exhibition"
             outcome="Booth, stage, and floor plans, lit and walkable."
           />
           <UseCard
-            img="castle-ridge.jpg"
+            img="interior.jpg"
             title="Architecture & interiors"
             outcome="Brief a room. Get massing, materials, and a view."
           />
           <UseCard
-            img="wave-teal.jpg"
+            img="warehousing.jpg"
             title="Warehouse & facility"
             outcome="Rapid layouts with collision-aware placement."
           />
           <UseCard
-            img="desert-relic.jpg"
+            img="real-estate.jpg"
             title="Real estate concepting"
             outcome="Concept-grade visualizations in minutes, not weeks."
           />
@@ -1187,16 +1248,8 @@ export function TryMixar() {
             <br />
             <em className="rd-em-grad">Skip the drudgery.</em>
           </h2>
-          <p className="rd-cta-copy">
-            <span className="rd-cta-strong">Free during beta.</span> Early
-            users keep founder pricing when paid tiers launch.
-          </p>
           <div className="rd-btn-row rd-btn-row-center">
             <Btn primary>Download Mixar →</Btn>
-            <Btn>Open dashboard</Btn>
-          </div>
-          <div className="rd-cta-foot">
-            MAC · WINDOWS · LINUX · 240MB INSTALL · MIXIE BUNDLED
           </div>
         </Reveal>
       </div>

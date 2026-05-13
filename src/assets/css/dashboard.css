@@ -59,7 +59,7 @@
 
 .stat-card:hover {
     border-color: var(--primary-cyan);
-    transform: translateY(-4px);
+    transform: translateY(-4px) scale(1.015);
 }
 
 .stat-card.highlight {
@@ -450,7 +450,7 @@
 
 .download-card:hover {
     border-color: var(--primary-cyan);
-    transform: translateY(-4px);
+    transform: translateY(-4px) scale(1.015);
 }
 
 /* Book a Call Modal */
@@ -752,6 +752,7 @@
 
 .community-card:hover {
     border-color: var(--primary-cyan);
+    transform: scale(1.015);
 }
 
 .community-icon {

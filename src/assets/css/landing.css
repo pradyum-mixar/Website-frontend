@@ -1082,7 +1082,7 @@ Button */
 }
 
 .feature-grid-card:hover {
-  transform: translateY(-8px);
+  transform: translateY(-8px) scale(1.015);
   border-color: rgba(0, 192, 199, 0.4);
   box-shadow: 0 8px 32px rgba(0, 192, 199, 0.15),
               0 0 0 1px rgba(0, 192, 199, 0.1);
@@ -1197,6 +1197,7 @@ Button */
 }
 
 .philosophy-card:hover {
+  transform: scale(1.015);
   border-color: rgba(0, 192, 199, 0.4);
   box-shadow: 0 8px 32px rgba(0, 192, 199, 0.15),
               0 0 0 1px rgba(0, 192, 199, 0.1);
@@ -2360,4 +2361,3 @@ p.sub-headline {
     font-size: 16px;
   }
 }
-
