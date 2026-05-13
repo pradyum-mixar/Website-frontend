@@ -451,120 +451,15 @@
   z-index: 3;
   pointer-events: none;
 }
-/* Chapter 5 (Models) — 2×2 bone cards. Each card is a vertical list of
- * model rows (logo on the left, model name on the right). For models that
- * run through Mixar's custom workflow, the Mixar logomark sits inline as
- * a peer logo next to the model logo (not as a corner badge). */
-.rd-scrolly-models {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  margin: auto;
-  width: min(94%, 640px);
-  height: min(86%, 580px);
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  gap: 14px;
-  transition: opacity 600ms var(--rd-ease), transform 1200ms var(--rd-ease);
+/* Chapter 5 (Models) — single composed PNG sized to roughly the same
+ * footprint as the rest of the chapter media, with a touch of breathing
+ * room on the sides so the bone cards don't kiss the vignette. */
+.rd-scrolly-video img.rd-scrolly-models-img {
+  object-fit: contain;
+  padding: 4% 8%;
 }
-.rd-models-card {
-  background: var(--rd-bone-surface);
-  border: 1px solid var(--rd-bone-rule);
-  border-radius: 12px;
-  padding: 22px 22px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  color: var(--rd-warm-ink);
-  overflow: hidden;
-}
-.rd-models-card-head {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.rd-models-card-counter {
-  font-family: var(--rd-mono);
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  color: var(--rd-warm-dim);
-}
-.rd-models-card-title {
-  margin: 0;
-  font-family: var(--rd-display);
-  font-weight: 400;
-  font-size: 24px;
-  line-height: 1.1;
-  letter-spacing: -0.012em;
-  color: var(--rd-warm-ink);
-}
-.rd-models-card-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.rd-models-card-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.rd-models-row-logos {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-/* Logo recolored via CSS mask so it ALWAYS renders in the surrounding ink
- * colour. SVGs loaded via <img> can't inherit colour, so the original
- * currentColor fills would resolve to black on whatever the page bg is. */
-.rd-models-logo {
-  display: inline-block;
-  width: 26px;
-  height: 26px;
-  background-color: var(--rd-warm-ink);
-  -webkit-mask-image: var(--logo);
-  mask-image: var(--logo);
-  -webkit-mask-size: contain;
-  mask-size: contain;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-position: center;
-}
-.rd-models-row-text {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
-}
-.rd-models-row-name {
-  font-family: var(--rd-sans);
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--rd-warm-ink);
-  line-height: 1.2;
-}
-.rd-models-row-sub {
-  font-family: var(--rd-mono);
-  font-size: 9.5px;
-  font-style: normal;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--rd-warm-dim);
-}
-
 @media (max-width: 1024px) {
-  .rd-scrolly-models { width: min(94%, 460px); height: min(82%, 460px); gap: 10px; }
-  .rd-models-card { padding: 16px 16px 14px; gap: 14px; }
-  .rd-models-card-title { font-size: 20px; }
-  .rd-models-card-list { gap: 8px; }
-  .rd-models-logo { width: 22px; height: 22px; }
-  .rd-models-row-name { font-size: 13px; }
-  .rd-models-row-sub { font-size: 9px; }
+  .rd-scrolly-video img.rd-scrolly-models-img { padding: 3% 4%; }
 }
 
 .rd-scrolly-bigword {

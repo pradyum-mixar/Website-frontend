@@ -191,7 +191,6 @@ function useScrollScene<T extends HTMLElement>() {
       const vh = window.innerHeight;
       const secRect = sec.getBoundingClientRect();
       const secTop = secRect.top;
-      const secBottom = secRect.bottom;
 
       // Centre-based with a deliberate STABLE plateau in the middle of the
       // viewport. Entry climbs to 1 as the section's centre approaches the
@@ -286,22 +285,6 @@ function useScrollProgress(ref: React.RefObject<HTMLElement | null>) {
     return () => cancelAnimationFrame(raf);
   }, [ref]);
   return p;
-}
-
-/* ── shared bits ── */
-function Eyebrow({ n, label }: { n?: string; label: string }) {
-  return (
-    <div className="rd-eyebrow">
-      <span className="rd-eyebrow-rule" />
-      {n && (
-        <>
-          <span>{n}</span>
-          <span className="rd-eyebrow-dot">·</span>
-        </>
-      )}
-      <span className="rd-eyebrow-label">{label}</span>
-    </div>
-  );
 }
 
 function Btn({
@@ -513,44 +496,6 @@ export function Walkthrough() {
  */
 const CDN_GIF = "https://d2znch1yzypu23.cloudfront.net";
 
-/* Model grid shown in chapter 5 (Models) instead of a single GIF. Logos live
- * in /public/assets/redesign/model-logos/ (or the Mixar logomark for custom
- * workflow modifiers). */
-const ML = "/assets/redesign/model-logos";
-const MODEL_GROUPS: Array<{
-  title: string;
-  rows: Array<{ logo: string; name: string; withMixar?: boolean }>;
-}> = [
-  {
-    title: "Image gen",
-    rows: [
-      { logo: `${ML}/nanobanana.svg`, name: "Nano Banana Flash" },
-      { logo: `${ML}/nanobanana.svg`, name: "Nano Banana Pro" },
-    ],
-  },
-  {
-    title: "Image to 3D",
-    rows: [
-      { logo: `${ML}/tripo.svg`, name: "Tripo" },
-      { logo: `${ML}/hunyuan.svg`, name: "Hunyuan" },
-      { logo: `${ML}/trellis.svg`, name: "Trellis" },
-      { logo: `${ML}/rodin.svg`, name: "Rodin" },
-    ],
-  },
-  {
-    title: "PBR & Retopology",
-    rows: [
-      { logo: `${ML}/hunyuan.svg`, name: "Hunyuan", withMixar: true },
-    ],
-  },
-  {
-    title: "Agent",
-    rows: [
-      { logo: `${ML}/gemini.svg`, name: "Gemini", withMixar: true },
-      { logo: `${ML}/claude.svg`, name: "Claude", withMixar: true },
-    ],
-  },
-];
 const CHAPTERS = [
   {
     id: "agent",
@@ -596,7 +541,7 @@ const CHAPTERS = [
     id: "models",
     num: "05",
     word: "Models",
-    gif: `${CDN_GIF}/webgif_UI_V1.gif`,
+    gif: "/assets/redesign/imagery/models-grid.png",
     title: "Powered by the best models in 3D.",
     copy:
       "One license, one workflow, every model. Mixar brings together the leading models for assets, textures, and image generation — and adds the pipeline work that makes their output actually usable.",
@@ -684,80 +629,13 @@ export function Scrolly() {
             {CHAPTERS.map((c, i) => {
               const isActive = i === active;
               const dir = i < active ? -1 : 1;
-              if (c.id === "models") {
-                const totalCards = MODEL_GROUPS.length;
-                return (
-                  <div
-                    key={c.id}
-                    className="rd-scrolly-models"
-                    aria-hidden={!isActive}
-                    style={{
-                      opacity: isActive ? 1 : 0,
-                      transform: isActive
-                        ? `translate3d(${(1 - localP) * -2}%, 0, 0) scale(${1 + localP * 0.02})`
-                        : `translate3d(${dir * 6}%, 0, 0) scale(1.04)`,
-                    }}
-                  >
-                    {MODEL_GROUPS.map((group, gi) => (
-                      <article key={group.title} className="rd-models-card">
-                        <header className="rd-models-card-head">
-                          <span className="rd-models-card-counter">
-                            0{gi + 1} / 0{totalCards}
-                          </span>
-                          <h3 className="rd-models-card-title">
-                            {group.title}
-                          </h3>
-                        </header>
-                        <ul className="rd-models-card-list">
-                          {group.rows.map((row) => (
-                            <li key={row.name} className="rd-models-card-row">
-                              <span className="rd-models-row-logos">
-                                <span
-                                  className="rd-models-logo"
-                                  aria-hidden="true"
-                                  style={
-                                    {
-                                      "--logo": `url(${row.logo})`,
-                                    } as React.CSSProperties
-                                  }
-                                />
-                                {row.withMixar && (
-                                  <span
-                                    className="rd-models-logo"
-                                    aria-hidden="true"
-                                    style={
-                                      {
-                                        "--logo":
-                                          "url(/assets/Logomark.svg)",
-                                      } as React.CSSProperties
-                                    }
-                                  />
-                                )}
-                              </span>
-                              <span className="rd-models-row-text">
-                                <span className="rd-models-row-name">
-                                  {row.name}
-                                </span>
-                                {row.withMixar && (
-                                  <em className="rd-models-row-sub">
-                                    custom workflow
-                                  </em>
-                                )}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      </article>
-                    ))}
-                  </div>
-                );
-              }
               return (
                 <img
                   key={c.id}
                   src={c.gif}
                   alt=""
                   aria-hidden="true"
+                  className={c.id === "models" ? "rd-scrolly-models-img" : ""}
                   style={{
                     opacity: isActive ? 1 : 0,
                     transform: isActive
@@ -922,71 +800,6 @@ export function Scrolly() {
 }
 
 /* ── 3. SYSTEM — built to assist, not replace ── */
-const OUTLINER_ROWS = [
-  { d: 0, icon: "▾", name: "Scene Collection", meta: "15 nodes", dim: true },
-  { d: 1, icon: "▾", name: "Cameras", dim: true },
-  { d: 2, icon: "◉", name: "Camera.hero" },
-  { d: 1, icon: "▾", name: "Lights", dim: true },
-  { d: 2, icon: "☼", name: "Sun.key" },
-  { d: 2, icon: "☼", name: "Area.fill", mixie: "lighting · 2m" },
-  { d: 1, icon: "▾", name: "Hero_Asset", dim: true },
-  { d: 2, icon: "◆", name: "body_mesh" },
-  {
-    d: 2,
-    icon: "◆",
-    name: "body_mesh.uv",
-    mixie: "uv-unwrap · 14m",
-    selected: true,
-  },
-  { d: 2, icon: "●", name: "body_mat" },
-  { d: 2, icon: "●", name: "body_mat.normals", mixie: "bake · 9m" },
-  { d: 1, icon: "▾", name: "Props", dim: true },
-  { d: 2, icon: "◆", name: "barrel_v2" },
-  { d: 2, icon: "◆", name: "lantern_v3", mixie: "mesh-gen · 22m" },
-  { d: 2, icon: "◆", name: "crate.stack", mixie: "mesh-gen · 22m" },
-];
-
-function OutlinerProof() {
-  return (
-    <div className="rd-outliner">
-      <div className="rd-outliner-titlebar">
-        <div className="rd-outliner-dots">
-          <span />
-          <span />
-          <span />
-        </div>
-        <div className="rd-outliner-title">OUTLINER · scene_hero.blend</div>
-        <div className="rd-outliner-filter">⌥ filter</div>
-      </div>
-      <div className="rd-outliner-rows">
-        {OUTLINER_ROWS.map((r, i) => (
-          <div
-            key={i}
-            className={`rd-outliner-row ${r.selected ? "is-selected" : ""} ${r.mixie ? "has-mixie" : ""} ${r.dim ? "is-dim" : ""}`}
-            style={{ paddingLeft: `${16 + r.d * 20}px` }}
-          >
-            <span className="rd-outliner-icon">{r.icon}</span>
-            <span className="rd-outliner-name">{r.name}</span>
-            {r.meta && <span className="rd-outliner-meta">{r.meta}</span>}
-            {r.mixie && (
-              <span className="rd-outliner-mixie">◆ Mixie · {r.mixie}</span>
-            )}
-          </div>
-        ))}
-      </div>
-      <div className="rd-outliner-footer">
-        <span>
-          <span className="rd-outliner-ink">15</span> nodes ·{" "}
-          <span className="rd-outliner-teal">4 by Mixie</span> · all reversible
-        </span>
-        <span className="rd-outliner-rollback">
-          <span className="rd-outliner-glow" /> ↶ rollback any step
-        </span>
-      </div>
-    </div>
-  );
-}
-
 function Principle({
   n,
   t,
