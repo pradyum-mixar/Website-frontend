@@ -99,6 +99,18 @@ function useScrollY() {
   return y;
 }
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 720px)");
+    const sync = () => setIsMobile(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+  return isMobile;
+}
+
 /* ── Scroll scene ──
  * Wraps a section so its root element fades/scales/blurs/translates in as it
  * enters the viewport and out as it leaves. Driven by scroll position so the
@@ -114,6 +126,7 @@ function useScrollScene<T extends HTMLElement>() {
     const sec = ref.current;
     if (!sec) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia("(max-width: 720px), (pointer: coarse)").matches) return;
 
     const content =
       sec.querySelector<HTMLElement>(":scope > .rd-container, :scope > .rd-wave-content") ||
@@ -351,6 +364,8 @@ function useWalkthroughCursor() {
   const frameRef = useRef<HTMLDivElement | null>(null);
   const cursorRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
+    if (window.matchMedia("(pointer: coarse)").matches) return;
+
     const frame = frameRef.current;
     const cursor = cursorRef.current;
     if (!frame || !cursor) return;
@@ -405,17 +420,41 @@ function useWalkthroughCursor() {
     };
     const onIframeLeave = () => hide();
 
-    const onIframeWheel = (e: WheelEvent) => {
-      // Wheel events inside the iframe never reach the parent window — so
-      // scrolling stops working while the cursor is over the demo. Forward
-      // the delta to whatever smooth-scroller the parent has configured.
+    let wheelRaf = 0;
+    let wheelDeltaX = 0;
+    let wheelDeltaY = 0;
+    const flushIframeWheel = () => {
+      wheelRaf = 0;
+      const dx = wheelDeltaX;
+      const dy = wheelDeltaY;
+      wheelDeltaX = 0;
+      wheelDeltaY = 0;
+
       const w = window as unknown as {
         __lenis?: { scrollTo: (target: number, opts?: object) => void };
       };
       if (w.__lenis) {
-        w.__lenis.scrollTo(window.scrollY + e.deltaY, { duration: 0.5 });
+        w.__lenis.scrollTo(window.scrollY + dy, { immediate: true, force: true });
       } else {
-        window.scrollBy({ top: e.deltaY, left: e.deltaX, behavior: "auto" });
+        window.scrollBy({ top: dy, left: dx, behavior: "auto" });
+      }
+    };
+
+    const onIframeWheel = (e: WheelEvent) => {
+      // Wheel events inside the iframe never reach the parent window, so
+      // forward them immediately. Animating every wheel tick with Lenis makes
+      // this area feel laggy, especially on trackpads.
+      e.preventDefault();
+      const multiplier =
+        e.deltaMode === WheelEvent.DOM_DELTA_LINE
+          ? 16
+          : e.deltaMode === WheelEvent.DOM_DELTA_PAGE
+            ? window.innerHeight
+            : 1;
+      wheelDeltaX += e.deltaX * multiplier;
+      wheelDeltaY += e.deltaY * multiplier;
+      if (!wheelRaf) {
+        wheelRaf = requestAnimationFrame(flushIframeWheel);
       }
     };
 
@@ -430,7 +469,7 @@ function useWalkthroughCursor() {
         doc.head.appendChild(injectedStyle);
         doc.addEventListener("mousemove", onIframeMove);
         doc.addEventListener("mouseleave", onIframeLeave);
-        doc.addEventListener("wheel", onIframeWheel, { passive: true });
+        doc.addEventListener("wheel", onIframeWheel, { passive: false });
       } catch {
         // cross-origin iframe — skip silently
       }
@@ -453,6 +492,7 @@ function useWalkthroughCursor() {
 
     return () => {
       cancelAnimationFrame(raf);
+      if (wheelRaf) cancelAnimationFrame(wheelRaf);
       window.removeEventListener("mousemove", onWindowMove);
       window.removeEventListener("blur", hide);
       iframe?.removeEventListener("load", attachInsideIframe);
@@ -502,12 +542,12 @@ export function Walkthrough() {
           <div>
             <div className="rd-cta-title">Ready to actually use it?</div>
             <div className="rd-cta-sub">
-              Mixar runs natively on Mac, Windows, Linux — free for personal use.
+              Mixar runs natively on Mac, Windows, and Linux.
             </div>
           </div>
           <div className="rd-btn-row">
-            <Btn primary>Download Mixar →</Btn>
-            <Btn>Read the docs</Btn>
+            <Btn primary href="/downloads">Download Mixar →</Btn>
+            <Btn href="/docs">Read the docs</Btn>
           </div>
         </Reveal>
       </div>
@@ -578,11 +618,75 @@ const CHAPTERS = [
 ];
 
 export function Scrolly() {
+  const isMobile = useIsMobile();
   const wrapRef = useRef<HTMLElement | null>(null);
   const p = useScrollProgress(wrapRef);
   const activeF = p * CHAPTERS.length;
   const active = Math.min(CHAPTERS.length - 1, Math.floor(activeF));
   const localP = Math.max(0, Math.min(1, activeF - active));
+
+  if (isMobile) {
+    return (
+      <section className="rd-section rd-section-scrolly rd-scrolly-mobile-section">
+        <div className="rd-container">
+          <div className="rd-scrolly-mobile-head">
+            <h2 className="rd-h2 rd-h2-small">
+              Five things <span className="rd-em-grad">Mixar</span> does that
+              Blender can't.
+            </h2>
+          </div>
+
+          <div className="rd-scrolly-mobile-list">
+            {CHAPTERS.map((c) => (
+              <article key={c.id} className="rd-scrolly-mobile-card">
+                <div className="rd-scrolly-mobile-media">
+                  {c.gif.endsWith(".mp4") ? (
+                    <video
+                      src={c.gif}
+                      aria-hidden="true"
+                      muted
+                      loop
+                      playsInline
+                      autoPlay
+                      preload="metadata"
+                    />
+                  ) : (
+                    <img
+                      src={c.gif}
+                      alt=""
+                      aria-hidden="true"
+                      loading="lazy"
+                      decoding="async"
+                      className={
+                        c.id === "models" ? "rd-scrolly-models-img" : ""
+                      }
+                    />
+                  )}
+                </div>
+                <div className="rd-scrolly-mobile-body">
+                  <div className="rd-scrolly-counter">
+                    <span>
+                      {c.num} / 0{CHAPTERS.length}
+                    </span>
+                    <span className="rd-counter-rule" />
+                  </div>
+                  <h3 className="rd-scrolly-title">{c.title}</h3>
+                  <p className="rd-scrolly-copy">{c.copy}</p>
+                  <div className="rd-spec-row">
+                    {c.spec.map((s) => (
+                      <span key={s} className="rd-spec-chip">
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section
@@ -1029,7 +1133,7 @@ const BB_CARDS: Array<{
   {
     t: "Per-task workspaces",
     d: "Each workspace is a purpose-built workbench — not a layout preset. The texturing room has stencil painting, the UV room has live island packing, the modelling room has retopo overlays.",
-    img: "workspaces-card.jpg",
+    img: "workspace-new.png",
     imagePosition: "center top",
   },
   {
@@ -1249,7 +1353,7 @@ export function TryMixar() {
             <em className="rd-em-grad">Skip the drudgery.</em>
           </h2>
           <div className="rd-btn-row rd-btn-row-center">
-            <Btn primary>Download Mixar →</Btn>
+            <Btn primary href="/downloads">Download Mixar →</Btn>
           </div>
         </Reveal>
       </div>

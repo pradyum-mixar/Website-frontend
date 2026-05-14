@@ -2361,3 +2361,213 @@ p.sub-headline {
     font-size: 16px;
   }
 }
+
+/* Landing mobile pass: keep this at the end so these rules win over the
+   desktop hero/footer definitions above without changing laptop layouts. */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 10px 12px;
+  }
+
+  .navbar-content {
+    width: 100%;
+    grid-template-columns: 1fr auto;
+    padding: 9px 14px;
+    border-radius: 18px;
+  }
+
+  .logo img {
+    height: 30px;
+  }
+
+  .mobile-menu {
+    margin: 8px 0 0;
+    padding: 10px;
+    border-radius: 18px;
+  }
+
+  .mobile-menu a,
+  .mobile-menu-link {
+    padding: 11px 12px;
+    font-size: 14px;
+  }
+
+  .hero-wrapper {
+    width: 100%;
+    min-height: auto;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 22px 18px 0;
+    overflow: hidden;
+  }
+
+  .hero-wrapper::after {
+    bottom: -70px;
+    width: 100%;
+    height: 170px;
+  }
+
+  .hero-wrapper header {
+    width: 100%;
+    padding: 10px 0 12px;
+    text-align: left;
+  }
+
+  .intro-text {
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+
+  .hero-wrapper h1 {
+    font-size: clamp(42px, 14vw, 58px);
+    line-height: 0.96;
+    letter-spacing: -0.02em;
+    max-width: 10ch;
+  }
+
+  .hero-wrapper p.sub-headline {
+    max-width: 22rem;
+    margin: 18px 0 24px;
+    font-size: 18px;
+    line-height: 1.35;
+  }
+
+  .hero-wrapper .actions {
+    justify-content: flex-start;
+  }
+
+  .btn-download {
+    min-height: 46px;
+    padding: 12px 24px;
+    font-size: 14px;
+  }
+
+  .btn-arrow {
+    width: 46px;
+    height: 46px;
+  }
+
+  .lp-main {
+    width: 100%;
+    min-height: 270px;
+    overflow: visible;
+  }
+
+  .stack {
+    height: 300px;
+    margin-top: 4px;
+    overflow: visible;
+    perspective: 1200px;
+  }
+
+  .stack-base {
+    width: 188%;
+    height: 390px;
+    left: 50%;
+    top: 46%;
+    transform: translate(-48%, -50%) scale(0.43) rotateX(42deg) rotateY(21deg) rotate(328deg);
+  }
+
+  .stack-item {
+    width: 118%;
+  }
+
+  .chat-bubble {
+    bottom: 10%;
+    left: 29%;
+    right: 29%;
+  }
+
+  .site-footer {
+    min-height: auto;
+    padding: 54px 20px 30px;
+    border-top-left-radius: 32px;
+    border-top-right-radius: 32px;
+  }
+
+  .footer-content {
+    gap: 44px;
+  }
+
+  .footer-top {
+    flex-direction: column;
+    gap: 34px;
+  }
+
+  .footer-links {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 28px;
+  }
+
+  .footer-links-column {
+    gap: 14px;
+  }
+
+  .footer-link,
+  .copyright {
+    font-size: 14px;
+  }
+
+  .footer-cta h3 {
+    font-size: 24px;
+    line-height: 1.15;
+  }
+
+  .cta-group {
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .footer-divider {
+    margin-top: 0;
+  }
+
+  .footer-bottom {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+  }
+
+  .footer-bg-2 {
+    width: 95%;
+    bottom: 40%;
+    opacity: 0.28;
+  }
+
+  .footer-logomark {
+    width: 75%;
+    left: 20%;
+    top: 62%;
+    opacity: 0.08;
+    scale: 2.2;
+  }
+
+  .footer-watermark {
+    font-size: 112px;
+  }
+}
+
+@media (max-width: 420px) {
+  .hero-wrapper {
+    padding-inline: 16px;
+  }
+
+  .hero-wrapper h1 {
+    font-size: clamp(38px, 13vw, 50px);
+  }
+
+  .hero-wrapper p.sub-headline {
+    font-size: 16px;
+  }
+
+  .stack {
+    height: 260px;
+  }
+
+  .stack-base {
+    width: 210%;
+    transform: translate(-48%, -50%) scale(0.37) rotateX(42deg) rotateY(21deg) rotate(328deg);
+  }
+}

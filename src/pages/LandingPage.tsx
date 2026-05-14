@@ -7,7 +7,6 @@ import {
   Walkthrough,
   Scrolly,
   System,
-  MeetMixie,
   BlenderBetter,
   UseCases,
   RideTheWave,
@@ -192,7 +191,6 @@ export function LandingPage() {
       <Walkthrough />
       <Scrolly />
       <System />
-      <MeetMixie />
       <BlenderBetter />
       <UseCases />
       <RideTheWave />
