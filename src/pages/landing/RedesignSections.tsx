@@ -609,9 +609,21 @@ export function Scrolly() {
   const localP = Math.max(0, Math.min(1, activeF - active));
   const activeChapter = CHAPTERS[active];
   const hasWhitePanel = WHITE_PANEL_CHAPTER_IDS.has(activeChapter.id);
+  const [loadedVideoIds, setLoadedVideoIds] = useState<Set<string>>(
+    () => new Set([CHAPTERS[0].id]),
+  );
 
   useEffect(() => {
-    if (isMobile || !activeChapter.gif.endsWith(".mp4")) return;
+    if (!activeChapter.gif.endsWith(".mp4")) return;
+
+    setLoadedVideoIds((current) => {
+      if (current.has(activeChapter.id)) return current;
+      const next = new Set(current);
+      next.add(activeChapter.id);
+      return next;
+    });
+
+    if (isMobile) return;
 
     Object.entries(videoRefs.current).forEach(([id, video]) => {
       if (!video) return;
@@ -657,7 +669,7 @@ export function Scrolly() {
                       loop
                       playsInline
                       autoPlay
-                      preload="metadata"
+                      preload="none"
                     />
                   ) : (
                     <img
@@ -789,13 +801,13 @@ export function Scrolly() {
                   onLoadedMetadata={(event) => {
                     event.currentTarget.playbackRate = c.playbackRate ?? 1;
                   }}
-                  src={c.gif}
+                  src={loadedVideoIds.has(c.id) ? c.gif : undefined}
                   aria-hidden="true"
                   muted
                   loop
                   playsInline
-                  autoPlay
-                  preload={isActive ? "auto" : "metadata"}
+                  autoPlay={isActive}
+                  preload={isActive ? "auto" : "none"}
                   style={{
                     opacity: isActive ? 1 : 0,
                     transform,

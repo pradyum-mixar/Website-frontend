@@ -60,7 +60,7 @@ export function PublicNavbar({ activePage }: PublicNavbarProps) {
     <nav className="navbar">
       <div className={`navbar-content${menuOpen ? " menu-open" : ""}`}>
         <Link to="/" className="logo">
-          <img src="https://d2znch1yzypu23.cloudfront.net/Logo-Primary_light.png" alt="Mixar" />
+          <img src="/assets/Logo-Primary_light.png" alt="Mixar" />
         </Link>
 
         {!isMobile && (

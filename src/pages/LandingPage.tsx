@@ -16,14 +16,13 @@ import "../assets/css/landing.css";
 import "../assets/css/redesign.css";
 
 // Critical above-fold images — must be loaded before we reveal the hero section.
-const CRITICAL_CDN_IMAGES = [
-  "https://d2znch1yzypu23.cloudfront.net/Logo-Primary_light.png",
-  "https://d2znch1yzypu23.cloudfront.net/Mixar-UI-Viewport.svg",
-  "https://d2znch1yzypu23.cloudfront.net/Mixar-UI-Header.svg",
-  "https://d2znch1yzypu23.cloudfront.net/Mixar-UI-Moodboard.svg",
-  "https://d2znch1yzypu23.cloudfront.net/Mixar-UI-Chat%20Window.svg",
-  "https://d2znch1yzypu23.cloudfront.net/Mixar-UI-Chat_Prompt%20Window.svg",
-  "https://d2znch1yzypu23.cloudfront.net/Mixar-UI-Chat%20Message.svg",
+const CRITICAL_IMAGES = [
+  "/assets/Logo-Primary_light.png",
+  "/assets/ui-stack/viewport-1.svg",
+  "/assets/ui-stack/viewport-2.svg",
+  "/assets/ui-stack/moodboard-1.svg",
+  "/assets/ui-stack/moodboard-2.svg",
+  "/assets/ui-stack/FloatingChatBubble.svg",
 ];
 
 function preloadImage(url: string): Promise<void> {
@@ -81,7 +80,7 @@ export function LandingPage() {
     }, 5000);
 
     Promise.all([
-      ...CRITICAL_CDN_IMAGES.map(preloadImage),
+      ...CRITICAL_IMAGES.map(preloadImage),
       document.fonts.ready,
     ]).then(() => {
       if (!cancelled) {
