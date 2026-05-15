@@ -53,7 +53,7 @@ body {
 
 .brand-logo { height: 40px; width: auto; }
 
-.nav-links { display: flex; align-items: center; gap: 1rem; }
+.nav-links { display: flex; align-items: center; justify-content: center; gap: 1rem; }
 
 .nav-link {
     display: flex;
@@ -365,6 +365,102 @@ body {
     padding: 3rem;
     backdrop-filter: blur(20px);
     animation: fadeUp 0.6s ease forwards;
+}
+
+:where(
+    .card,
+    .stat-card,
+    .account-card,
+    .download-card,
+    .community-card,
+    .usage-bar-card,
+    .sub-plan-card,
+    .pricing-card,
+    .order-card,
+    .admin-stat-card,
+    .admin-ops-card,
+    .contact-info-card,
+    .bug-report-info-card,
+    .about-philosophy-card,
+    .docs-workflow-card,
+    .feature-grid-card,
+    .philosophy-card,
+    .rd-bb-card,
+    .rd-use-card
+) {
+    transform-origin: center;
+    transition-property: transform, box-shadow, border-color, background-color;
+    transition-duration: 240ms;
+    transition-timing-function: ease;
+    will-change: transform;
+}
+
+:where(
+    .card,
+    .account-card,
+    .usage-bar-card,
+    .sub-plan-card,
+    .order-card,
+    .admin-ops-card,
+    .contact-info-card,
+    .bug-report-info-card,
+    .about-philosophy-card,
+    .docs-workflow-card,
+    .rd-bb-card,
+    .rd-use-card
+):hover {
+    transform: scale(1.015);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :where(
+        .card,
+        .stat-card,
+        .account-card,
+        .download-card,
+        .community-card,
+        .usage-bar-card,
+        .sub-plan-card,
+        .pricing-card,
+        .order-card,
+        .admin-stat-card,
+        .admin-ops-card,
+        .contact-info-card,
+        .bug-report-info-card,
+        .about-philosophy-card,
+        .docs-workflow-card,
+        .feature-grid-card,
+        .philosophy-card,
+        .rd-bb-card,
+        .rd-use-card
+    ) {
+        transition: none;
+        will-change: auto;
+    }
+
+    :where(
+        .card,
+        .stat-card,
+        .account-card,
+        .download-card,
+        .community-card,
+        .usage-bar-card,
+        .sub-plan-card,
+        .pricing-card,
+        .order-card,
+        .admin-stat-card,
+        .admin-ops-card,
+        .contact-info-card,
+        .bug-report-info-card,
+        .about-philosophy-card,
+        .docs-workflow-card,
+        .feature-grid-card,
+        .philosophy-card,
+        .rd-bb-card,
+        .rd-use-card
+    ):hover {
+        transform: none;
+    }
 }
 
 .card-header {

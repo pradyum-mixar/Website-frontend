@@ -357,10 +357,11 @@
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 16px;
   padding: 28px;
-  transition: border-color 0.2s ease;
+  transition: transform 0.24s ease, border-color 0.2s ease;
 }
 
 .docs-workflow-card:hover {
+  transform: scale(1.015);
   border-color: rgba(0, 192, 199, 0.25);
 }
 

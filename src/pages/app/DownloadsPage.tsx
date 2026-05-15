@@ -129,6 +129,28 @@ export function DownloadsPage() {
               );
             })}
           </div>
+
+          <div className="downloads-book-call">
+            <div className="downloads-book-call-text">
+              <h3>New to Mixar? We'll help you get set up.</h3>
+              <ul>
+                <li>Personalized walkthrough for your workflow</li>
+                <li>Tips on how to use the agent more effectively</li>
+                <li>30 mins, free, no commitment</li>
+              </ul>
+            </div>
+            <a
+              href="https://calendly.com/pradyum-mixar/30min"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="downloads-book-call-btn"
+            >
+              Book a Call
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </a>
+          </div>
         </div>
       </div>
     </div>

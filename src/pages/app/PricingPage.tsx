@@ -120,70 +120,146 @@ function PricingContent({ standalone, isAuthenticated, currentPlanId, hasActiveS
             <SkeletonCard />
             <SkeletonCard />
             <SkeletonCard />
+            <SkeletonCard />
           </>
         ) : (
-          plans.map((plan) => {
-            const isCurrent = isAuthenticated && plan.id === currentPlanId;
+          <>
+            {/* Free Trial card */}
+            <div className={`pricing-card${isAuthenticated && currentPlanId === null && !hasActiveSubscription ? " current" : ""}`}>
+              {isAuthenticated && currentPlanId === null && !hasActiveSubscription && (
+                <span className="pricing-current-badge">Your Plan</span>
+              )}
+              <div className="pricing-card-name">Free</div>
+              <div className="pricing-card-tagline">Get started with all features</div>
 
-            return (
-              <div key={plan.id} className={`pricing-card${plan.highlight ? " featured" : ""}${isCurrent ? " current" : ""}`}>
-                {isCurrent && <span className="pricing-current-badge">Your Plan</span>}
-                <div className="pricing-card-name">{plan.name}</div>
-                <div className="pricing-card-tagline">{plan.tagline}</div>
+              <div className="pricing-price">
+                <span className="currency">$</span>
+                <span className="amount">0</span>
+              </div>
 
-                <div className="pricing-price">
-                  {plan.id === "pro" && (
-                    <span className="price-original">$39.99</span>
-                  )}
-                  <span className="currency">$</span>
-                  <span className="amount">{plan.price_monthly}</span>
-                  <span className="period">/mo</span>
-                </div>
-                {plan.id === "pro" && (
-                  <div className="pricing-discount-badge">GDC 2026 Offer</div>
-                )}
+              <div className="pricing-badge-slot" />
 
-                {plan.trial_period_days > 0 && trialEligible && (
-                  <div className="pricing-trial-badge">
-                    Free trial
-                  </div>
-                )}
+              <div className="pricing-credits">&nbsp;</div>
 
-                <div className="pricing-credits">&nbsp;</div>
+              <ul className="pricing-features">
+                <li><CheckIcon />All core features included</li>
+                <li><CheckIcon />Scene generation</li>
+                <li><CheckIcon />Mesh segmentation</li>
+                <li><CheckIcon />No credit card required</li>
+              </ul>
 
-                <ul className="pricing-features">
-                  {plan.features.map((feature) => (
-                    <li key={feature}>
-                      <CheckIcon />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-
-                {isCurrent ? (
+              {isAuthenticated ? (
+                currentPlanId === null && !hasActiveSubscription ? (
                   <button className="pricing-cta current" disabled>
                     Current Plan
                   </button>
-                ) : hasActiveSubscription ? (
-                  <button
-                    className="pricing-cta"
-                    onClick={() => handleSwitch(plan)}
-                    disabled={switchingPlan !== null}
-                  >
-                    {switchingPlan === plan.id ? "Switching\u2026" : `Switch to ${plan.name}`}
-                  </button>
                 ) : (
-                  <button className="pricing-cta" onClick={() => handleBuy(plan)}>
-                    {plan.price_monthly === 0
-                      ? "Get Started Free"
-                      : plan.trial_period_days > 0
-                        ? "Start free trial"
-                        : `Start ${plan.name}`}
+                  <button className="pricing-cta" disabled style={{ opacity: 0.5 }}>
+                    Free Tier
                   </button>
-                )}
+                )
+              ) : (
+                <button className="pricing-cta" onClick={() => navigate("/auth/signup")}>
+                  Get Started Free
+                </button>
+              )}
+            </div>
+
+            {/* API plans */}
+            {plans.map((plan) => {
+              const isCurrent = isAuthenticated && plan.id === currentPlanId;
+
+              return (
+                <div key={plan.id} className={`pricing-card${plan.highlight ? " featured" : ""}${isCurrent ? " current" : ""}`}>
+                  {isCurrent && <span className="pricing-current-badge">Your Plan</span>}
+                  <div className="pricing-card-name">{plan.name}</div>
+                  <div className="pricing-card-tagline">{plan.tagline}</div>
+
+                  <div className="pricing-price">
+                    {plan.id === "pro" && (
+                      <span className="price-original">$39.99</span>
+                    )}
+                    <span className="currency">$</span>
+                    <span className="amount">{plan.price_monthly}</span>
+                    <span className="period">/mo</span>
+                  </div>
+                  <div className="pricing-badge-slot">
+                    {plan.id === "pro" && (
+                      <div className="pricing-discount-badge">Spring 2026 Offer</div>
+                    )}
+                    {plan.trial_period_days > 0 && trialEligible && (
+                      <div className="pricing-trial-badge">
+                        Free trial
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="pricing-credits">&nbsp;</div>
+
+                  <ul className="pricing-features">
+                    {plan.features.map((feature) => (
+                      <li key={feature}>
+                        <CheckIcon />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+
+                  {isCurrent ? (
+                    <button className="pricing-cta current" disabled>
+                      Current Plan
+                    </button>
+                  ) : hasActiveSubscription ? (
+                    <button
+                      className="pricing-cta"
+                      onClick={() => handleSwitch(plan)}
+                      disabled={switchingPlan !== null}
+                    >
+                      {switchingPlan === plan.id ? "Switching\u2026" : `Switch to ${plan.name}`}
+                    </button>
+                  ) : (
+                    <button className="pricing-cta" onClick={() => handleBuy(plan)}>
+                      {plan.price_monthly === 0
+                        ? "Get Started Free"
+                        : plan.trial_period_days > 0
+                          ? "Start free trial"
+                          : `Start ${plan.name}`}
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+
+            {/* Enterprise / Custom — static, not tied to DB plan */}
+            <div className="pricing-card">
+              <div className="pricing-card-name">Enterprise</div>
+              <div className="pricing-card-tagline">For teams and studios</div>
+
+              <div className="pricing-price">
+                <span className="amount">Custom</span>
               </div>
-            );
-          })
+              <div className="pricing-badge-slot" />
+
+              <div className="pricing-credits">&nbsp;</div>
+
+              <ul className="pricing-features">
+                <li><CheckIcon />Everything in Pro</li>
+                <li><CheckIcon />Custom credit volume</li>
+                <li><CheckIcon />Dedicated support</li>
+                <li><CheckIcon />Custom contracts &amp; invoicing</li>
+                <li><CheckIcon />Onboarding assistance</li>
+              </ul>
+
+              <a
+                className="pricing-cta"
+                href="https://calendly.com/pradyum-mixar/30min"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Book a call
+              </a>
+            </div>
+          </>
         )}
       </div>
 

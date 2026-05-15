@@ -2,7 +2,7 @@
 
 /* Page container — centers content in both standalone and AppShell contexts */
 .pricing-page {
-    max-width: 1100px;
+    max-width: 1300px;
     margin: 0 auto;
     padding-bottom: 2rem;
     display: flex;
@@ -125,10 +125,10 @@
 /* Grid */
 .pricing-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 1.5rem;
     margin: 0 auto 3rem;
-    max-width: 1100px;
+    max-width: 1300px;
     width: 100%;
 }
 
@@ -145,7 +145,7 @@
 }
 
 .pricing-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-4px) scale(1.015);
     border-color: rgba(0, 192, 199, 0.3);
 }
 
@@ -225,9 +225,23 @@
     opacity: 0.6;
 }
 
+/* Fixed-height slot so badges don't shift features vertically */
+.pricing-badge-slot {
+    min-height: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0.25rem;
+}
+
+.pricing-badge-slot:empty {
+    min-height: 0;
+    display: none;
+}
+
 .pricing-trial-badge {
     display: inline-block;
-    margin: 0.5rem auto 0;
     padding: 0.25rem 0.75rem;
     background: linear-gradient(135deg, rgba(133, 196, 73, 0.15), rgba(133, 196, 73, 0.08));
     border: 1px solid rgba(133, 196, 73, 0.3);
@@ -243,7 +257,6 @@
 
 .pricing-discount-badge {
     display: inline-block;
-    margin: 0.5rem auto 0;
     padding: 0.25rem 0.75rem;
     background: linear-gradient(135deg, rgba(0, 192, 199, 0.15), rgba(0, 192, 199, 0.08));
     border: 1px solid rgba(0, 192, 199, 0.3);
@@ -299,6 +312,92 @@
     color: var(--primary-green);
     width: fit-content;
 }
+
+/* Trial CTA card */
+.pricing-trial-cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 2rem;
+    padding: 1.25rem 2rem 1.5rem;
+    background: var(--bg-card);
+    border: 1px dashed var(--border-color);
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+    width: 100%;
+    max-width: calc((1100px - 3rem) / 3);
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.pricing-trial-cta:hover {
+    transform: translateY(-4px);
+    border-color: rgba(0, 192, 199, 0.3);
+}
+
+.pricing-trial-cta-header {
+    text-align: center;
+}
+
+.pricing-trial-cta-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+    color: var(--text-primary);
+}
+
+.pricing-trial-hero {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.35rem;
+    margin-bottom: 0.25rem;
+}
+
+.pricing-trial-hero-number {
+    font-size: 3rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary-cyan) 0%, var(--primary-green) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+}
+
+.pricing-trial-hero-label {
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+.pricing-trial-cta-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin: 0 0 1.25rem;
+}
+
+.pricing-trial-cta-btn {
+    display: block;
+    width: 100%;
+    padding: 0.875rem;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+}
+
+.pricing-trial-cta-btn:hover {
+    border-color: var(--primary-cyan);
+    color: var(--primary-cyan);
+    transform: translateY(-2px);
+}
+
 
 .pricing-trust {
     text-align: center;
@@ -579,6 +678,15 @@
     }
 }
 
+@media (max-width: 1024px) {
+    .pricing-grid {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
 @media (max-width: 768px) {
     .pricing-grid {
         grid-template-columns: 1fr;
@@ -589,6 +697,10 @@
 }
 
 @media (max-width: 768px) {
+    .pricing-trial-cta {
+        max-width: 400px;
+    }
+
     .pricing-card {
         padding: 2rem 1.5rem;
     }
@@ -598,6 +710,10 @@
     }
 
     .pricing-price .amount {
+        font-size: 2.5rem;
+    }
+
+    .pricing-trial-hero-number {
         font-size: 2.5rem;
     }
 

@@ -59,7 +59,7 @@
 
 .stat-card:hover {
     border-color: var(--primary-cyan);
-    transform: translateY(-4px);
+    transform: translateY(-4px) scale(1.015);
 }
 
 .stat-card.highlight {
@@ -450,7 +450,242 @@
 
 .download-card:hover {
     border-color: var(--primary-cyan);
-    transform: translateY(-4px);
+    transform: translateY(-4px) scale(1.015);
+}
+
+/* Book a Call Modal */
+.book-call-overlay {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 1000;
+    /* gradient wrapper creates the glowing border */
+    background: linear-gradient(135deg, #00c0c7 0%, #85c449 100%);
+    padding: 1.5px;
+    border-radius: 22px;
+    box-shadow: 0 0 40px rgba(0, 192, 199, 0.25), 0 24px 60px rgba(0, 0, 0, 0.6);
+    animation: modal-slide-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modal-slide-in {
+    from { opacity: 0; transform: translateY(24px) scale(0.94); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.book-call-modal {
+    position: relative;
+    width: 300px;
+    padding: 1.75rem 1.75rem 1.4rem;
+    background: #f5f9f9;
+    border-radius: 21px;
+    text-align: center;
+}
+
+.book-call-modal-close {
+    position: absolute;
+    top: 0.85rem;
+    right: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid #d1d5db;
+    background: transparent;
+    color: #9ca3af;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.book-call-modal-close:hover {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.book-call-modal-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #00c0c7 0%, #85c449 100%);
+    color: #ffffff;
+    margin-bottom: 1rem;
+}
+
+.book-call-modal-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0a0f1a;
+    margin: 0 0 0.3rem;
+    line-height: 1.35;
+}
+
+.book-call-modal-subtitle {
+    font-size: 0.78rem;
+    color: #00999f;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    margin: 0 0 1.1rem;
+}
+
+.book-call-modal-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    text-align: left;
+}
+
+.book-call-modal-list li {
+    font-size: 0.84rem;
+    color: #4b5563;
+    padding-left: 1.2rem;
+    position: relative;
+}
+
+.book-call-modal-list li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: #85c449;
+    font-size: 0.75rem;
+}
+
+.book-call-modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    align-items: center;
+}
+
+.book-call-modal-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.5rem;
+    border-radius: 11px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    background: linear-gradient(135deg, #00c0c7 0%, #85c449 100%);
+    color: #ffffff;
+    transition: all 0.25s ease;
+    width: 100%;
+    justify-content: center;
+    letter-spacing: 0.01em;
+}
+
+.book-call-modal-btn:hover {
+    box-shadow: 0 6px 20px rgba(0, 192, 199, 0.45);
+    transform: translateY(-1px);
+    filter: brightness(1.08);
+}
+
+.book-call-modal-skip {
+    background: none;
+    border: none;
+    color: #9ca3af;
+    font-size: 0.8rem;
+    cursor: pointer;
+    padding: 0.2rem 0.5rem;
+    transition: color 0.2s ease;
+}
+
+.book-call-modal-skip:hover {
+    color: #4b5563;
+}
+
+@media (max-width: 500px) {
+    .book-call-overlay {
+        bottom: 1rem;
+        right: 1rem;
+        left: 1rem;
+    }
+    .book-call-modal {
+        width: 100%;
+    }
+}
+
+.downloads-book-call {
+    margin-top: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    padding: 2rem 2.5rem;
+    background: linear-gradient(135deg, rgba(0, 192, 199, 0.06) 0%, rgba(133, 196, 73, 0.06) 100%);
+    border: 1px solid rgba(0, 192, 199, 0.2);
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+}
+
+.downloads-book-call-text h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0 0 0.75rem;
+    color: var(--text-primary);
+}
+
+.downloads-book-call-text ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.downloads-book-call-text ul li {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    padding-left: 1.1rem;
+    position: relative;
+}
+
+.downloads-book-call-text ul li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--primary-cyan);
+}
+
+.downloads-book-call-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, var(--primary-cyan) 0%, var(--primary-green) 100%);
+    color: var(--bg-dark);
+    transition: all 0.3s ease;
+}
+
+.downloads-book-call-btn:hover {
+    box-shadow: 0 8px 20px rgba(0, 192, 199, 0.3);
+    transform: translateY(-2px);
+}
+
+@media (max-width: 600px) {
+    .downloads-book-call {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .downloads-book-call-btn {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 .download-icon {
@@ -517,6 +752,7 @@
 
 .community-card:hover {
     border-color: var(--primary-cyan);
+    transform: scale(1.015);
 }
 
 .community-icon {

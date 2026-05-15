@@ -20,7 +20,7 @@
 
 .admin-stat-card:hover {
     border-color: var(--primary-cyan);
-    transform: translateY(-4px);
+    transform: translateY(-4px) scale(1.015);
 }
 
 .admin-stat-icon {
