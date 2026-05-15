@@ -9,7 +9,6 @@ import {
   System,
   BlenderBetter,
   UseCases,
-  RideTheWave,
   TryMixar,
 } from "./landing/RedesignSections";
 import "../assets/css/redesign-fonts.css";
@@ -193,7 +192,6 @@ export function LandingPage() {
       <System />
       <BlenderBetter />
       <UseCases />
-      <RideTheWave />
       <TryMixar />
 
       <footer className="site-footer">

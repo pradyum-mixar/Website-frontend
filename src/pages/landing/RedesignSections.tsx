@@ -81,24 +81,6 @@ function Reveal({
   );
 }
 
-/* ── Scroll Y tracker (raf-throttled) ── */
-function useScrollY() {
-  const [y, setY] = useState(0);
-  useEffect(() => {
-    let raf = 0;
-    const onScroll = () => {
-      if (raf) return;
-      raf = requestAnimationFrame(() => {
-        setY(window.scrollY);
-        raf = 0;
-      });
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-  return y;
-}
-
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
@@ -128,9 +110,7 @@ function useScrollScene<T extends HTMLElement>() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     if (window.matchMedia("(max-width: 720px), (pointer: coarse)").matches) return;
 
-    const content =
-      sec.querySelector<HTMLElement>(":scope > .rd-container, :scope > .rd-wave-content") ||
-      sec;
+    const content = sec.querySelector<HTMLElement>(":scope > .rd-container") || sec;
 
     // Flatten grid/group/stagger containers so each individual heading line,
     // card, principle, list item gets its own staggered animation instead of
@@ -142,7 +122,6 @@ function useScrollScene<T extends HTMLElement>() {
       "rd-cases-grid",
       "rd-cases-subhead",
       "rd-principle-list",
-      "rd-wave-row",
       "rd-walkthrough-cta",
       "rd-reveal-stagger",
     ];
@@ -172,7 +151,7 @@ function useScrollScene<T extends HTMLElement>() {
     // rate to the foreground so the section feels layered with depth.
     const bg = Array.from(
       sec.querySelectorAll<HTMLElement>(
-        ":scope > .rd-system-bg, :scope > .rd-cta-bg, :scope > .rd-wave-bg, :scope > .rd-wave-overlay",
+        ":scope > .rd-system-bg, :scope > .rd-cta-bg",
       ),
     );
     bg.forEach((b) => {
@@ -569,7 +548,8 @@ const CHAPTERS = [
     id: "agent",
     num: "01",
     word: "Agent",
-    gif: "/assets/redesign/videos/moodboard.mp4",
+    gif: "/assets/redesign/videos/agent.mp4",
+    playbackRate: 7,
     title: "Background agents that finish what you started.",
     copy:
       "Dispatch Mixie to unwrap, bake, retopologize, or generate while you keep moving. The grunt work runs in the background — you stay in the flow.",
@@ -617,7 +597,7 @@ const CHAPTERS = [
   },
 ];
 
-const WHITE_PANEL_CHAPTER_IDS = new Set(["focus", "scene", "mood"]);
+const WHITE_PANEL_CHAPTER_IDS = new Set(["agent", "focus", "scene", "mood"]);
 
 export function Scrolly() {
   const isMobile = useIsMobile();
@@ -635,6 +615,8 @@ export function Scrolly() {
 
     Object.entries(videoRefs.current).forEach(([id, video]) => {
       if (!video) return;
+      const chapter = CHAPTERS.find((c) => c.id === id);
+      video.playbackRate = chapter?.playbackRate ?? 1;
 
       if (id === activeChapter.id) {
         video.play().catch(() => {
@@ -666,6 +648,9 @@ export function Scrolly() {
                   {c.gif.endsWith(".mp4") ? (
                     <video
                       className={WHITE_PANEL_CHAPTER_IDS.has(c.id) ? "rd-scrolly-inset-media" : undefined}
+                      onLoadedMetadata={(event) => {
+                        event.currentTarget.playbackRate = c.playbackRate ?? 1;
+                      }}
                       src={c.gif}
                       aria-hidden="true"
                       muted
@@ -799,6 +784,10 @@ export function Scrolly() {
                   className={hasInsetMedia ? "rd-scrolly-inset-media" : undefined}
                   ref={(el) => {
                     videoRefs.current[c.id] = el;
+                    if (el) el.playbackRate = c.playbackRate ?? 1;
+                  }}
+                  onLoadedMetadata={(event) => {
+                    event.currentTarget.playbackRate = c.playbackRate ?? 1;
                   }}
                   src={c.gif}
                   aria-hidden="true"
@@ -1331,45 +1320,7 @@ export function UseCases() {
   );
 }
 
-/* ── 7. RIDE THE WAVE ── */
-export function RideTheWave() {
-  const y = useScrollY();
-  const sceneRef = useScrollScene<HTMLElement>();
-  return (
-    <section ref={sceneRef} className="rd-section rd-section-wave rd-scene">
-      <div
-        className="rd-wave-bg"
-        style={{ transform: `translateY(${y * -0.08}px) scale(1.08)` }}
-      />
-      <div className="rd-wave-overlay" />
-      <div className="rd-wave-content">
-        <div className="rd-container">
-          <Reveal stagger>
-            <h2 className="rd-h-display">
-              Ride the
-              <br />
-              <em className="rd-em-grad">agentic wave.</em>
-            </h2>
-            <div className="rd-wave-row">
-              <p className="rd-wave-copy">
-                Teams shipping with Mixar move{" "}
-                <span className="rd-wave-stat">4.3×</span> faster on UV +
-                texturing, and ship{" "}
-                <span className="rd-wave-stat">2.1× more</span> hero assets per
-                sprint. Internal benchmark, v3 suite.
-              </p>
-              <div className="rd-btn-row">
-                <Btn primary>Read the benchmark →</Btn>
-              </div>
-            </div>
-          </Reveal>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ── 8. TRY MIXAR ── */
+/* ── 7. TRY MIXAR ── */
 export function TryMixar() {
   const sceneRef = useScrollScene<HTMLElement>();
   return (
