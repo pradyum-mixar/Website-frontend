@@ -447,6 +447,23 @@
   overflow: hidden;
   background: #040404;
 }
+.rd-scrolly-video.rd-scrolly-white-surface,
+.rd-scrolly-mobile-media.rd-scrolly-white-surface {
+  background: #fff;
+}
+.rd-scrolly-video.rd-scrolly-white-surface {
+  background: #040404;
+}
+.rd-scrolly-video.rd-scrolly-white-surface::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 18%;
+  height: 55%;
+  background: radial-gradient(circle at 50% 45%, #fff 0 44%, #f3f3f1 68%, #c9c9c6 100%);
+  z-index: 0;
+}
 .rd-scrolly-video video,
 .rd-scrolly-video img {
   position: absolute;
@@ -454,7 +471,17 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
+  z-index: 1;
   transition: opacity 600ms var(--rd-ease), transform 1200ms var(--rd-ease);
+}
+.rd-scrolly-video video.rd-scrolly-inset-media {
+  inset: auto;
+  left: 50%;
+  top: 43%;
+  width: min(78%, 760px);
+  height: auto;
+  max-height: 58%;
+  object-fit: contain;
 }
 .rd-scrolly-vignette {
   position: absolute;
@@ -1274,6 +1301,17 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  .rd-scrolly-mobile-media video.rd-scrolly-inset-media {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 82%;
+    height: auto;
+    max-height: 72%;
+    object-fit: contain;
+    transform: translate(-50%, -50%);
   }
 
   .rd-scrolly-mobile-media img.rd-scrolly-models-img {

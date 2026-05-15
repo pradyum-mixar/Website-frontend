@@ -579,7 +579,7 @@ const CHAPTERS = [
     id: "focus",
     num: "02",
     word: "Focus",
-    gif: "/assets/redesign/videos/image-to-3d.mp4",
+    gif: "/assets/redesign/videos/focus.mp4",
     title: "Less UI. More work.",
     copy:
       "A single-pane mode that hides panels, menus, and chrome — leaving you, your scene, and your agents. Pure flow, no toolbar tax.",
@@ -589,7 +589,7 @@ const CHAPTERS = [
     id: "scene",
     num: "03",
     word: "Scene",
-    gif: "/assets/redesign/videos/uv-unwrap.mp4",
+    gif: "/assets/redesign/videos/scene.mp4",
     title: "From prompt to populated scene.",
     copy:
       "Brief a full scene — a warehouse, a booth, a cave — and the agent assembles it. Generated props, placed by spatial logic, styled to your moodboard. You direct the room; Mixar builds it.",
@@ -599,7 +599,7 @@ const CHAPTERS = [
     id: "mood",
     num: "04",
     word: "Mood",
-    gif: "/assets/redesign/videos/pbr.mp4",
+    gif: "/assets/redesign/videos/mood.mp4",
     title: "The canvas your scenes are built from.",
     copy:
       "Pin references, paste palettes, set the visual language — and Mixar's scene generation reads from it. The moodboard isn't a separate tab; it's the brief your agents follow.",
@@ -617,13 +617,34 @@ const CHAPTERS = [
   },
 ];
 
+const WHITE_PANEL_CHAPTER_IDS = new Set(["focus", "scene", "mood"]);
+
 export function Scrolly() {
   const isMobile = useIsMobile();
   const wrapRef = useRef<HTMLElement | null>(null);
+  const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
   const p = useScrollProgress(wrapRef);
   const activeF = p * CHAPTERS.length;
   const active = Math.min(CHAPTERS.length - 1, Math.floor(activeF));
   const localP = Math.max(0, Math.min(1, activeF - active));
+  const activeChapter = CHAPTERS[active];
+  const hasWhitePanel = WHITE_PANEL_CHAPTER_IDS.has(activeChapter.id);
+
+  useEffect(() => {
+    if (isMobile || !activeChapter.gif.endsWith(".mp4")) return;
+
+    Object.entries(videoRefs.current).forEach(([id, video]) => {
+      if (!video) return;
+
+      if (id === activeChapter.id) {
+        video.play().catch(() => {
+          // Muted autoplay can still be blocked by browser settings.
+        });
+      } else {
+        video.pause();
+      }
+    });
+  }, [activeChapter, isMobile]);
 
   if (isMobile) {
     return (
@@ -639,9 +660,12 @@ export function Scrolly() {
           <div className="rd-scrolly-mobile-list">
             {CHAPTERS.map((c) => (
               <article key={c.id} className="rd-scrolly-mobile-card">
-                <div className="rd-scrolly-mobile-media">
+                <div
+                  className={`rd-scrolly-mobile-media ${WHITE_PANEL_CHAPTER_IDS.has(c.id) ? "rd-scrolly-white-surface" : ""}`}
+                >
                   {c.gif.endsWith(".mp4") ? (
                     <video
+                      className={WHITE_PANEL_CHAPTER_IDS.has(c.id) ? "rd-scrolly-inset-media" : undefined}
                       src={c.gif}
                       aria-hidden="true"
                       muted
@@ -756,26 +780,36 @@ export function Scrolly() {
           </div>
 
           {/* CENTER: media */}
-          <div className="rd-scrolly-video">
+          <div
+            className={`rd-scrolly-video ${hasWhitePanel ? "rd-scrolly-white-surface" : ""}`}
+          >
             <div className="rd-scrolly-vignette" />
             {CHAPTERS.map((c, i) => {
               const isActive = i === active;
               const dir = i < active ? -1 : 1;
+              const hasInsetMedia = WHITE_PANEL_CHAPTER_IDS.has(c.id);
+              const motionTransform = isActive
+                ? `translate3d(${(1 - localP) * -2}%, 0, 0) scale(${1 + localP * 0.04})`
+                : `translate3d(${dir * 6}%, 0, 0) scale(1.08)`;
+              const transform =
+                hasInsetMedia ? `translate(-50%, -50%) ${motionTransform}` : motionTransform;
               return c.gif.endsWith(".mp4") ? (
                 <video
                   key={c.id}
+                  className={hasInsetMedia ? "rd-scrolly-inset-media" : undefined}
+                  ref={(el) => {
+                    videoRefs.current[c.id] = el;
+                  }}
                   src={c.gif}
                   aria-hidden="true"
                   muted
                   loop
                   playsInline
-                  autoPlay={isActive}
+                  autoPlay
                   preload={isActive ? "auto" : "metadata"}
                   style={{
                     opacity: isActive ? 1 : 0,
-                    transform: isActive
-                      ? `translate3d(${(1 - localP) * -2}%, 0, 0) scale(${1 + localP * 0.04})`
-                      : `translate3d(${dir * 6}%, 0, 0) scale(1.08)`,
+                    transform,
                   }}
                 />
               ) : (
@@ -797,11 +831,11 @@ export function Scrolly() {
               );
             })}
             <div className="rd-scrolly-bigword">
-              {CHAPTERS[active].word}.
+              {activeChapter.word}.
             </div>
             <div className="rd-scrolly-rec">
               <span className="rd-rec-pulse" />
-              REC · {CHAPTERS[active].num}
+              REC · {activeChapter.num}
             </div>
             <div
               className="rd-scrolly-keepscrolling"
